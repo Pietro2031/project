@@ -1,0 +1,543 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700&display=swap');
+
+/* General Styling */
+body {
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    min-height: 100vh;
+    background-color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    background-color: #9E9B76; /* Olive Green */
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed; /* Sidebar stays fixed */
+    top: 0;
+    left: 0;
+    bottom: 0; /* Full height of screen */
+    z-index: 1050; /* Make sure sidebar stays above content */
+}
+
+/* Profile Styling */
+.profile {
+    text-align: center;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.profile-image-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    text-align: center;
+    color: #ffffff;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.profile-role {
+    font-size: 14px;
+    color: #f5f5f5;
+}
+
+/* Sidebar Navigation */
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+nav ul li {
+    margin: 15px 0;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+nav ul li a:hover {
+    background-color: #7A7A4D;
+}
+
+nav ul li a.active {
+    background-color: #4A4A2D;
+}
+
+/* Sidebar Bottom Section */
+.sidebar-bottom {
+    margin-top: auto;
+    width: 100%;
+}
+
+.sidebar-bottom ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-bottom ul li {
+    margin: 10px 0;
+}
+
+.sidebar-bottom ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-bottom ul li a:hover {
+    background-color: #7A7A4D;
+}
+
+/* Topbar */
+.topbar {
+    width: 100%; /* Full width of the screen */
+    height: 100px;
+    background-color: #C9C9A6;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed; /* Fixed the topbar at the top */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Lower z-index than sidebar so sidebar overlaps */
+}
+
+/* Topbar Heading */
+.topbar h1 {
+    margin: 0;
+    margin-left: 300px;
+    margin-top: 20px;
+    font-size: 35px;
+    font-family: 'Roboto Slab', serif;
+    color: #333;
+}
+
+/* Logout Button */
+.logout-btn {
+    margin-top: 20px;
+    background-color: transparent;
+    color: #333;
+    margin-right: 6%;
+    font-size: 25px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.logout-btn i {
+    margin-right: 5px;
+}
+
+.logout-btn:hover {
+    opacity: 0.8;
+}
+
+/* Content Section */
+.content {
+    margin-left: 250px; /* Space for sidebar */
+    margin-top: 120px; /* Space for the fixed topbar */
+    width: calc(100% - 250px); /* Adjust content width considering sidebar */
+    padding: 30px;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    max-width: 1100px;
+    margin: 50px 20px;
+    border-collapse: collapse;
+    text-align: left;
+    background-color: #fff; /* White background for table */
+    border-radius: 10px; /* Rounded corners for the table */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for a floating effect */
+}
+
+/* Table Header */
+th {
+    padding: 12px 20px;
+    background-color: #9E9B76; /* Olive Green */
+    color: #fff; /* White text */
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    border-top-left-radius: 10px; /* Rounded top-left corner */
+    border-top-right-radius: 10px; /* Rounded top-right corner */
+    border-bottom: 2px solid #7C7C4A; /* Darker Olive Green border */
+}
+
+/* Table Rows */
+tr:nth-child(even) {
+    background-color: #f7f7f7; /* Light grey for even rows */
+}
+
+tr:nth-child(odd) {
+    background-color: #fff; /* White for odd rows */
+}
+
+tr:hover {
+    background-color: #e0e0e0; /* Slight grey hover effect */
+}
+
+/* Table Cells */
+td {
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 2px solid #ddd; /* Light border between rows */
+    border-left: 2px solid #f0f0f0; /* Subtle border between cells */
+    border-right: 2px solid #f0f0f0; /* Subtle border between cells */
+}
+
+/* Profile Image in Table */
+.table-profile-img {
+    width: 35px; /* Smaller, minimalist image */
+    height: 35px;
+    object-fit: cover; /* Ensure image fits without distortion */
+    border-radius: 50%;
+}
+
+/* Action Button Styling */
+td .block-btn, td .profile-link {
+    background-color: #9E9B76; /* Olive Green */
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 12px;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    border: 2px solid #7C7C4A; /* Darker border for buttons */
+}
+
+td .block-btn:hover, td .profile-link:hover {
+    background-color: #7C4A32; /* Darker Olive Green on hover */
+}
+
+td .block-btn {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+td .profile-link {
+    font-size: 13px;
+    color: #9E9B76; /* Olive Green */
+    text-decoration: none;
+}
+
+td .profile-link:hover {
+    text-decoration: underline;
+}
+
+/* Table Footer */
+tfoot td {
+    font-weight: 700;
+    color: #9E9B76; /* Olive Green */
+    text-align: center;
+    padding: 12px 20px;
+    border-top: 2px solid #7C7C4A; /* Darker Olive Green border */
+}
+
+/* Footer Action Button */
+tfoot td .block-btn {
+    background-color: #9E9B76; /* Olive Green */
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: 2px solid #7C7C4A; /* Darker border for buttons */
+}
+
+tfoot td .block-btn:hover {
+    background-color: #7C4A32; /* Darker Olive Green on hover */
+}
+  /* Floating notification styles */
+  .notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+    text-align: center;
+}
+.notification.block { background-color: #e74c3c; }   /* Red for block */
+.notification.unblock { background-color: #4CAF50; }  /* Green for unblock */
+.search-bar {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.content .search-bar input[type="text"] {
+    padding: 8px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-left: -600px;
+}
+
+.content .search-bar button {
+    padding: 8px 15px;
+    border: none;
+    background-color: #9E9B76;
+    color: #C9C9A6;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.content .search-bar button:hover {
+    background-color: #9E9B76;
+    color: #fff;
+}
+.no-results {
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+    margin-top: 20px;
+}
+.selected {
+    background-color: #f0f0f0; /* Highlight the selected row */
+}
+/* General Styling for Buttons */
+button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+/* Edit Button */
+/* Edit Button */
+#editButton {
+    padding: 8px 15px;
+    border: none;
+    background-color: #9E9B76;
+    color: #C9C9A6;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 510px;
+    margin-right: 10px; /* Add space between the buttons */
+    position: relative;
+    top: -55px; /* Move the button 20px upwards */
+}
+
+#editButton:hover {
+    background-color: #7A7A4D;
+    color: #fff;
+}
+
+/* Delete Button */
+#deleteButton {
+    background-color: #dc3545;  /* Red background to indicate danger */
+    color: white;
+    text-transform: uppercase;
+    display: inline-block; /* Allow it to sit next to the update button */
+    width: 150px;  /* Set width to control size */
+    padding: 8px 15px; /* Adjust padding for consistency */
+    position: relative;
+    top: -55px; /* Move the button 20px upwards */
+}
+
+#deleteButton:hover {
+    background-color: #c82333;  /* Darker red on hover */
+}
+
+.createButton {
+    background-color: #9E9B76;  /* Red background to indicate danger */
+    color: #C9C9A6;
+    text-transform: uppercase;
+    display: inline-block; /* Allow it to sit next to the update button */
+    width: 150px;  /* Set width to control size */
+    padding: 8px 15px; /* Adjust padding for consistency */
+    position: relative;
+    padding-left: -5px;
+    top: -55px; /* Move the button 20px upwards */
+}
+
+.createButton:hover {
+    background-color: #9E9B76;  /* Darker red on hover */
+    color: #fff;
+}
+
+
+
+/* Wrapper to align the buttons side by side */
+.button-container {
+    display: flex;
+    gap: 10px; /* Adds space between buttons */
+    justify-content: center; /* Centers the buttons */
+    margin-top: 20px; /* Space from the content */
+}
+
+/* Additional Styling for the Buttons when needed */
+#notification {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    width: 300px;
+    border-radius: 10px;
+}
+
+#notification form input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#notification form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #9E9B76;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#notification form button:hover {
+    background-color: #7A7A4D;
+}
+
+.popup {
+    position: fixed;                /* Fixes the popup to the screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    display: flex;                   /* Flexbox layout to center content */
+    justify-content: center;         /* Centers the popup horizontally */
+    align-items: center;             /* Centers the popup vertically */
+    z-index: 9999;                   /* Ensures the popup is above other elements */
+    overflow: auto;                  /* Allows scrolling if popup content is larger than the viewport */
+}
+
+/* Style for the popup content */
+.popup-content {
+    background-color: #ffffff;      /* White background */
+    padding: 40px 30px;
+    width: 100%;
+    max-width: 500px;                /* Maximum width for the popup */
+    border-radius: 15px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    text-align: center;
+    position: relative;
+    z-index: 10000;                  /* Ensures the content stays above the background */
+}
+
+
+/* Input field styling */
+input[type="password"] {
+    width: 70%;
+    padding: 10px;
+    border: 2px solid #C9C9A6; /* Light border */
+    border-radius: 10px;
+    margin-top: 20px;
+    font-size: 16px;
+    background-color: #fff; /* Ensure the background of the input is white */
+}
+
+/* Button styling */
+table button {
+    padding: 10px 20px;
+    background-color: #9E9B76; /* Olive button color */
+    color: white;
+    border: none;
+    margin-right: -20px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+button{
+    margin-left: 20px;
+    padding: 10px 20px;
+    background-color: #9E9B76; /* Olive button color */
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #7a7a51; /* Darker button color on hover */
+}
+
+/* Additional styles for Cancel button */
+button:nth-of-type(1):hover {
+    background-color: #f44336; /* Red background for cancel */
+}
+
+button:nth-of-type(3):hover {
+    background-color: #e53935; /* Darker red on hover */
+}
+

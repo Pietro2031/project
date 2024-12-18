@@ -1,0 +1,306 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    scroll-padding-top: 4rem;
+    list-style: none;
+    text-decoration: none;
+}
+html{
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #C9C9A6;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Profile Container */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: -60px;
+    align-items: center;
+    width: 100%;
+    margin-top:-40px;
+    padding: 40px;
+}
+
+/* Cover Photo Section */
+.cover-photo {
+    width: 100%;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    background-color: #C9C9A6; /* Olive Green Background */
+}
+
+.cover-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Profile Info Section */
+.profile-info-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 50px; /* Adjusted gap for better spacing */
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    margin-top: -70px; /* Ensures proper alignment under the cover photo */
+}
+
+/* Left Section: Profile Picture */
+.profile-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    margin-top: -50px;
+    width: 350px; /* Larger width */
+}
+
+.profile-photo img {
+    width: 200px; /* Larger profile picture */
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+}
+
+.username p {
+    font-size: 22px; /* Adjust font size for the username */
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px; /* Adjust space between profile picture and username */
+}
+
+.change-picture-btn {
+    background-color: #9E9B76; /* Olive Green */
+    color: white;
+    padding: 10px 15px;
+    position: absolute;
+    border: none;
+    top:115%;
+    left: 16%;
+    border-radius: 50px;
+    cursor: pointer;
+}
+.change-picture-btn:hover{
+    background-color: #6A6A3A; /* Darker shade for hover effect */
+}
+
+.profile-picture-input {
+    display: none; /* Hides the file input */
+}
+
+/* Right Section: Profile Form */
+.profile-right {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 60%;
+    background: linear-gradient(-5deg, #C9C9A6, #fff); /* Olive Green to Warm Light Olive gradient */
+    margin-left: -80px;
+    margin-right: 100px;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-right h1 {
+    font-weight: bold;
+    color: #9E9B76;
+    font-size: 50px;
+    margin-left: 30px;
+    margin-top: 10px;
+    margin-bottom: 28px;
+}
+
+.profile-right p {
+    color: #333;
+    font-size: 20px;
+    margin-left: 80px;
+    color: #9E9B76;
+}
+
+/* Profile Header - My Profile */
+.profile-header {
+    font-family: 'Roboto Slab', serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: #9E9B76;
+    margin-bottom: 20px;
+}
+
+/* Profile Info Section (First and Last Name) */
+.profile-info p {
+    font-size: 20px;
+    color: #9E9B76;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+/* Form Layout */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+label {
+    font-size: 16px;
+    color: #9E9B76;
+    margin-bottom: 8px;
+    font-weight: 600;    
+    margin-left: 10px;       /* Make the label text a bit bolder */
+}
+
+/* Updated General input field styling */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 15px;
+    font-size: 14px;
+    border: 1px solid #C9C9A6;  /* Light olive green border */
+    font-family: 'Poppins', sans-serif;
+    border-radius: 50px;        /* Rounded corners for a smoother look */
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #F9F9F0;  /* Light background color */
+    color: #9E9B76;                /* Dark text color for readability */
+    margin-bottom: 15px;         /* Space between the fields */
+}
+/* Adjust the width of the Address field */
+.address-field input {
+    width: 49%; /* Ensure it takes up available space */
+    max-width: 1000px; /* Limit the width */
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #9E9B76;      /* Olive green border on focus */
+    background-color: #fff;     /* White background on focus */
+    outline: none;              /* Removes the default blue outline */
+}
+
+/* Update Profile Button - Reduced Width */
+.update-btn {
+    background-color: #9E9B76;
+    color: white;
+    padding: 10px 20px; /* Reduced padding for smaller width */
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    width: 400px; /* Set width to auto for content-based sizing */
+    margin-left: 26px;
+    height: 50px;
+    margin-top: 15px;
+}
+
+/* Change Password Button - Inline with Update Profile */
+.change-password-btn {
+    position: absolute;
+    background-color: #9E9B76;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    height: 50px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    width: 400px;
+    margin-left: 456px; /* Space between buttons */
+    margin-top: -70px;
+}
+
+.change-password-btn:hover {
+    background-color: #6A6A3A; /* Darker shade for hover effect */
+}
+
+/* Form Button Container */
+.form-btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Space between the two buttons */
+    margin-top: 20px;
+}
+
+/* Button Styles */
+button {
+    margin-top: 3%;
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background: #9E9B76; /* Olive Green */
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background: #7A7A4D; /* Slightly darker shade on hover */
+    color: #ffffff;
+    font-size: 19px;
+}
+.cover-photo .title1 {
+    position: absolute;
+    font-size: 90px;
+    top: 50px;
+    font-weight: bold;
+    left: 350px;
+    color: #fff;
+    text-shadow: 10px 3px 7px rgba(0, 0, 0, 1);
+}
+.back-btn {
+    position: absolute;
+    top: 400px;
+    background-color: #9E9B76;
+    left: 100px;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    width: 130px;
+    margin-bottom: 20px;
+}
+
+.back-btn:hover {
+    background-color: #6A6A3A; /* Darker shade for hover effect */
+}

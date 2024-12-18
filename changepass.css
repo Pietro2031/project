@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700&display=swap');
+
+/* General Reset */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #C9C9A6; /* Olive Green Background */
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+
+/* Profile Container */
+.profile-container {
+    margin-top: -60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 40px;
+}
+
+/* Cover Photo Section */
+.cover-photo {
+    width: 100%;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    background-color: #C9C9A6; /* Olive Green Background */
+}
+
+.cover-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Profile Info Section */
+.profile-info-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 50px; /* Adjusted gap for better spacing */
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    margin-top: -70px; /* Ensures proper alignment under the cover photo */
+}
+
+/* Left Section: Profile Picture */
+.profile-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    margin-top: -50px;
+    width: 350px; /* Larger width */
+}
+
+.profile-photo img {
+    width: 200px; /* Larger profile picture */
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+}
+
+.username p {
+    font-size: 22px; /* Adjust font size for the username */
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px; /* Adjust space between profile picture and username */
+}
+
+.change-picture-btn {
+    background-color: #9E9B76; /* Olive Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.profile-picture-input {
+    display: none; /* Hides the file input */
+}
+
+/* Right Section: Change Password Form */
+.profile-right {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 60%;
+    background: linear-gradient(-5deg, #C9C9A6, #fff); /* Olive Green to Warm Light Olive gradient */;
+    margin-left: -80px;
+    margin-right: 100px;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    align-items: center; /* Center the content horizontally */
+}
+.profile-right h1{
+    font-weight: bold;
+    color: #9E9B76;
+    font-size: 50px;
+    margin-left: -300px;
+    margin-top: 10px;
+    margin-bottom: 28px;
+}
+
+
+/* Change Password Form Layout */
+.change-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px; /* Limit max width of form */
+    align-items: center; /* Center the form horizontally */
+}
+
+.change-password-row {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.change-password-row label {
+    font-size: 16px;
+    font-family: 'Roboto Slab', serif; /* Matching the given code font */
+    color: #9E9B76; /* Olive Green */
+}
+
+.change-password-row input {
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 2px solid #C9C9A6; /* Warm Light Olive border */
+    border-radius: 50px;
+    width: 100%;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    color: #9E9B76; /* Olive Green text */
+}
+
+button {
+    margin-top: 3%;
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background: #9E9B76; /* Olive Green */
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background: #7A7A4D; /* Slightly darker shade on hover */
+    color: #ffffff;
+    font-size: 19px;
+}
+
+/* Back Button Style */
+.back-btn {
+    position: absolute;
+    top: 340px;
+    background-color: #9E9B76;
+    left: 100px;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    width: 130px;
+    margin-bottom: 20px;
+}
+
+.back-btn:hover {
+    background-color: #7A7A4D;
+}
+.cover-photo .title1 {
+    position: absolute;
+    font-size: 90px;
+    top: -15px;
+    font-weight: bold;
+    left: 350px;
+    color: #fff;
+    text-shadow: 10px 3px 7px rgba(0, 0, 0, 1);
+}
