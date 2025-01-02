@@ -85,52 +85,7 @@ if ($result->num_rows > 0) {
 </style>
 
 <body>
-    <header class=" header">
-        <img src="<?php echo $logo; ?>" alt="Peter Beans Logo" class="logopic">
-        <p class="logo">Peter Beans</p>
-        <nav class="navbar">
-            <a href="home.php"><strong>Home</strong></a>
-            <a href="menu.php"><strong>Menu</strong></a>
-            <a href="about.php"><strong>About</strong></a>
-            <a href="contactus.php"><strong>Contact Us</strong></a>
-            <div class="action">
-                <div class="profile" onclick="menuToggle();" aria-expanded="false">
-                    <img
-                        src="<?php echo $userImage; ?>"
-                        alt="Account Profile"
-                        class="profile-img" />
-                </div>
-                <div class="menu" aria-hidden="true">
-                    <?php if ($userLoggedIn): ?>
-                        <strong>
-                            <h3><br> <?php echo htmlspecialchars($_SESSION['first_name']) . ' ' . htmlspecialchars($_SESSION['last_name']); ?></h3>
-                        </strong>
-                        <ul>
-                            <li>
-                                <i class="fas fa-user"></i>
-                                <a href="profile.php">My Profile</a>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <a href="otp.php">Verification</a>
-                            </li>
-                            <li>
-                                <i class="fas fa-sign-out-alt"></i>
-                                <a href="logout.php">Logout</a>
-                            </li>
-                        </ul>
-                    <?php else: ?>
-                        <ul>
-                            <li>
-                                <i class="fas fa-user-plus"></i>
-                                <a href="login.php">Sign Up</a>
-                            </li>
-                        </ul>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </nav>
-    </header>
+    <?php include 'header.php'; ?>
     <section class="hero-section">
         <div class="hero-content">
             <div class="left-column-text">
@@ -142,24 +97,24 @@ mission is to provide you with more than
 just a cup of coffee – we aim to create
 a moment of joy in every sip.
 </pre>
-                <button class="cta-button">Learn More</button> 
+                <button class="cta-button">Learn More</button>
             </div>
 
             <div class="right-column-icons">
-                
+
                 <div class="feature-box">
-                    <i class="fa fa-mug-hot mug-icon"></i> 
+                    <i class="fa fa-mug-hot mug-icon"></i>
                     <h4>Delicious Coffee</h4>
                     <p>Experience the rich taste of freshly brewed coffee that will keep you coming back for more.</p>
                 </div>
-                
+
                 <div class="feature-box">
-                    <i class="fa fa-seedling beans-icon"></i> 
+                    <i class="fa fa-seedling beans-icon"></i>
                     <h4>Organic Beans</h4>
                     <p>We use only the finest organic beans, carefully sourced to bring you the best flavors.</p>
                 </div>
                 <div class="feature-box">
-                    <i class="fa fa-coffee mug-icon"></i> 
+                    <i class="fa fa-coffee mug-icon"></i>
                     <h4>Fresh Brews</h4>
                     <p>Our coffee is brewed fresh to order, giving you the perfect cup every time.</p>
                 </div>
@@ -213,67 +168,7 @@ a moment of joy in every sip.
             <p class="desc">Enjoy signature dishes and our delicious desserts creations.</p>
         </div>
     </div>
-
-    <footer>
-        <div class="footerContainer">
-            <div class="socialIcons">
-                <a href=""><i class="fa-brands fa-facebook"></i></a>
-                <a href=""><i class="fa-brands fa-instagram"></i></a>
-                <a href=""><i class="fa-brands fa-twitter"></i></a>
-                <a href=""><i class="fa-brands fa-youtube"></i></a>
-            </div>
-            <div class="footerNav">
-                <ul>
-                    <li><a href="home.php">Home</a></li>
-                    <li><a href="menu.php">Menu</a></li>
-                    <li><a href="about.php">About</a></li>
-                    <li><a href="contactus.php">Contact Us</a></li>
-                </ul>
-            </div>
-
-        </div>
-        <div class="footerBottom">
-            <p>Copyright &copy;2024 <strong><span class="designer">Peter Beans</span> </strong>All Rights Reserved</p>
-        </div>
-    </footer>
-    
-    <script>
-        function menuToggle() {
-            const menu = document.querySelector(".menu");
-            const profile = document.querySelector(".profile");
-
-            menu.classList.toggle("active");
-
-            const expanded = profile.getAttribute("aria-expanded") === "true";
-            profile.setAttribute("aria-expanded", !expanded);
-            menu.setAttribute("aria-hidden", expanded);
-        }
-        document.addEventListener("click", (event) => {
-            const menu = document.querySelector(".menu");
-            const profile = document.querySelector(".profile");
-            if (!menu.contains(event.target) && !profile.contains(event.target)) {
-                menu.classList.remove("active");
-                profile.setAttribute("aria-expanded", "false");
-                menu.setAttribute("aria-hidden", "true");
-            }
-        });
-    </script>
-    
-    <script>
-        ScrollReveal().reveal('.dream-clients2 li', {
-            distance: '60px',
-            origin: 'left',
-            duration: 2000,
-            delay: 400
-        });
-        ScrollReveal().reveal('.content img, .content .icon-left i, .content .icon-right i, .content h1, .content p', {
-            distance: '60px',
-            duration: 2000,
-            delay: 300,
-            interval: 200,
-            origin: 'bottom'
-        });
-    </script>
+    <?php include 'footer.php'; ?>
     <script>
         let slideIndex = 0;
         showSlides();
@@ -291,6 +186,6 @@ a moment of joy in every sip.
             setTimeout(showSlides, 2000);
         }
     </script>
-    <script src="https:
 </body>
+
 </html>
