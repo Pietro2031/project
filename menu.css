@@ -87,12 +87,12 @@
 }
 
 .add-btn {
-  background-color: #382208;
+  background-color: #9e9b76;
   color: #fff;
   border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -100,7 +100,7 @@
 }
 
 .add-btn:hover {
-  background-color: #9e9b76;
+  background-color: #382208;
 }
 
 .categories {
@@ -174,7 +174,6 @@
 }
 
 .pagination a.active {
-  /* background-color: #9e9b76; */
   cursor: not-allowed;
 }
 
@@ -192,11 +191,8 @@
   }
 }
 .pagination a {
-  /* padding: 5px 10px; */
   margin: 0 5px;
-  /* text-decoration: none; */
   border: 1px solid #ddd;
-  /* color: #333; */
 }
 
 .pagination a.active {

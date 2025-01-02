@@ -105,7 +105,7 @@ $stmt->close();
                         </div>
                         <h3><?php echo $product['product_name']; ?></h3>
                         <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
-                        <button class="add-btn">+</button>
+                        <button class="add-btn">Order</button>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
