@@ -97,7 +97,12 @@ mission is to provide you with more than
 just a cup of coffee – we aim to create
 a moment of joy in every sip.
 </pre>
-                <button class="cta-button">Learn More</button>
+                <a href="#more" class="cta-button">
+                    <p>Learn More</p>
+                </a>
+                <a href="makeourown.php" class="cta-button">
+                    <p>Make you own Drink</p>
+                </a>
             </div>
 
             <div class="right-column-icons">
@@ -150,7 +155,7 @@ a moment of joy in every sip.
             </div>
         </div>
     </section>
-    <div class="footer">
+    <div class="footer" id="more">
         <h1>Coffee, Bakery, and Desserts Done Right</h1>
         <div class="menu-item coffee">
             <img src="aboutimg4.webp" alt="Coffee">

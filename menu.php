@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('connection.php');
+
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : null;
 $categoryQuery = "SELECT * FROM coffee_category";
 $categoryResult = $conn->query($categoryQuery);
@@ -15,14 +16,17 @@ $bestStampLimit = 3;
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
-    $addons = isset($_POST['addons']) ? $_POST['addons'] : [];  // Add-ons as an array
-    $size = isset($_POST['size']) ? $_POST['size'] : null;  // Add size selection
+    $addons = isset($_POST['addons']) ? $_POST['addons'] : [];
+    $size = isset($_POST['size']) ? $_POST['size'] : null;
+
     if (!isset($_SESSION['username'])) {
         die("Error: You must be logged in to add items to the cart.");
     }
+
     if (!$size) {
         die("Error: Please select a size.");
     }
+
     $username = $_SESSION['username'];
     $userQuery = "SELECT id FROM user_account WHERE username = ?";
     $userStmt = $conn->prepare($userQuery);
@@ -35,35 +39,52 @@ if (isset($_POST['add_to_cart'])) {
     $user = $userResult->fetch_assoc();
     $userId = $user['id'];
     $userStmt->close();
-    
-    // Check if the product is already in the cart
-    $checkCartQuery = "SELECT * FROM cart WHERE user_id = ? AND product_id = ? AND size = ?";
+
+    // Convert addons array to JSON for comparison
+    $addonsJson = json_encode($addons);
+
+    // Check if the cart already has this product with the same size and add-ons
+    $checkCartQuery = "
+        SELECT * FROM cart 
+        WHERE user_id = ? 
+        AND product_id = ? 
+        AND size = ? 
+        AND addons = ?
+    ";
     $stmt = $conn->prepare($checkCartQuery);
-    $stmt->bind_param("iis", $userId, $productId, $size);
+    $stmt->bind_param("iiss", $userId, $productId, $size, $addonsJson);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
-        // If product already exists in the cart, update the quantity and add-ons
-        $updateCartQuery = "UPDATE cart SET quantity = quantity + ?, addons = ? WHERE user_id = ? AND product_id = ? AND size = ?";
+        // If the item already exists with the same size and addons, update the quantity
+        $updateCartQuery = "
+            UPDATE cart 
+            SET quantity = quantity + ? 
+            WHERE user_id = ? 
+            AND product_id = ? 
+            AND size = ? 
+            AND addons = ?
+        ";
         $updateStmt = $conn->prepare($updateCartQuery);
-        $addonsJson = json_encode($addons);  // Convert the addons array to JSON
-        $updateStmt->bind_param("iisss", $quantity, $addonsJson, $userId, $productId, $size);
+        $updateStmt->bind_param("iisss", $quantity, $userId, $productId, $size, $addonsJson);
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-        // If product is not in the cart, insert it along with add-ons
-        $insertCartQuery = "INSERT INTO cart (user_id, product_id, quantity, size, addons) VALUES (?, ?, ?, ?, ?)";
+        // If the item doesn't exist with the same size and addons, insert a new record
+        $insertCartQuery = "
+            INSERT INTO cart (user_id, product_id, quantity, size, addons) 
+            VALUES (?, ?, ?, ?, ?)
+        ";
         $insertStmt = $conn->prepare($insertCartQuery);
-        $addonsJson = json_encode($addons);  // Convert the addons array to JSON
         $insertStmt->bind_param("iiiss", $userId, $productId, $quantity, $size, $addonsJson);
         $insertStmt->execute();
         $insertStmt->close();
     }
-
     $stmt->close();
 }
 
+// Product query and other operations
 $productQuery = "SELECT * FROM coffee_products";
 if ($selectedCategory && $selectedCategory != 'best') {
     $productQuery .= " WHERE category_id = ?";
@@ -75,6 +96,7 @@ if ($selectedCategory && $selectedCategory != 'best') {
 $stmt->execute();
 $productResult = $stmt->get_result();
 $stmt->close();
+
 $addonQuery = "SELECT * FROM addons";
 $addonResult = $conn->query($addonQuery);
 ?>
@@ -128,10 +150,12 @@ $addonResult = $conn->query($addonQuery);
                             <div class="div-size-info">
                                 <input type="radio" name="size" value="M" id="sizeM" required>
                                 <label for="sizeM">M</label>
+                                <p>+₱10</p>
                             </div>
                             <div class="div-size-info">
                                 <input type="radio" name="size" value="L" id="sizeL" required>
                                 <label for="sizeL">L</label>
+                                <p>+₱20</p>
                             </div>
                         </div>
                     </div>
@@ -141,14 +165,12 @@ $addonResult = $conn->query($addonQuery);
                         </div>
                     </div>
                 </div>
-
                 <div class="button">
                     <button type="submit" class="button2" name="add_to_cart">Add to Cart</button>
                 </div>
             </div>
         </form>
     </div>
-
     <section class="categories">
         <h2>Available Categories</h2>
         <div class="category-list">
@@ -195,7 +217,7 @@ $addonResult = $conn->query($addonQuery);
                                 <div class="best-stamp">Best</div>
                             <?php endif; ?>
                             <div class="image-container">
-                    <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
+                                <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
                             </div>
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
@@ -247,13 +269,13 @@ $addonResult = $conn->query($addonQuery);
                         <div class="product">
                             <div class="image-container">
                                 <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
-                    </div>
+                            </div>
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
                             <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
-                </div>
-            <?php endwhile; ?>
+                        </div>
+                    <?php endwhile; ?>
                 <?php else: ?>
                     <p>No products available in this category.</p>
                 <?php endif; ?>
@@ -277,6 +299,7 @@ $addonResult = $conn->query($addonQuery);
             </div>
         <?php endif; ?>
     </section>
+
     <script>
         function openModal(productId, productName, productDesc, productPrice, productImage, totalSales, stockQuantity) {
             var overlay = document.getElementById("overlay");
@@ -304,29 +327,25 @@ $addonResult = $conn->query($addonQuery);
 
             addonsContainer.innerHTML = '';
             <?php while ($addon = $addonResult->fetch_assoc()): ?>
-
                 var addonOption = document.createElement("div");
                 addonOption.innerHTML = `
-            
             <input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>" id="addon-<?php echo $addon['id']; ?>">
             <label for="addon-<?php echo $addon['id']; ?>"><?= $addon['addon_name'] ?></label>
-                 <p>₱<?= $addon['addon_price'] ?></p>
-            
+            <p>₱<?= $addon['addon_price'] ?></p>
         `;
                 addonsContainer.appendChild(addonOption);
-
             <?php endwhile; ?>
-
-
             overlay.style.display = "block";
             modal.style.display = "flex";
         }
+
         var closeBtn = document.getElementsByClassName("close")[0];
         closeBtn.onclick = function() {
             var modal = document.getElementById("quantityModal");
             modal.style.display = "none";
             overlay.style.display = "none";
         }
+
         window.onclick = function(event) {
             var modal = document.getElementById("quantityModal");
             if (event.target == modal) {
@@ -335,6 +354,8 @@ $addonResult = $conn->query($addonQuery);
             }
         }
     </script>
+
     <?php include 'footer.php'; ?>
 </body>
+
 </html>

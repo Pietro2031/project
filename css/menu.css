@@ -671,3 +671,13 @@ div#addonsContainer p {
   padding: 3px;
   font-size: 10px;
 }
+.div-size-info p {
+  position: absolute;
+  top: -9px;
+  right: 0;
+  background-color: #e45353;
+  color: white;
+  border-radius: 10px;
+  padding: 3px;
+  font-size: 10px;
+}

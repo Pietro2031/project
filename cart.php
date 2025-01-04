@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <?php include('connection.php'); ?>
     <title>User Cart</title>
@@ -28,19 +29,21 @@ if ($userResult->num_rows === 0) {
 $user = $userResult->fetch_assoc();
 $userId = $user['id'];
 $userStmt->close();
-$getCartItemsQuery = "
+$getCartItemsQuery = " 
     SELECT 
-        cart.id AS cart_id, 
-        cart.user_id, 
-        cart.product_id, 
-        cart.quantity, 
-        coffee_products.product_name AS product_name, 
-        coffee_products.product_image AS product_image, 
-        coffee_products.price AS price 
-    FROM cart
-    INNER JOIN coffee_products ON cart.product_id = coffee_products.id
-    WHERE cart.user_id = ?
-";
+    cart.id AS cart_id, 
+    cart.user_id, 
+    cart.product_id, 
+    cart.quantity, 
+    cart.size, 
+    cart.addons AS addon_ids, 
+    coffee_products.product_name AS product_name, 
+    coffee_products.product_image AS product_image, 
+    coffee_products.price AS price 
+    FROM cart 
+    INNER JOIN coffee_products ON cart.product_id = coffee_products.id 
+    WHERE cart.user_id = ? 
+    ";
 $cartStmt = $conn->prepare($getCartItemsQuery);
 $cartStmt->bind_param("i", $userId);
 $cartStmt->execute();
@@ -51,6 +54,7 @@ while ($row = $result->fetch_assoc()) {
 }
 $totalCartValue = 0;
 ?>
+
 <body>
     <?php include("header.php"); ?>
     <form method="post" action="" id="cartForm" enctype="multipart/form-data">
@@ -64,10 +68,39 @@ $totalCartValue = 0;
                                 <th style="width:60px;">Select</th>
                                 <th style="text-align: start;">Product</th>
                                 <th>Quantity</th>
+                                <th>Size</th>
+                                <th>Add-ons</th>
                                 <th style="text-align: end; padding-right: 0px">Unit Price</th>
                             </tr>
                             <?php foreach ($cartItems as $item):
-                                $totalPrice = $item['quantity'] * $item['price'];
+                                $productPrice = $item['price'];
+                                $totalPrice = $item['quantity'] * $productPrice;
+
+                                $sizeCharge = 0;
+                                if ($item['size'] == 'M') {
+                                    $sizeCharge = 10;
+                                } elseif ($item['size'] == 'L') {
+                                    $sizeCharge = 20;
+                                }
+                                $addonIds = json_decode($item['addon_ids'], true);
+                                $addonPrice = 0;
+                                $addonNames = [];
+                                if (!empty($addonIds)) {
+                                    $placeholders = implode(',', array_fill(0, count($addonIds), '?'));
+                                    $addonQuery = "SELECT addon_name, addon_price FROM addons WHERE id IN ($placeholders)";
+                                    $addonStmt = $conn->prepare($addonQuery);
+                                    $addonStmt->bind_param(str_repeat('i', count($addonIds)), ...$addonIds);
+                                    $addonStmt->execute();
+                                    $addonResult = $addonStmt->get_result();
+                                    while ($addon = $addonResult->fetch_assoc()) {
+                                        $addonNames[] = $addon['addon_name'];
+                                        $addonPrice += $addon['addon_price'];
+                                    }
+                                    $addonStmt->close();
+                                }
+                                $addonsText = $addonNames ? implode(", ", $addonNames) : "None";
+
+                                $totalPrice += ($addonPrice + $sizeCharge) * $item['quantity'];
                                 $totalCartValue += $totalPrice;
                             ?>
                                 <tr class="cart-item" style="height: 100px;">
@@ -81,12 +114,18 @@ $totalCartValue = 0;
                                         </div>
                                     </td>
                                     <td>
-                                        <input type="number" name="quantity[]" value="<?= $item['quantity']; ?>" min="1" data-price="<?= $item['price']; ?>" data-cart-id="<?= $item['cart_id']; ?>" onchange="updateQuantity(this)">
+                                        <input type="number" name="quantity[]" value="<?= $item['quantity']; ?>" min="1" data-price="<?= $productPrice; ?>" data-cart-id="<?= $item['cart_id']; ?>" data-addon-price="<?= $addonPrice; ?>" data-size-charge="<?= $sizeCharge; ?>" onchange="updateQuantity(this)">
+                                    </td>
+                                    <td>
+                                        <div class="size"><?= $item['size']; ?></div>
+                                    </td>
+                                    <td>
+                                        <div class="addons"><?= $addonsText; ?></div>
                                     </td>
                                     <td>
                                         <div class="total-price">
-                                            <p class="sumtext"><?= $item['quantity']; ?> x $<?= $item['price'] ?></p>
-                                            <p class="item-total-price">$<?= number_format($totalPrice, 2) ?></p>
+                                            <p class="sumtext"><?= $item['quantity']; ?> x ₱<?= number_format($productPrice, 2) ?> + Add-ons (₱<?= number_format($addonPrice * $item['quantity'], 2) ?>) + Size Upgrade (₱<?= number_format($sizeCharge * $item['quantity'], 2) ?>)</p>
+                                            <p class="item-total-price">₱<?= number_format($totalPrice, 2) ?></p>
                                         </div>
                                     </td>
                                 </tr>
@@ -96,10 +135,11 @@ $totalCartValue = 0;
                         <p>Your cart is empty.</p>
                     <?php endif; ?>
                 </div>
+            </div>
         </section>
         <?php if (count($cartItems) > 0): ?>
             <div class="CartTotal">
-                <span id="totalCartValue">$<?= number_format($totalCartValue, 2) ?></span>
+                <span id="totalCartValue">₱<?= number_format($totalCartValue, 2) ?></span>
                 <p>Shipping & taxes calculated at checkout.</p>
                 <div>
                     <button type="submit" class="deletebtn" name="deleteSelected" formaction="deleteCartItem.php" onclick="return confirmAction()">Delete Selected</button>
@@ -119,6 +159,7 @@ $totalCartValue = 0;
                 return confirm("Would you like to confirm the deletion of selected items?");
             }
         }
+
         function updateTotal(checkbox) {
             var checkboxes = document.getElementsByName('selectedItems[]');
             var total = 0;
@@ -130,69 +171,43 @@ $totalCartValue = 0;
                     total += totalPrice;
                 }
             }
-            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
+            document.getElementById('totalCartValue').textContent = '₱' + total.toFixed(2);
         }
-        function updateCartTotal() {
-            var checkboxes = document.getElementsByName('selectedItems[]');
-            var total = 0;
-            checkboxes.forEach(function(checkbox) {
-                if (checkbox.checked) {
-                    var totalPriceElement = checkbox.closest('.cart-item').querySelector('.item-total-price');
-                    var totalPriceText = totalPriceElement.textContent.trim();
-                    var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
-                    total += totalPrice;
-                }
-            });
-            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
-        }
-        function updateCartTotal() {
-            var checkboxes = document.getElementsByName('selectedItems[]');
-            var total = 0;
-            checkboxes.forEach(function(checkbox) {
-                if (checkbox.checked) {
-                    var totalPriceElement = checkbox.closest('.cart-item').querySelector('.item-total-price');
-                    var totalPriceText = totalPriceElement.textContent.trim();
-                    var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
-                    total += totalPrice;
-                }
-            });
-            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
-        }
+
         function updateQuantity(input) {
-            var quantity = parseInt(input.value); 
-            var price = parseFloat(input.dataset.price); 
-            var cartId = input.dataset.cartId; 
+            var quantity = parseInt(input.value);
+            var price = parseFloat(input.dataset.price);
+            var addonPrice = parseFloat(input.dataset.addonPrice);
+            var sizeCharge = parseFloat(input.dataset.sizeCharge);
+            var cartId = input.dataset.cartId;
             if (isNaN(quantity) || isNaN(price)) {
                 console.error("Invalid quantity or price");
                 return;
             }
-            
-            var newTotalPrice = quantity * price;
-            
+
+            var newTotalPrice = quantity * price + (addonPrice + sizeCharge) * quantity;
+            var newAddonTotal = addonPrice * quantity;
+            var newSizeChargeTotal = sizeCharge * quantity;
             var totalPriceElement = input.closest('.cart-item').querySelector('.item-total-price');
-            totalPriceElement.textContent = '$' + newTotalPrice.toFixed(2);
-            
+            totalPriceElement.textContent = '₱' + newTotalPrice.toFixed(2);
             var sumtextElement = input.closest('.cart-item').querySelector('.sumtext');
-            sumtextElement.textContent = quantity + ' x $' + price.toFixed(2);
-            
+            sumtextElement.textContent = quantity + ' x ₱' + price.toFixed(2) + ' + Add-ons (₱' + newAddonTotal.toFixed(2) + ') + Size Upgrade (₱' + newSizeChargeTotal.toFixed(2) + ')';
             updateCartTotal();
-            
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "updateQuantity.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        
                         showNotification("Quantity updated successfully!");
                     } else {
-                        
                         showNotification("Error updating quantity. Please try again.", "error");
                     }
                 }
             };
             xhr.send("cart_id=" + cartId + "&quantity=" + quantity);
         }
+
         function updateCartTotal() {
             var total = 0;
             var cartItems = document.querySelectorAll('.cart-item');
@@ -202,21 +217,20 @@ $totalCartValue = 0;
                 var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
                 total += totalPrice;
             });
-            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
+            document.getElementById('totalCartValue').textContent = '₱' + total.toFixed(2);
         }
+
         function showNotification(message, type = "success") {
-            
             var notification = document.createElement("div");
             notification.className = "notification " + type;
             notification.textContent = message;
-            
             document.body.appendChild(notification);
-            
             setTimeout(function() {
                 document.body.removeChild(notification);
-            }, 3000000);
+            }, 3000);
         }
     </script>
     <?php include "footer.php"; ?>
 </body>
+
 </html>
