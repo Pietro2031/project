@@ -11,8 +11,6 @@ $bestSellersQuery = "
 ";
 $bestSellersResult = $conn->query($bestSellersQuery);
 $bestStampLimit = 3;
-
-// Adding product to cart
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
@@ -51,7 +49,6 @@ if (isset($_POST['add_to_cart'])) {
         $insertStmt->close();
     }
 
-    // Add-ons insertion (if any)
     if (!empty($addons)) {
         foreach ($addons as $addonId) {
             $insertAddonQuery = "INSERT INTO cart_addons (cart_id, addon_id) VALUES (?, ?)";
@@ -63,7 +60,6 @@ if (isset($_POST['add_to_cart'])) {
     }
     $stmt->close();
 }
-
 $productQuery = "SELECT * FROM coffee_products";
 if ($selectedCategory && $selectedCategory != 'best') {
     $productQuery .= " WHERE category_id = ?";
@@ -92,10 +88,10 @@ $addonResult = $conn->query($addonQuery);
     <?php include 'header.php'; ?>
     <div id="overlay" class="overlay  close"></div>
     <div id="quantityModal" class="modal">
-        <form id="quantityForm" action="menu.php" method="post">
+        <form id="quantityForm" action="menu.php" method="post" enctype="multipart/form-data">
             <input type="hidden" name="product_id" id="modalProductId">
             <input type="hidden" name="product_name" id="modalProductName">
-            <input type="hidden" name="product_name" id="modalProductDesc">
+            <input type="hidden" name="product_description" id="modalProductDesc">
             <input type="hidden" name="product_price" id="modalProductPrice">
             <input type="hidden" name="product_img" id="modalProductImage">
             <div class="modal-confirm-order">
@@ -122,23 +118,26 @@ $addonResult = $conn->query($addonQuery);
                         <div class="label-size">Size</div>
                         <div class="div-size">
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="S"> S
+                                <input type="radio" name="size" value="S" id="sizeS">
+                                <label for="sizeS">S</label>
                             </div>
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="M"> M
+                                <input type="radio" name="size" value="M" id="sizeM">
+                                <label for="sizeM">M</label>
                             </div>
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="L"> L
+                                <input type="radio" name="size" value="L" id="sizeL">
+                                <label for="sizeL">L</label>
                             </div>
                         </div>
                     </div>
                     <div class="div-23">
                         <div class="label-size">Add-ons</div>
                         <div class="div-add-ons" id="addonsContainer">
-                            <!-- Add-ons dynamically populated here -->
                         </div>
                     </div>
                 </div>
+
                 <div class="button">
                     <button type="submit" class="button2">Add to Cart</button>
                 </div>
@@ -196,7 +195,7 @@ $addonResult = $conn->query($addonQuery);
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
+                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
                         </div>
                     <?php
                         $counter++;
@@ -212,12 +211,10 @@ $addonResult = $conn->query($addonQuery);
                 if ($selectedCategory) {
                     $totalQuery .= " WHERE category_id = ?";
                 }
-
                 $totalStmt = $conn->prepare($totalQuery);
                 if ($totalStmt === false) {
                     die("Error preparing the statement: " . $conn->error);
                 }
-
                 if ($selectedCategory) {
                     $totalStmt->bind_param("i", $selectedCategory);
                 }
@@ -227,7 +224,6 @@ $addonResult = $conn->query($addonQuery);
                 $totalProducts = $totalRow['total'];
                 $totalPages = ceil($totalProducts / $productsPerPage);
                 $totalStmt->close();
-
                 $productQuery = "SELECT * FROM coffee_products";
                 if ($selectedCategory) {
                     $productQuery .= " WHERE category_id = ? LIMIT ?, ?";
@@ -258,7 +254,6 @@ $addonResult = $conn->query($addonQuery);
                 <?php endif; ?>
             <?php endif; ?>
         </div>
-
         <?php if ($selectedCategory != 'best'): ?>
             <div class="pagination">
                 <?php if ($page > 1): ?>
@@ -277,7 +272,6 @@ $addonResult = $conn->query($addonQuery);
             </div>
         <?php endif; ?>
     </section>
-
     <script>
         function openModal(productId, productName, productDesc, productPrice, productImage, totalSales, stockQuantity) {
             var overlay = document.getElementById("overlay");
@@ -294,34 +288,40 @@ $addonResult = $conn->query($addonQuery);
 
             productIdInput.value = productId;
             productNameInput.value = productName;
-            productDescInput.value = productDesc;
+            document.getElementById("modalProductDescription").textContent = productDesc;
             productPriceInput.value = productPrice;
             productImageInput.value = productImage;
-            modalProductImageDisplay.src = productImage;
-            modalProductNameDisplay.textContent = productName;
+            document.getElementById("modalProductImageDisplay").src = productImage;
+            document.getElementById("modalProductNameDisplay").textContent = productName;
             priceDisplay.textContent = "₱ " + productPrice;
             soldDisplay.textContent = "Solds: " + totalSales;
             leftDisplay.textContent = "Quantity Left: " + stockQuantity;
 
-            // Add-ons
             addonsContainer.innerHTML = '';
             <?php while ($addon = $addonResult->fetch_assoc()): ?>
+
                 var addonOption = document.createElement("div");
-                addonOption.innerHTML = `<label><input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>"> <?php echo $addon['addon_name']; ?> - ₱ <?php echo number_format($addon['addon_price'], 2); ?></label>`;
+                addonOption.innerHTML = `
+            
+            <input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>" id="addon-<?php echo $addon['id']; ?>">
+            <label for="addon-<?php echo $addon['id']; ?>"><?= $addon['addon_name'] ?></label>
+                 <p>₱<?= $addon['addon_price'] ?></p>
+            
+        `;
                 addonsContainer.appendChild(addonOption);
+
             <?php endwhile; ?>
+
 
             overlay.style.display = "block";
             modal.style.display = "flex";
         }
-
         var closeBtn = document.getElementsByClassName("close")[0];
         closeBtn.onclick = function() {
             var modal = document.getElementById("quantityModal");
             modal.style.display = "none";
             overlay.style.display = "none";
         }
-
         window.onclick = function(event) {
             var modal = document.getElementById("quantityModal");
             if (event.target == modal) {
