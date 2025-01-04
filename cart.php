@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <?php include('connection.php'); ?>
     <title>User Cart</title>
@@ -12,16 +11,12 @@
         }
     </style>
 </head>
-
 <?php
 session_start();
 if (!isset($_SESSION['username'])) {
     die("Error: You must be logged in to view your cart.");
 }
-
 $username = $_SESSION['username'];
-
-// Retrieve the user ID based on the session username
 $userQuery = "SELECT id FROM user_account WHERE username = ?";
 $userStmt = $conn->prepare($userQuery);
 $userStmt->bind_param("s", $username);
@@ -33,8 +28,6 @@ if ($userResult->num_rows === 0) {
 $user = $userResult->fetch_assoc();
 $userId = $user['id'];
 $userStmt->close();
-
-// Fetch items in the user's cart
 $getCartItemsQuery = "
     SELECT 
         cart.id AS cart_id, 
@@ -52,24 +45,12 @@ $cartStmt = $conn->prepare($getCartItemsQuery);
 $cartStmt->bind_param("i", $userId);
 $cartStmt->execute();
 $result = $cartStmt->get_result();
-
-// Fetch all rows into an array
 $cartItems = [];
 while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
 }
-
 $totalCartValue = 0;
-
-// Debug: Print the cart items array
-// Uncomment to debug the array structure
-/*
-echo "<pre>";
-print_r($cartItems);
-echo "</pre>";
-*/
 ?>
-
 <body>
     <?php include("header.php"); ?>
     <form method="post" action="" id="cartForm" enctype="multipart/form-data">
@@ -138,7 +119,6 @@ echo "</pre>";
                 return confirm("Would you like to confirm the deletion of selected items?");
             }
         }
-
         function updateTotal(checkbox) {
             var checkboxes = document.getElementsByName('selectedItems[]');
             var total = 0;
@@ -152,25 +132,6 @@ echo "</pre>";
             }
             document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
         }
-
-
-        function updateCartTotal() {
-            var checkboxes = document.getElementsByName('selectedItems[]');
-            var total = 0;
-
-            checkboxes.forEach(function(checkbox) {
-                if (checkbox.checked) {
-                    var totalPriceElement = checkbox.closest('.cart-item').querySelector('.item-total-price');
-                    var totalPriceText = totalPriceElement.textContent.trim();
-                    var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
-                    total += totalPrice;
-                }
-            });
-
-            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
-        }
-
-
         function updateCartTotal() {
             var checkboxes = document.getElementsByName('selectedItems[]');
             var total = 0;
@@ -184,73 +145,73 @@ echo "</pre>";
             });
             document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
         }
-
+        function updateCartTotal() {
+            var checkboxes = document.getElementsByName('selectedItems[]');
+            var total = 0;
+            checkboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    var totalPriceElement = checkbox.closest('.cart-item').querySelector('.item-total-price');
+                    var totalPriceText = totalPriceElement.textContent.trim();
+                    var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
+                    total += totalPrice;
+                }
+            });
+            document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
+        }
         function updateQuantity(input) {
-            var quantity = parseInt(input.value); // Convert quantity to an integer
-            var price = parseFloat(input.dataset.price); // Convert price to a float
-            var cartId = input.dataset.cartId; // ID of the cart item
-
+            var quantity = parseInt(input.value); 
+            var price = parseFloat(input.dataset.price); 
+            var cartId = input.dataset.cartId; 
             if (isNaN(quantity) || isNaN(price)) {
                 console.error("Invalid quantity or price");
                 return;
             }
-
-            // Calculate the new total price for this item
+            
             var newTotalPrice = quantity * price;
-
-            // Update the total price displayed for this item
+            
             var totalPriceElement = input.closest('.cart-item').querySelector('.item-total-price');
             totalPriceElement.textContent = '$' + newTotalPrice.toFixed(2);
-
-            // Update the summary price text
+            
             var sumtextElement = input.closest('.cart-item').querySelector('.sumtext');
             sumtextElement.textContent = quantity + ' x $' + price.toFixed(2);
-
-            // Update the total cart value
+            
             updateCartTotal();
-
-            // Send the updated quantity to the server via AJAX
+            
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "updateQuantity.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        // Show a notification when the quantity is successfully updated
+                        
                         showNotification("Quantity updated successfully!");
                     } else {
-                        // Show an error notification if the update fails
+                        
                         showNotification("Error updating quantity. Please try again.", "error");
                     }
                 }
             };
             xhr.send("cart_id=" + cartId + "&quantity=" + quantity);
         }
-
         function updateCartTotal() {
             var total = 0;
             var cartItems = document.querySelectorAll('.cart-item');
-
             cartItems.forEach(function(item) {
                 var totalPriceElement = item.querySelector('.item-total-price');
                 var totalPriceText = totalPriceElement.textContent.trim();
                 var totalPrice = parseFloat(totalPriceText.replace(/[^\d.]/g, ''));
                 total += totalPrice;
             });
-
             document.getElementById('totalCartValue').textContent = '$' + total.toFixed(2);
         }
-
         function showNotification(message, type = "success") {
-            // Create notification div
+            
             var notification = document.createElement("div");
             notification.className = "notification " + type;
             notification.textContent = message;
-
-            // Add the notification to the body
+            
             document.body.appendChild(notification);
-
-            // Remove the notification after 3 seconds
+            
             setTimeout(function() {
                 document.body.removeChild(notification);
             }, 3000000);
@@ -258,5 +219,4 @@ echo "</pre>";
     </script>
     <?php include "footer.php"; ?>
 </body>
-
 </html>
