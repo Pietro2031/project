@@ -1,29 +1,23 @@
 <?php
-session_start(); // Start the session to access session variables
+session_start();
 
-// Include the database connection file
 include('connection.php');
 
-// Default user logged-in status and profile picture
 $userLoggedIn = false;
-$userImage = 'user.png'; // Default profile image
+$userImage = 'user.png'; 
 
-// Fetch theme settings from the database
-$themeQuery = "SELECT * FROM theme LIMIT 1"; // Assuming there's only one theme row
+$themeQuery = "SELECT * FROM theme LIMIT 1";
 $themeResult = $conn->query($themeQuery);
 $theme = $themeResult->fetch_assoc();
 
-// Set default values in case no theme is found
 $primaryColor = $theme['primary_color'] ?? '#ffffff';
 $secondaryColor = $theme['secondary_color'] ?? '#C9C9A6';
 $fontColor = $theme['font_color'] ?? '#9E9B76';
-$logo = $theme['logo'] ?? 'logo3.png'; // Default logo if none is found
+$logo = $theme['logo'] ?? 'logo3.png'; 
 
-// Check if the user is logged in
 if (isset($_SESSION['username'])) {
     $userLoggedIn = true;
 
-    // Fetch user info from the database based on session username
     $query = "SELECT * FROM user_account WHERE userName = ?";
     $stmt = $conn->prepare($query);
     if ($stmt) {
@@ -34,9 +28,8 @@ if (isset($_SESSION['username'])) {
             $user = $result->fetch_assoc();
             $_SESSION['first_name'] = $user['Fname'];
             $_SESSION['last_name'] = $user['Lname'];
-            // Check if user has a profile picture set
             if (!empty($user['profile_picture'])) {
-                $userImage = $user['profile_picture']; // Use the uploaded profile picture
+                $userImage = $user['profile_picture']; 
             }
         }
         $stmt->close();
@@ -74,8 +67,6 @@ if (isset($_SESSION['username'])) {
         <a href="menu.php"><strong>Menu</strong></a>
         <a href="about.php"><strong>About</strong></a>
         <a href="contactus.php"><strong>Contact Us</strong></a>
-
-        <!-- Account Dropdown -->
         <div class="action">
             <div class="profile" onclick="menuToggle();" aria-expanded="false">
                 <img 
@@ -99,7 +90,7 @@ if (isset($_SESSION['username'])) {
 </li>
 <li>
     <i class="fas fa-sign-out-alt"></i>
-    <a href="logout.php">Logout</a> <!-- Link to logout.php -->
+    <a href="logout.php">Logout</a> 
 </li>
 
                     </ul>

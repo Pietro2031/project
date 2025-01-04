@@ -2,13 +2,44 @@
 <?php
 $userLoggedIn = false;
 $userImage = 'user.png';
+$cartCount = 0;
+
 $themeQuery = "SELECT * FROM theme LIMIT 1";
 $themeResult = $conn->query($themeQuery);
 $theme = $themeResult->fetch_assoc();
 $primaryColor = $theme['primary_color'] ?? '#fff';
 $secondaryColor = $theme['secondary_color'] ?? '#C9C9A6';
 $fontColor = $theme['font_color'] ?? '#9E9B76';
-$logo = $theme['logo'] ?? 'logo3.png'; ?>
+$logo = $theme['logo'] ?? 'logo3.png';
+if (isset($_SESSION['username'])) {
+    $userLoggedIn = true;
+    $query = "SELECT * FROM user_account WHERE userName = ?";
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param("s", $_SESSION['username']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            $_SESSION['first_name'] = $user['Fname'];
+            $_SESSION['last_name'] = $user['Lname'];
+            if (!empty($user['profile_picture'])) {
+                $userImage = $user['profile_picture'];
+            }
+        }
+        $userId = $user['id'];
+        $cartCountQuery = "SELECT COUNT(*) AS count FROM cart WHERE user_id = ?";
+        $cartStmt = $conn->prepare($cartCountQuery);
+        $cartStmt->bind_param("i", $userId);
+        $cartStmt->execute();
+        $cartResult = $cartStmt->get_result();
+        if ($cartResult->num_rows > 0) {
+            $cartData = $cartResult->fetch_assoc();
+            $cartCount = $cartData['count'];
+        }
+        $stmt->close();
+    }
+} ?>
 <header class=" header">
     <img src="<?php echo $logo; ?>" alt="Peter Beans Logo" class="logopic">
     <p class="logo">Peter Beans</p>
@@ -17,40 +48,55 @@ $logo = $theme['logo'] ?? 'logo3.png'; ?>
         <a href="menu.php"><strong>Menu</strong></a>
         <a href="about.php"><strong>About</strong></a>
         <a href="contactus.php"><strong>Contact Us</strong></a>
-        <div class="action">
-            <div class="profile" onclick="menuToggle();" aria-expanded="false">
-                <img
-                    src="<?php echo $userImage; ?>"
-                    alt="Account Profile"
-                    class="profile-img" />
-            </div>
-            <div class="menu" aria-hidden="true">
-                <?php if ($userLoggedIn): ?>
-                    <strong>
-                        <h3><br> <?php echo htmlspecialchars($_SESSION['first_name']) . ' ' . htmlspecialchars($_SESSION['last_name']); ?></h3>
-                    </strong>
-                    <ul>
-                        <li>
-                            <i class="fas fa-user"></i>
-                            <a href="profile.php">My Profile</a>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <a href="otp.php">Verification</a>
-                        </li>
-                        <li>
-                            <i class="fas fa-sign-out-alt"></i>
-                            <a href="logout.php">Logout</a>
-                        </li>
-                    </ul>
-                <?php else: ?>
-                    <ul>
-                        <li>
-                            <i class="fas fa-user-plus"></i>
-                            <a href="login.php">Sign Up</a>
-                        </li>
-                    </ul>
-                <?php endif; ?>
+        <div class="slideright" style="gap: 20px;">
+            <?php if ($userLoggedIn): ?>
+                <div class="cart" style="cursor: pointer;" onclick="goToCart()">
+                    <img src="img/icon/cart.png" alt="">
+                    <div class="count"><?= $cartCount ?></div>
+                </div>
+
+                <script>
+                    function goToCart() {
+                        window.location.href = "cart.php";
+                    }
+                </script>
+
+            <?php endif; ?>
+            <div class="action">
+                <div class="profile" onclick="menuToggle();" aria-expanded="false">
+                    <img
+                        src="<?php echo $userImage; ?>"
+                        alt="Account Profile"
+                        class="profile-img" />
+                </div>
+                <div class="menu" aria-hidden="true">
+                    <?php if ($userLoggedIn): ?>
+                        <strong>
+                            <h3><br> <?php echo htmlspecialchars($_SESSION['first_name']) . ' ' . htmlspecialchars($_SESSION['last_name']); ?></h3>
+                        </strong>
+                        <ul>
+                            <li>
+                                <i class="fas fa-user"></i>
+                                <a href="profile.php">My Profile</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <a href="otp.php">Verification</a>
+                            </li>
+                            <li>
+                                <i class="fas fa-sign-out-alt"></i>
+                                <a href="logout.php">Logout</a>
+                            </li>
+                        </ul>
+                    <?php else: ?>
+                        <ul>
+                            <li>
+                                <i class="fas fa-user-plus"></i>
+                                <a href="login.php">Sign Up</a>
+                            </li>
+                        </ul>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </nav>
@@ -176,8 +222,6 @@ $logo = $theme['logo'] ?? 'logo3.png'; ?>
     }
 
     .action .profile {
-        margin-right: -60px;
-        margin-left: 100px;
         width: 50px;
         height: 50px;
         border-radius: 50%;
