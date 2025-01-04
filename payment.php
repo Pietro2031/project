@@ -3,7 +3,8 @@ session_start();
 include 'connection.php';
 
 if (!isset($_SESSION['selectedItems']) || empty($_SESSION['selectedItems'])) {
-    die("No coffee_products selected for purchase.");
+    echo "<script>alert('No coffee_products selected for purchase.'); window.location.href = 'home.php';</script>";
+    exit();
 }
 
 $selectedItems = implode(',', $_SESSION['selectedItems']);
@@ -11,13 +12,15 @@ $selectedItems = implode(',', $_SESSION['selectedItems']);
 $userQuery = "SELECT id FROM user_account WHERE username = ?";
 $userStmt = $conn->prepare($userQuery);
 if (!$userStmt) {
-    die("Error preparing user query: " . $conn->error);
+    echo "<script>alert('Error preparing user query: {$conn->error}'); window.location.href = 'home.php';</script>";
+    exit();
 }
 $userStmt->bind_param("s", $_SESSION['username']);
 $userStmt->execute();
 $userResult = $userStmt->get_result();
 if ($userResult->num_rows === 0) {
-    die("User not found.");
+    echo "<script>alert('User not found.'); window.location.href = 'home.php';</script>";
+    exit();
 }
 $user = $userResult->fetch_assoc();
 $UserID = $user['id'];
@@ -26,12 +29,13 @@ $userStmt->close();
 $getSelectedItemsQuery = "
     SELECT coffee_products.id, coffee_products.product_name, coffee_products.Price, cart.Quantity 
     FROM cart 
-    INNER JOIN coffee_products ON cart.id = coffee_products.id 
+    INNER JOIN coffee_products ON cart.product_id = coffee_products.id 
     WHERE cart.user_id = ? AND cart.id IN ($selectedItems)
 ";
 $stmtGetSelectedItems = $conn->prepare($getSelectedItemsQuery);
 if (!$stmtGetSelectedItems) {
-    die("Error preparing selected coffee_products query: " . $conn->error);
+    echo "<script>alert('Error preparing selected coffee_products query: {$conn->error}'); window.location.href = 'home.php';</script>";
+    exit();
 }
 $stmtGetSelectedItems->bind_param("i", $UserID);
 $stmtGetSelectedItems->execute();
@@ -52,41 +56,51 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $paymentMode = $_POST['paymentMode'];
     $totalAmount = $totalPurchaseValue;
 
-    $saveOrderQuery = "INSERT INTO orders (user_id, order_date, total_amount, order_quantity, product_ids) VALUES (?, NOW(), ?, ?, ?)";
-    $stmtSaveOrder = $conn->prepare($saveOrderQuery);
-    if (!$stmtSaveOrder) {
-        die("Error preparing order query: " . $conn->error);
-    }
-    $orderQuantity = array_sum($quantities);
-    $productIDsString = implode(',', $productIDs);
-    $stmtSaveOrder->bind_param("idss", $UserID, $totalAmount, $orderQuantity, $productIDsString);
-    $stmtSaveOrder->execute();
-    $orderId = $stmtSaveOrder->insert_id;
-    $stmtSaveOrder->close();
+    $conn->begin_transaction();
 
-    $savePaymentQuery = "INSERT INTO payment (order_id, user_id, payment_mode, amount_paid) VALUES (?, ?, ?, ?)";
-    $stmtSavePayment = $conn->prepare($savePaymentQuery);
-    if (!$stmtSavePayment) {
-        die("Error preparing payment query: " . $conn->error);
-    }
-    $stmtSavePayment->bind_param("iisd", $orderId, $UserID, $paymentMode, $totalAmount);
-    $stmtSavePayment->execute();
-    $stmtSavePayment->close();
-
-    foreach ($productIDs as $index => $productId) {
-        $quantity = $quantities[$index];
-        $updateItemsQuery = "UPDATE coffee_products SET Quantity = Quantity - ?, total_sales = total_sales + ? WHERE id = ?";
-        $stmtUpdateItems = $conn->prepare($updateItemsQuery);
-        if (!$stmtUpdateItems) {
-            die("Error updating item quantities: " . $conn->error);
+    try {
+        $saveOrderQuery = "INSERT INTO orders (user_id, order_date, total_amount, order_quantity, product_ids) VALUES (?, NOW(), ?, ?, ?)";
+        $stmtSaveOrder = $conn->prepare($saveOrderQuery);
+        if (!$stmtSaveOrder) {
+            throw new Exception("Error preparing order query: " . $conn->error);
         }
-        $stmtUpdateItems->bind_param("iii", $quantity, $quantity, $productId);
-        $stmtUpdateItems->execute();
-        $stmtUpdateItems->close();
-    }
+        $orderQuantity = array_sum($quantities);
+        $productIDsString = implode(',', $productIDs);
+        $stmtSaveOrder->bind_param("idss", $UserID, $totalAmount, $orderQuantity, $productIDsString);
+        $stmtSaveOrder->execute();
+        $orderId = $stmtSaveOrder->insert_id;
+        $stmtSaveOrder->close();
 
-    header('Location: orderdone.php');
-    exit();
+        $savePaymentQuery = "INSERT INTO payment (order_id, user_id, payment_mode, amount_paid) VALUES (?, ?, ?, ?)";
+        $stmtSavePayment = $conn->prepare($savePaymentQuery);
+        if (!$stmtSavePayment) {
+            throw new Exception("Error preparing payment query: " . $conn->error);
+        }
+        $stmtSavePayment->bind_param("iisd", $orderId, $UserID, $paymentMode, $totalAmount);
+        $stmtSavePayment->execute();
+        $stmtSavePayment->close();
+
+        foreach ($productIDs as $index => $productId) {
+            $quantity = $quantities[$index];
+            $updateItemsQuery = "UPDATE coffee_products SET Quantity = Quantity - ?, total_sales = total_sales + ? WHERE id = ?";
+            $stmtUpdateItems = $conn->prepare($updateItemsQuery);
+            if (!$stmtUpdateItems) {
+                throw new Exception("Error updating item quantities: " . $conn->error);
+            }
+            $stmtUpdateItems->bind_param("iii", $quantity, $quantity, $productId);
+            $stmtUpdateItems->execute();
+            $stmtUpdateItems->close();
+        }
+
+        $conn->commit();
+
+        echo "<script>alert('Order placed successfully!'); window.location.href = 'home.php';</script>";
+        exit();
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "<script>alert('Error processing your order: {$e->getMessage()}'); window.location.href = 'home.php';</script>";
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
