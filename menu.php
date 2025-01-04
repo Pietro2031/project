@@ -11,6 +11,8 @@ $bestSellersQuery = "
 ";
 $bestSellersResult = $conn->query($bestSellersQuery);
 $bestStampLimit = 3;
+
+// Adding product to cart
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
@@ -49,6 +51,7 @@ if (isset($_POST['add_to_cart'])) {
         $insertStmt->close();
     }
 
+    // Add-ons insertion (if any)
     if (!empty($addons)) {
         foreach ($addons as $addonId) {
             $insertAddonQuery = "INSERT INTO cart_addons (cart_id, addon_id) VALUES (?, ?)";
@@ -60,6 +63,7 @@ if (isset($_POST['add_to_cart'])) {
     }
     $stmt->close();
 }
+
 $productQuery = "SELECT * FROM coffee_products";
 if ($selectedCategory && $selectedCategory != 'best') {
     $productQuery .= " WHERE category_id = ?";
@@ -86,32 +90,31 @@ $addonResult = $conn->query($addonQuery);
 
 <body>
     <?php include 'header.php'; ?>
+    <div id="overlay" class="overlay  close"></div>
     <div id="quantityModal" class="modal">
         <form id="quantityForm" action="menu.php" method="post">
             <input type="hidden" name="product_id" id="modalProductId">
             <input type="hidden" name="product_name" id="modalProductName">
+            <input type="hidden" name="product_name" id="modalProductDesc">
             <input type="hidden" name="product_price" id="modalProductPrice">
             <input type="hidden" name="product_img" id="modalProductImage">
             <div class="modal-confirm-order">
                 <div class="div-item-info">
-                    <img class="itemimg" src="itemimg0.png" />
+                    <img class="itemimg" src="" id="modalProductImageDisplay" />
                     <div class="div-item-text-info">
-                        <div class="itemname">Chocolate Frappuccino</div>
-                        <div class="iteminfo">
-                            Sweet chocolate with coffee, milk, and whipped cream
-                        </div>
+                        <div class="itemname" id="modalProductNameDisplay"></div>
+                        <div class="iteminfo" id="modalProductDescription"></div>
                         <div class="iteminfo" id="modalSold"></div>
                         <div class="iteminfo" id="modalLeft"></div>
                         <div class="div-price">
-                            <div class="curency">₱</div>
-                            <div class="price"  id="modalPrice"></div>
+                            <div class="price" id="modalPrice"></div>
                         </div>
                     </div>
                 </div>
                 <div class="div-inputs">
                     <div class="div-2">
                         <div class="label-size">Quantity</div>
-                        <div class="input"></div>
+                        <input type="number" name="quantity" id="quantityInput" min="1" value="1">
                     </div>
                 </div>
                 <div class="div-inputs">
@@ -119,36 +122,25 @@ $addonResult = $conn->query($addonQuery);
                         <div class="label-size">Size</div>
                         <div class="div-size">
                             <div class="div-size-info">
-                                <div class="small">S</div>
+                                <input type="radio" name="size" value="S"> S
                             </div>
                             <div class="div-size-info">
-                                <div class="small">M</div>
+                                <input type="radio" name="size" value="M"> M
                             </div>
                             <div class="div-size-info">
-                                <div class="small">L</div>
+                                <input type="radio" name="size" value="L"> L
                             </div>
                         </div>
                     </div>
                     <div class="div-23">
                         <div class="label-size">Add-ons</div>
-                        <div class="div-add-ons">
-                            <div class="div-addons-info">
-                                <div class="text">Extra Shot of Espresso</div>
-                            </div>
-                            <div class="div-addons-info">
-                                <div class="text">Oat Milk</div>
-                            </div>
-                            <div class="div-addons-info">
-                                <div class="text">Caramel Syrup</div>
-                            </div>
-                            <div class="div-addons-info">
-                                <div class="text">Whipped Cream</div>
-                            </div>
+                        <div class="div-add-ons" id="addonsContainer">
+                            <!-- Add-ons dynamically populated here -->
                         </div>
                     </div>
                 </div>
                 <div class="button">
-                    <div class="button2">Button</div>
+                    <button type="submit" class="button2">Add to Cart</button>
                 </div>
             </div>
         </form>
@@ -193,8 +185,7 @@ $addonResult = $conn->query($addonQuery);
             if ($selectedCategory == 'best'):
                 if ($bestSellersResult->num_rows > 0):
                     $counter = 1;
-                    while ($product = $bestSellersResult->fetch_assoc()):
-            ?>
+                    while ($product = $bestSellersResult->fetch_assoc()): ?>
                         <div class="product">
                             <?php if ($counter <= $bestStampLimit): ?>
                                 <div class="best-stamp">Best</div>
@@ -203,9 +194,9 @@ $addonResult = $conn->query($addonQuery);
                                 <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
                             </div>
                             <h3><?php echo $product['product_name']; ?></h3>
-                            <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
+                            <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>)">Order</button>
+                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
                         </div>
                     <?php
                         $counter++;
@@ -259,7 +250,7 @@ $addonResult = $conn->query($addonQuery);
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
+                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
@@ -286,11 +277,14 @@ $addonResult = $conn->query($addonQuery);
             </div>
         <?php endif; ?>
     </section>
+
     <script>
-        function openModal(productId, productName, productPrice, productImage, totalSales, stockQuantity) {
+        function openModal(productId, productName, productDesc, productPrice, productImage, totalSales, stockQuantity) {
+            var overlay = document.getElementById("overlay");
             var modal = document.getElementById("quantityModal");
             var productIdInput = document.getElementById("modalProductId");
             var productNameInput = document.getElementById("modalProductName");
+            var productDescInput = document.getElementById("modalProductDescription");
             var productPriceInput = document.getElementById("modalProductPrice");
             var productImageInput = document.getElementById("modalProductImage");
             var priceDisplay = document.getElementById("modalPrice");
@@ -300,29 +294,39 @@ $addonResult = $conn->query($addonQuery);
 
             productIdInput.value = productId;
             productNameInput.value = productName;
+            productDescInput.value = productDesc;
             productPriceInput.value = productPrice;
             productImageInput.value = productImage;
-            priceDisplay.textContent = "Price: ₱ " + productPrice;
+            modalProductImageDisplay.src = productImage;
+            modalProductNameDisplay.textContent = productName;
+            priceDisplay.textContent = "₱ " + productPrice;
             soldDisplay.textContent = "Solds: " + totalSales;
             leftDisplay.textContent = "Quantity Left: " + stockQuantity;
 
+            // Add-ons
             addonsContainer.innerHTML = '';
             <?php while ($addon = $addonResult->fetch_assoc()): ?>
                 var addonOption = document.createElement("div");
-                addonOption.innerHTML = `<label><input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>"> <?php echo $addon['addon_name']; ?> - $<?php echo number_format($addon['addon_price'], 2); ?></label>`;
+                addonOption.innerHTML = `<label><input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>"> <?php echo $addon['addon_name']; ?> - ₱ <?php echo number_format($addon['addon_price'], 2); ?></label>`;
                 addonsContainer.appendChild(addonOption);
             <?php endwhile; ?>
-            modal.style.display = "block";
+
+            overlay.style.display = "block";
+            modal.style.display = "flex";
         }
+
         var closeBtn = document.getElementsByClassName("close")[0];
         closeBtn.onclick = function() {
             var modal = document.getElementById("quantityModal");
             modal.style.display = "none";
+            overlay.style.display = "none";
         }
+
         window.onclick = function(event) {
             var modal = document.getElementById("quantityModal");
             if (event.target == modal) {
                 modal.style.display = "none";
+                overlay.style.display = "none";
             }
         }
     </script>
