@@ -11,12 +11,17 @@ $bestSellersQuery = "
 ";
 $bestSellersResult = $conn->query($bestSellersQuery);
 $bestStampLimit = 3;
+
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
-    $addons = isset($_POST['addons']) ? $_POST['addons'] : [];
+    $addons = isset($_POST['addons']) ? $_POST['addons'] : [];  // Add-ons as an array
+    $size = isset($_POST['size']) ? $_POST['size'] : null;  // Add size selection
     if (!isset($_SESSION['username'])) {
         die("Error: You must be logged in to add items to the cart.");
+    }
+    if (!$size) {
+        die("Error: Please select a size.");
     }
     $username = $_SESSION['username'];
     $userQuery = "SELECT id FROM user_account WHERE username = ?";
@@ -30,36 +35,35 @@ if (isset($_POST['add_to_cart'])) {
     $user = $userResult->fetch_assoc();
     $userId = $user['id'];
     $userStmt->close();
-    $checkCartQuery = "SELECT * FROM cart WHERE user_id = ? AND product_id = ?";
+    
+    // Check if the product is already in the cart
+    $checkCartQuery = "SELECT * FROM cart WHERE user_id = ? AND product_id = ? AND size = ?";
     $stmt = $conn->prepare($checkCartQuery);
-    $stmt->bind_param("ii", $userId, $productId);
+    $stmt->bind_param("iis", $userId, $productId, $size);
     $stmt->execute();
     $result = $stmt->get_result();
+    
     if ($result->num_rows > 0) {
-        $updateCartQuery = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
+        // If product already exists in the cart, update the quantity and add-ons
+        $updateCartQuery = "UPDATE cart SET quantity = quantity + ?, addons = ? WHERE user_id = ? AND product_id = ? AND size = ?";
         $updateStmt = $conn->prepare($updateCartQuery);
-        $updateStmt->bind_param("iii", $quantity, $userId, $productId);
+        $addonsJson = json_encode($addons);  // Convert the addons array to JSON
+        $updateStmt->bind_param("iisss", $quantity, $addonsJson, $userId, $productId, $size);
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-        $insertCartQuery = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+        // If product is not in the cart, insert it along with add-ons
+        $insertCartQuery = "INSERT INTO cart (user_id, product_id, quantity, size, addons) VALUES (?, ?, ?, ?, ?)";
         $insertStmt = $conn->prepare($insertCartQuery);
-        $insertStmt->bind_param("iii", $userId, $productId, $quantity);
+        $addonsJson = json_encode($addons);  // Convert the addons array to JSON
+        $insertStmt->bind_param("iiiss", $userId, $productId, $quantity, $size, $addonsJson);
         $insertStmt->execute();
         $insertStmt->close();
     }
 
-    if (!empty($addons)) {
-        foreach ($addons as $addonId) {
-            $insertAddonQuery = "INSERT INTO cart_addons (cart_id, addon_id) VALUES (?, ?)";
-            $addonStmt = $conn->prepare($insertAddonQuery);
-            $addonStmt->bind_param("ii", $cartId, $addonId);
-            $addonStmt->execute();
-            $addonStmt->close();
-        }
-    }
     $stmt->close();
 }
+
 $productQuery = "SELECT * FROM coffee_products";
 if ($selectedCategory && $selectedCategory != 'best') {
     $productQuery .= " WHERE category_id = ?";
@@ -86,7 +90,7 @@ $addonResult = $conn->query($addonQuery);
 
 <body>
     <?php include 'header.php'; ?>
-    <div id="overlay" class="overlay  close"></div>
+    <div id="overlay" class="overlay close"></div>
     <div id="quantityModal" class="modal">
         <form id="quantityForm" action="menu.php" method="post" enctype="multipart/form-data">
             <input type="hidden" name="product_id" id="modalProductId">
@@ -118,15 +122,15 @@ $addonResult = $conn->query($addonQuery);
                         <div class="label-size">Size</div>
                         <div class="div-size">
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="S" id="sizeS">
+                                <input type="radio" name="size" value="S" id="sizeS" required>
                                 <label for="sizeS">S</label>
                             </div>
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="M" id="sizeM">
+                                <input type="radio" name="size" value="M" id="sizeM" required>
                                 <label for="sizeM">M</label>
                             </div>
                             <div class="div-size-info">
-                                <input type="radio" name="size" value="L" id="sizeL">
+                                <input type="radio" name="size" value="L" id="sizeL" required>
                                 <label for="sizeL">L</label>
                             </div>
                         </div>
@@ -139,11 +143,12 @@ $addonResult = $conn->query($addonQuery);
                 </div>
 
                 <div class="button">
-                    <button type="submit" class="button2">Add to Cart</button>
+                    <button type="submit" class="button2" name="add_to_cart">Add to Cart</button>
                 </div>
             </div>
         </form>
     </div>
+
     <section class="categories">
         <h2>Available Categories</h2>
         <div class="category-list">
@@ -190,7 +195,7 @@ $addonResult = $conn->query($addonQuery);
                                 <div class="best-stamp">Best</div>
                             <?php endif; ?>
                             <div class="image-container">
-                                <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
+                    <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
                             </div>
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
@@ -242,13 +247,13 @@ $addonResult = $conn->query($addonQuery);
                         <div class="product">
                             <div class="image-container">
                                 <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
-                            </div>
+                    </div>
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
                             <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
-                        </div>
-                    <?php endwhile; ?>
+                </div>
+            <?php endwhile; ?>
                 <?php else: ?>
                     <p>No products available in this category.</p>
                 <?php endif; ?>
@@ -332,5 +337,4 @@ $addonResult = $conn->query($addonQuery);
     </script>
     <?php include 'footer.php'; ?>
 </body>
-
 </html>
