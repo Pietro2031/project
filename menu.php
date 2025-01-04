@@ -14,10 +14,10 @@ $bestStampLimit = 3;
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $quantity = $_POST['quantity'];
+    $addons = isset($_POST['addons']) ? $_POST['addons'] : [];
     if (!isset($_SESSION['username'])) {
         die("Error: You must be logged in to add items to the cart.");
     }
-
     $username = $_SESSION['username'];
     $userQuery = "SELECT id FROM user_account WHERE username = ?";
     $userStmt = $conn->prepare($userQuery);
@@ -30,26 +30,33 @@ if (isset($_POST['add_to_cart'])) {
     $user = $userResult->fetch_assoc();
     $userId = $user['id'];
     $userStmt->close();
-
     $checkCartQuery = "SELECT * FROM cart WHERE user_id = ? AND product_id = ?";
     $stmt = $conn->prepare($checkCartQuery);
     $stmt->bind_param("ii", $userId, $productId);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
-
         $updateCartQuery = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
         $updateStmt = $conn->prepare($updateCartQuery);
         $updateStmt->bind_param("iii", $quantity, $userId, $productId);
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-
         $insertCartQuery = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
         $insertStmt = $conn->prepare($insertCartQuery);
         $insertStmt->bind_param("iii", $userId, $productId, $quantity);
         $insertStmt->execute();
         $insertStmt->close();
+    }
+
+    if (!empty($addons)) {
+        foreach ($addons as $addonId) {
+            $insertAddonQuery = "INSERT INTO cart_addons (cart_id, addon_id) VALUES (?, ?)";
+            $addonStmt = $conn->prepare($insertAddonQuery);
+            $addonStmt->bind_param("ii", $cartId, $addonId);
+            $addonStmt->execute();
+            $addonStmt->close();
+        }
     }
     $stmt->close();
 }
@@ -64,6 +71,8 @@ if ($selectedCategory && $selectedCategory != 'best') {
 $stmt->execute();
 $productResult = $stmt->get_result();
 $stmt->close();
+$addonQuery = "SELECT * FROM addons";
+$addonResult = $conn->query($addonQuery);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,74 +81,77 @@ $stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Grid</title>
-    <link rel="stylesheet" href="menu.css">
-    <style>
-        .best-stamp {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: #ff5757;
-            color: white;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 5px;
-            z-index: 2;
-        }
-
-        .product {
-            position: relative;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 3;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 20%;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="css/menu.css">
 </head>
 
 <body>
     <?php include 'header.php'; ?>
     <div id="quantityModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Input Quantity</h2>
-            <form id="quantityForm" action="menu.php" method="post">
-                <input type="hidden" name="product_id" id="modalProductId">
-                <label for="quantity">Quantity:</label>
-                <input type="number" name="quantity" id="modalQuantity" value="1" min="1" required>
-                <button type="submit" name="add_to_cart">Add to Cart</button>
-            </form>
-        </div>
+        <form id="quantityForm" action="menu.php" method="post">
+            <input type="hidden" name="product_id" id="modalProductId">
+            <input type="hidden" name="product_name" id="modalProductName">
+            <input type="hidden" name="product_price" id="modalProductPrice">
+            <input type="hidden" name="product_img" id="modalProductImage">
+            <div class="modal-confirm-order">
+                <div class="div-item-info">
+                    <img class="itemimg" src="itemimg0.png" />
+                    <div class="div-item-text-info">
+                        <div class="itemname">Chocolate Frappuccino</div>
+                        <div class="iteminfo">
+                            Sweet chocolate with coffee, milk, and whipped cream
+                        </div>
+                        <div class="iteminfo" id="modalSold"></div>
+                        <div class="iteminfo" id="modalLeft"></div>
+                        <div class="div-price">
+                            <div class="curency">₱</div>
+                            <div class="price"  id="modalPrice"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="div-inputs">
+                    <div class="div-2">
+                        <div class="label-size">Quantity</div>
+                        <div class="input"></div>
+                    </div>
+                </div>
+                <div class="div-inputs">
+                    <div class="div-22">
+                        <div class="label-size">Size</div>
+                        <div class="div-size">
+                            <div class="div-size-info">
+                                <div class="small">S</div>
+                            </div>
+                            <div class="div-size-info">
+                                <div class="small">M</div>
+                            </div>
+                            <div class="div-size-info">
+                                <div class="small">L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="div-23">
+                        <div class="label-size">Add-ons</div>
+                        <div class="div-add-ons">
+                            <div class="div-addons-info">
+                                <div class="text">Extra Shot of Espresso</div>
+                            </div>
+                            <div class="div-addons-info">
+                                <div class="text">Oat Milk</div>
+                            </div>
+                            <div class="div-addons-info">
+                                <div class="text">Caramel Syrup</div>
+                            </div>
+                            <div class="div-addons-info">
+                                <div class="text">Whipped Cream</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button">
+                    <div class="button2">Button</div>
+                </div>
+            </div>
+        </form>
     </div>
     <section class="categories">
         <h2>Available Categories</h2>
@@ -238,18 +250,18 @@ $stmt->close();
                 $stmt->execute();
                 $productResult = $stmt->get_result();
                 if ($productResult->num_rows > 0):
-                while ($product = $productResult->fetch_assoc()):
+                    while ($product = $productResult->fetch_assoc()):
                     ?>
-                    <div class="product">
-                        <div class="image-container">
-                            <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
+                        <div class="product">
+                            <div class="image-container">
+                                <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
+                            </div>
+                            <h3><?php echo $product['product_name']; ?></h3>
+                            <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
+                            <p class="price">Solds: <?= $product['total_sales'] ?></p>
+                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
                         </div>
-                        <h3><?php echo $product['product_name']; ?></h3>
-                        <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
-                        <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                        <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>)">Order</button>
-                    </div>
-                <?php endwhile; ?>
+                    <?php endwhile; ?>
                 <?php else: ?>
                     <p>No products available in this category.</p>
                 <?php endif; ?>
@@ -275,10 +287,31 @@ $stmt->close();
         <?php endif; ?>
     </section>
     <script>
-        function openModal(productId) {
+        function openModal(productId, productName, productPrice, productImage, totalSales, stockQuantity) {
             var modal = document.getElementById("quantityModal");
             var productIdInput = document.getElementById("modalProductId");
+            var productNameInput = document.getElementById("modalProductName");
+            var productPriceInput = document.getElementById("modalProductPrice");
+            var productImageInput = document.getElementById("modalProductImage");
+            var priceDisplay = document.getElementById("modalPrice");
+            var soldDisplay = document.getElementById("modalSold");
+            var leftDisplay = document.getElementById("modalLeft");
+            var addonsContainer = document.getElementById("addonsContainer");
+
             productIdInput.value = productId;
+            productNameInput.value = productName;
+            productPriceInput.value = productPrice;
+            productImageInput.value = productImage;
+            priceDisplay.textContent = "Price: ₱ " + productPrice;
+            soldDisplay.textContent = "Solds: " + totalSales;
+            leftDisplay.textContent = "Quantity Left: " + stockQuantity;
+
+            addonsContainer.innerHTML = '';
+            <?php while ($addon = $addonResult->fetch_assoc()): ?>
+                var addonOption = document.createElement("div");
+                addonOption.innerHTML = `<label><input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>"> <?php echo $addon['addon_name']; ?> - $<?php echo number_format($addon['addon_price'], 2); ?></label>`;
+                addonsContainer.appendChild(addonOption);
+            <?php endwhile; ?>
             modal.style.display = "block";
         }
         var closeBtn = document.getElementsByClassName("close")[0];

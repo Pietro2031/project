@@ -7,6 +7,7 @@ if (!isset($_SESSION['selectedItems']) || empty($_SESSION['selectedItems'])) {
     exit();
 }
 
+// Selected items come from $_SESSION['selectedItems']
 $selectedItems = implode(',', $_SESSION['selectedItems']);
 
 $userQuery = "SELECT id FROM user_account WHERE username = ?";
@@ -27,7 +28,7 @@ $UserID = $user['id'];
 $userStmt->close();
 
 $getSelectedItemsQuery = "
-    SELECT coffee_products.id, coffee_products.product_name, coffee_products.Price, cart.Quantity 
+    SELECT coffee_products.id, coffee_products.product_name, coffee_products.Price, cart.Quantity, cart.id AS cart_id
     FROM cart 
     INNER JOIN coffee_products ON cart.product_id = coffee_products.id 
     WHERE cart.user_id = ? AND cart.id IN ($selectedItems)
@@ -44,11 +45,13 @@ $result = $stmtGetSelectedItems->get_result();
 $totalPurchaseValue = 0;
 $productIDs = [];
 $quantities = [];
+$cartIds = [];
 
 while ($row = $result->fetch_assoc()) {
     $totalPurchaseValue += $row['Quantity'] * $row['Price'];
     $productIDs[] = $row['id'];
     $quantities[] = $row['Quantity'];
+    $cartIds[] = $row['cart_id']; // Collect cart IDs for deletion
 }
 $stmtGetSelectedItems->close();
 
@@ -92,6 +95,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmtUpdateItems->close();
         }
 
+        // Remove only the selected items from the cart
+        $cartIdsString = implode(',', $cartIds);
+        $deleteCartItemsQuery = "DELETE FROM cart WHERE id IN ($cartIdsString)";
+        if (!$conn->query($deleteCartItemsQuery)) {
+            throw new Exception("Error removing items from cart: " . $conn->error);
+        }
+
         $conn->commit();
 
         echo "<script>alert('Order placed successfully!'); window.location.href = 'home.php';</script>";
@@ -121,9 +131,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form method="post" action="" class="payment-form">
                 <div class="form-group">
                     <label for="paymentMode">Payment Mode:</label>
-                    <span class="tooltiptext">Select your preferred payment method.</span>
                     <div class="method_img">
-                        <img src="uploads\method\link-91720ed84858d490ca62142de0494559.png" alt=""> <img src="uploads\method\link-cf7aaa8b59e07c8548d2f03f0d930acb.png" alt=""> <img src="uploads\method\link-4a1f1c2d9ee1820ccc9621b44f277387.png" alt=""> <img src="uploads\method\link-8efc3b564e08e9e864ea83ab43d9f913.png" alt="">
+                        <img src="uploads/method/link-91720ed84858d490ca62142de0494559.png">
+                        <img src="uploads/method/link-cf7aaa8b59e07c8548d2f03f0d930acb.png">
+                        <img src="uploads/method/link-4a1f1c2d9ee1820ccc9621b44f277387.png">
+                        <img src="uploads/method/link-8efc3b564e08e9e864ea83ab43d9f913.png">
                     </div>
                     <select name="paymentMode" id="paymentMode" required>
                         <option value="GCash">GCash</option>
