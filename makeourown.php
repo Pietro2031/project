@@ -76,7 +76,9 @@
                     <button class="tab active" data-category="all">All</button>
                     <button class="tab" data-category="classics">Classics</button>
                     <button class="tab" data-category="fruity">Fruity</button>
+                    <button class="tab" data-category="toppings">Toppings</button>
                     <button class="tab" data-category="unexpected">Unexpected</button>
+
                 </div>
                 <div class="ingredients-list" id="ingredients-list">
                     <?php

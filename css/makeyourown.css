@@ -514,3 +514,13 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
 }
+button#checkout-btn {
+  margin-top: 20px;
+  background-color: #9e9b76;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 24px;
+}
