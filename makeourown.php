@@ -20,15 +20,15 @@
                 <h2>What kind of coffee?</h2>
                 <div class="base-options">
                     <?php
-                    $baseQuery = "SELECT * FROM drink_bases";
+                    $baseQuery = "SELECT * FROM coffee_products Where drink_bases = '1'";
                     $baseResult = $conn->query($baseQuery);
                     if ($baseResult->num_rows > 0) {
                         while ($base = $baseResult->fetch_assoc()) {
                             echo '<div class="base-item">
- <img src="' . $base['image'] . '" alt="' . $base['name'] . '">
- <div class="base-name">' . $base['name'] . '</div>
+ <img src="' . $base['product_image'] . '" alt="' .  $base['product_name'] . '">
+ <div class="base-name">' .  $base['product_name'] . '</div>
  <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
- <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['name'] . '" data-price="' . $base['price'] . '">Select</button>
+ <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' .  $base['product_name'] . '" data-price="' . $base['price'] . '">Select</button>
  </div>';
                         }
                     } else {
@@ -41,6 +41,8 @@
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
                     <img src="img/cup.png" alt="">
+                    <img src="<?= $logo ?>" style=" width: 200px; height: 200px; position: absolute; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); ">
+
                     <div id="cup-content" class="cup-content"></div>
                 </div>
                 <div class="total-price">
@@ -97,8 +99,38 @@
             </div>
         </div>
     </section>
+    <div class="checkout-popup" id="checkout-popup">
+        <h2>Checkout</h2>
+        <p>Total: <span id="popup-total-price">₱0.00</span></p>
+        <p>Select Payment Method:</p>
+        <button onclick="confirmOrder('GCash')">GCash</button>
+        <button onclick="confirmOrder('Debit Card')">Debit Card</button>
+        <button onclick="confirmOrder('Pay at Counter')">Pay at Counter</button>
+        <button onclick="closeCheckout()">Cancel</button>
+    </div>
+    <div class="checkout-overlay" id="checkout-overlay"></div>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            const checkoutBtn = document.getElementById("checkout-btn");
+            const checkoutPopup = document.getElementById("checkout-popup");
+            const checkoutOverlay = document.getElementById("checkout-overlay");
+            const popupTotalPrice = document.getElementById("popup-total-price");
+
+            checkoutBtn.addEventListener("click", () => {
+                popupTotalPrice.textContent = document.getElementById("total-price").textContent;
+                checkoutPopup.style.display = "block";
+                checkoutOverlay.style.display = "block";
+            });
+
+            window.closeCheckout = () => {
+                checkoutPopup.style.display = "none";
+                checkoutOverlay.style.display = "none";
+            };
+
+            window.confirmOrder = (method) => {
+                alert(`Order confirmed! Payment method: ${method}`);
+                closeCheckout();
+            };
             const cupContent = document.getElementById("cup-content");
             const totalPriceElement = document.getElementById("total-price");
             const ingredientTabs = document.querySelectorAll(".tab");
