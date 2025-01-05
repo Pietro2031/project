@@ -11,11 +11,11 @@
 .container,
 .customization-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 items per row */
-  gap: 20px; /* Space between grid items */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
   padding: 20px;
-  justify-items: center; /* Centers the items horizontally */
-  align-items: start; /* Aligns the items vertically */
+  justify-items: center;
+  align-items: start;
 }
 
 .cup-container {
@@ -107,20 +107,20 @@
 }
 .ingredients-list {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 items per row */
-  gap: 15px; /* Spacing between items */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
 }
 
 .ingredient-item {
   display: flex;
-  flex-direction: column; /* Aligns content vertically within each item */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px; /* Optional: adds some spacing inside each item */
-  border: 1px solid #ddd; /* Optional: adds a border for better visibility */
-  border-radius: 5px; /* Optional: adds rounded corners */
-  background-color: #f9f9f9; /* Optional: adds a background color */
-  text-align: center; /* Centers the text inside each item */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  text-align: center;
 }
 
 .ingredient-item button {
@@ -233,19 +233,19 @@
   height: auto;
   max-height: 150px;
   object-fit: cover;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
   border-radius: 8px;
 }
 .base-item .base-name {
   font-weight: bold;
-  margin: 10px 0;
+  /* margin: 10px 0; */
   font-size: 16px;
   color: #333;
 }
 .base-price {
   color: #9e9b76;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 12px;
+  /* margin-bottom: 10px; */
 }
 .base-item button {
   background-color: #9e9b76;

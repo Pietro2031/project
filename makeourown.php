@@ -59,7 +59,7 @@
                         <div class="div-size-info">
                             <input type="radio" name="size" value="M" id="sizeM" required>
                             <label for="sizeM">M</label>
-                            <p>++₱10</p>
+                            <p>+₱10</p>
                         </div>
                         <div class="div-size-info">
                             <input type="radio" name="size" value="L" id="sizeL" required>
