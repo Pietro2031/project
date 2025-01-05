@@ -42,7 +42,7 @@
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
                     <img src="img/cup.png" alt="">
-                    <img src="<?= $logo ?>" style=" width: 200px; height: 200px; position: absolute; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); ">
+                    <img src="<?= $logo ?>" style=" width: 150px;height: 150px;position: absolute;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
                     <div id="cup-content" class="cup-content"></div>
                 </div>
                 <div class="total-price">

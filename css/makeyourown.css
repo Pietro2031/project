@@ -1,9 +1,9 @@
 .section {
-  margin-top: 100px;
+  margin-top: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 50px;
+  padding: 20px;
 }
 .section h1 {
   font-size: 46px;
@@ -20,11 +20,11 @@
 
 .cup-container {
   text-align: center;
-  margin-top: 20px;
+  /* margin-top: 20px; */
   font-family: "Arial", sans-serif;
 }
 .virtual-cup {
-  margin: 20px auto;
+  /* margin: 20px auto; */
   position: relative;
 }
 .cup-lid {
@@ -109,6 +109,8 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
+  height: 330px;
+  overflow: auto;
 }
 
 .ingredient-item {
@@ -116,7 +118,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 5px;
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #f9f9f9;
@@ -130,6 +132,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 10px;
 }
 .ingredient-tabs {
   display: flex;
@@ -198,9 +201,9 @@
   }
 }
 .total-price {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 .ingredient-left {
   align-self: flex-start;
@@ -222,7 +225,7 @@
 .base-item {
   text-align: center;
   background-color: #fff;
-  padding: 15px;
+  padding: 15px 20px;
   border: 1px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -236,10 +239,10 @@
   /* margin-bottom: 10px; */
   border-radius: 8px;
 }
-.base-item .base-name {
+.base-name {
   font-weight: bold;
   /* margin: 10px 0; */
-  font-size: 16px;
+  font-size: 12px;
   color: #333;
 }
 .base-price {
@@ -254,7 +257,7 @@
   padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: bold;
   transition: background-color 0.2s ease;
 }
@@ -308,14 +311,14 @@
 }
 .div-22 {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   gap: 10px;
   align-items: center;
   justify-content: flex-start;
-  flex-shrink: 0;
-  height: 89px;
-  position: relative;
-  margin-top: 20px;
+  /* flex-shrink: 0; */
+  /* height: 89px; */
+  /* position: relative; */
+  margin-top: 10px;
 }
 .modal-confirm-order,
 .modal-confirm-order * {
@@ -430,14 +433,14 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .virtual-cup > img {
-  height: 450px;
+  height: 350px;
   transition: height 0.3s ease-in-out;
 }
 .virtual-cup.selected-m > img {
-  height: 500px;
+  height: 400px;
 }
 .virtual-cup.selected-l > img {
-  height: 550px;
+  height: 500px;
 }
 .ingredient {
   animation: dropIn 0.5s ease-in-out;
@@ -465,9 +468,9 @@
   margin-left: 5px;
 }
 .indicator {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   text-align: center;
   color: #333;
 }
@@ -527,5 +530,5 @@ button#checkout-btn {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 14px;
 }
