@@ -141,22 +141,22 @@ session_start();
     $total_pages = ceil($total_items / $items_per_page);
 
     $get_pro = "
-        SELECT 
-    orders.id AS order_id, 
-    orders.order_date, 
-    orders.order_quantity, 
-    orders.status,
-    GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
-    GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
-    SUM(payment.amount_paid) AS amount_paid,
-    payment.payment_mode
-FROM orders
-JOIN coffee_products ON coffee_products.id = orders.product_ids
-JOIN payment ON orders.id = payment.order_id
-WHERE orders.user_id = '$userId '
-GROUP BY orders.id, orders.order_date, orders.order_quantity, orders.status, payment.payment_mode
-ORDER BY orders.order_date DESC
-LIMIT $offset, $items_per_page";
+    SELECT 
+        orders.id AS order_id, 
+        orders.order_date, 
+        orders.order_quantity, 
+        orders.status,
+        GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
+        GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
+        SUM(payment.amount_paid) AS amount_paid,
+        payment.payment_mode
+    FROM orders
+    JOIN coffee_products ON coffee_products.id = orders.product_ids
+    JOIN payment ON orders.id = payment.order_id
+    WHERE orders.user_id = '$userId'
+    GROUP BY orders.id, orders.order_date, orders.order_quantity, orders.status, payment.payment_mode
+    ORDER BY orders.order_date DESC
+    LIMIT $offset, $items_per_page";
     $run_pro = mysqli_query($conn, $get_pro);
     // echo $get_pro;
     ?>
@@ -165,54 +165,56 @@ LIMIT $offset, $items_per_page";
         <div class="Itemcart">
             <h1>Purchase History</h1>
             <div class="cart-container">
-                <p class="cart-tip"><?= $total_items ?> total purchase(s).</p>
                 <table class="itemtable">
-                    <thead>
-                        <tr>
-                            <th>Ref #</th>
-                            <th>Product</th>
-                            <th>Details</th>
-                            <th>Order Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row_pro = mysqli_fetch_array($run_pro)) : ?>
-                            <?php
-                            $order_date = date('F j, Y', strtotime($row_pro['order_date']));
-                            $price = "₱ " . $row_pro['amount_paid'];
-                            $status_text = [
-                                "-1" => "Processing",
-                                "0" => "Placed",
-                                "1" => "Received",
-                                "2" => "Pending Return",
-                                "3" => "Return Approved",
-                                "4" => "Request Rejected"
-                            ][$row_pro['status']];
-                            ?>
-                            <tr>
-                                <td><?= $row_pro['order_id'] ?></td>
-                                <td>
-                                    <div>
-                                        <?php
-                                        $names = explode(', ', $row_pro['item_names']);
-                                        $images = explode(', ', $row_pro['item_images']);
-                                        foreach ($images as $index => $image) :
-                                        ?>
-                                            <div>
-                                                <img src="<?= $image ?>" alt="<?= $names[$index] ?>">
-                                                <?= $names[$index] ?>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </td>
-                                <td><?= $price ?> - <?= $row_pro['payment_mode'] ?></td>
-                                <td><?= $order_date ?></td>
-                                <td><?= $status_text ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+    <thead>
+        <tr>
+            <th>Ref #</th>
+            <th>Product</th>
+            <th>Quantity</th>  
+            <th>Details</th>
+            <th>Order Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php while ($row_pro = mysqli_fetch_array($run_pro)) : ?>
+            <?php
+            $order_date = date('F j, Y', strtotime($row_pro['order_date']));
+            $price = "₱ " . $row_pro['amount_paid'];
+            $status_text = [
+                "-1" => "Processing",
+                "0" => "Placed",
+                "1" => "Received",
+                "2" => "Pending Return",
+                "3" => "Return Approved",
+                "4" => "Request Rejected"
+            ][$row_pro['status']];
+            ?>
+            <tr>
+                <td><?= $row_pro['order_id'] ?></td>
+                <td>
+                    <div>
+                        <?php
+                        $names = explode(', ', $row_pro['item_names']);
+                        $images = explode(', ', $row_pro['item_images']);
+                        foreach ($images as $index => $image) :
+                        ?>
+                            <div>
+                                <img src="<?= $image ?>" alt="<?= $names[$index] ?>">
+                                <?= $names[$index] ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </td>
+                <td><?= $row_pro['order_quantity'] ?></td> 
+                <td><?= $price ?> - <?= $row_pro['payment_mode'] ?></td>
+                <td><?= $order_date ?></td>
+                <td><?= $status_text ?></td>
+            </tr>
+        <?php endwhile; ?>
+    </tbody>
+</table>
+
             </div>
 
             <div id="pagination-container_category" class="pageno">
