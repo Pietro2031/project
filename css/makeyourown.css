@@ -106,18 +106,23 @@
   border-radius: 5px;
 }
 .ingredients-list {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-height: 500px;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 items per row */
+  gap: 15px; /* Spacing between items */
 }
+
 .ingredient-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* Aligns content vertically within each item */
+  justify-content: center;
   align-items: center;
-  margin-bottom: 15px;
+  padding: 10px; /* Optional: adds some spacing inside each item */
+  border: 1px solid #ddd; /* Optional: adds a border for better visibility */
+  border-radius: 5px; /* Optional: adds rounded corners */
+  background-color: #f9f9f9; /* Optional: adds a background color */
+  text-align: center; /* Centers the text inside each item */
 }
+
 .ingredient-item button {
   background-color: #9e9b76;
   color: #fff;
