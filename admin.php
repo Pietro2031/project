@@ -35,7 +35,6 @@ if (!isset($_SESSION['admin_username'])) {
     <title>User Information</title>
     <link rel="stylesheet" href="userinfo.css">
     <link rel="stylesheet" href="css/global.css">
-
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/table.css">
 
@@ -64,7 +63,7 @@ if (!isset($_SESSION['admin_username'])) {
                     </a>
                 </li>
                 <li><a href="themevalidation.php"><i class="fas fa-paint-brush"></i> Theme</a></li>
-                <li><a href="?insert_products" <?php if (isset($_GET['insert_products'])) {
+                <li><a href="?view_products" <?php if (isset($_GET['view_products']) || isset($_GET['insert_products'])|| isset($_GET['edit_product'])) {
                                                     echo 'class="active"';
                                                 } ?>><i class="fas fa-box-open"></i> Products</a></li>
                 <li><a href="?report" <?php if (isset($_GET['report'])) {
@@ -84,7 +83,7 @@ if (!isset($_SESSION['admin_username'])) {
         </div>
     </div>
     <div class="topbar">
-        <h1>Admin Dashboard</h1>
+        
         <a href="adminlogout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
     <div class="dom">
@@ -95,6 +94,15 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['insert_products'])) {
             include 'insert_products.php';
         }
+        if (isset($_GET['edit_product'])) {
+            include 'edit_product.php';
+        }
+        if (isset($_GET['view_inventory'])) {
+            include 'view_inventory.php';
+        }
+
+
+
         ?>
 
     </div>

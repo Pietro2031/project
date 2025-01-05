@@ -1,7 +1,28 @@
 <?php
 include 'connection.php';
 
-// Fetch categories
+// Get the product ID from the URL
+$product_id = isset($_GET['id']) ? $_GET['id'] : null;
+
+if (!$product_id) {
+    // If no product ID is provided, redirect to product list page or show an error
+    echo "<script>alert('Product ID not specified!'); window.location = 'admin.php?view_products';</script>";
+    exit();
+}
+
+// Fetch the product details for the given ID
+$productQuery = "SELECT * FROM coffee_products WHERE id = $product_id";
+$productResult = mysqli_query($conn, $productQuery);
+
+if (mysqli_num_rows($productResult) == 0) {
+    // If no product is found with the given ID, show an error
+    echo "<script>alert('Product not found!'); window.location = 'admin.php?view_products';</script>";
+    exit();
+}
+
+$product = mysqli_fetch_assoc($productResult);
+
+// Fetch categories, bases, flavors, and toppings (same as in the original form)
 $categoryQuery = "SELECT id, category_name FROM coffee_category";
 $categoryResult = mysqli_query($conn, $categoryQuery);
 $categories = [];
@@ -9,7 +30,6 @@ while ($categoryRow = mysqli_fetch_assoc($categoryResult)) {
     $categories[] = $categoryRow;
 }
 
-// Fetch bases
 $baseQuery = "SELECT id, base_name FROM coffee_base";
 $baseResult = mysqli_query($conn, $baseQuery);
 $bases = [];
@@ -17,7 +37,6 @@ while ($baseRow = mysqli_fetch_assoc($baseResult)) {
     $bases[] = $baseRow;
 }
 
-// Fetch flavors
 $flavorQuery = "SELECT id, flavor_name FROM coffee_flavors";
 $flavorResult = mysqli_query($conn, $flavorQuery);
 $flavors = [];
@@ -25,7 +44,6 @@ while ($flavorRow = mysqli_fetch_assoc($flavorResult)) {
     $flavors[] = $flavorRow;
 }
 
-// Fetch toppings
 $toppingQuery = "SELECT id, topping_name FROM coffee_toppings";
 $toppingResult = mysqli_query($conn, $toppingQuery);
 $toppings = [];
@@ -40,7 +58,7 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Add Coffee Product</h3>
+                <h3 class="panel-title">Edit Coffee Product</h3>
             </div>
             <div class="panel-body">
                 <div class="insertform">
@@ -50,19 +68,17 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
                                 <div class="sectiondiv">
                                     <div class="sectioninsidediv">
                                         <span>Product Name:</span>
-                                        <input type="text" name="name" required>
-                                        <p class="tooltiptext">Enter the coffee product name</p>
+                                        <input type="text" name="name" value="<?= $product['product_name'] ?>" required>
                                     </div>
                                     <div class="sectioninsidediv">
                                         <span>Category:</span>
                                         <select name="category_id" id="category" required>
                                             <?php foreach ($categories as $category) : ?>
-                                                <option value="<?= $category['id'] ?>">
+                                                <option value="<?= $category['id'] ?>" <?= $category['id'] == $product['category_id'] ? 'selected' : '' ?>>
                                                     <?= $category['category_name'] ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <p class="tooltiptext">Select the coffee category (e.g., Espresso, Latte, etc.)</p>
                                     </div>
                                 </div>
                                 <div class="sectiondiv">
@@ -70,40 +86,37 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
                                         <span>Base:</span>
                                         <select name="drink_bases" id="base" required>
                                             <?php foreach ($bases as $base) : ?>
-                                                <option value="<?= $base['id'] ?>">
+                                                <option value="<?= $base['id'] ?>" <?= $base['id'] == $product['drink_bases'] ? 'selected' : '' ?>>
                                                     <?= $base['base_name'] ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <p class="tooltiptext">Select the coffee base (e.g., Espresso, Cold Brew, etc.)</p>
                                     </div>
                                     <div class="sectioninsidediv">
                                         <span>Flavor:</span>
                                         <select name="flavor_id" id="flavor" required>
                                             <?php foreach ($flavors as $flavor) : ?>
-                                                <option value="<?= $flavor['id'] ?>">
+                                                <option value="<?= $flavor['id'] ?>" <?= $flavor['id'] == $product['flavor_id'] ? 'selected' : '' ?>>
                                                     <?= $flavor['flavor_name'] ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <p class="tooltiptext">Select the coffee flavor (e.g., Vanilla, Caramel, etc.)</p>
                                     </div>
                                     <div class="sectioninsidediv">
                                         <span>Toppings:</span>
                                         <select name="toppings_id" id="toppings">
                                             <?php foreach ($toppings as $topping) : ?>
-                                                <option value="<?= $topping['id'] ?>">
+                                                <option value="<?= $topping['id'] ?>" <?= $topping['id'] == $product['toppings_id'] ? 'selected' : '' ?>>
                                                     <?= $topping['topping_name'] ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <p class="tooltiptext">Select any toppings (optional, e.g., Whipped Cream, Chocolate Drizzle)</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="sectioninsidediv">
                                 <span>Image:</span>
-                                <img id="profileImage" src="">
+                                <img id="profileImage" src="<?= $product['product_image'] ?>" width="150" height="150">
                                 <label class="btn-upload-img">
                                     Upload Image<input type="file" id="img" name="ItemImg" accept="image/*">
                                 </label>
@@ -114,13 +127,12 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
                                 <div class="sectiondiv">
                                     <div class="sectioninsidediv">
                                         <span>Price:</span>
-                                        <input type="text" name="price" required>
-                                        <p class="tooltiptext">Enter the product price</p>
+                                        <input type="text" name="price" value="<?= $product['price'] ?>" required>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <input type="submit" name="submit" class="submit-btn" value="Add Coffee">
+                        <input type="submit" name="submit" class="submit-btn" value="Update Product">
                     </form>
                 </div>
             </div>
@@ -144,6 +156,7 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
 </script>
 
 <?php
+// Update the product in the database
 if (isset($_POST['submit'])) {
     $name = $_POST['name'];
     $category_id = $_POST['category_id'];
@@ -151,22 +164,26 @@ if (isset($_POST['submit'])) {
     $flavor_id = $_POST['flavor_id'];
     $toppings_id = $_POST['toppings_id'];
     $price = $_POST['price'];
-    $total_sales = 0;  
+    $image = $_FILES['ItemImg']['name'] ? $_FILES['ItemImg']['name'] : $product['product_image']; // Keep the existing image if no new one is uploaded
+    $target = "uploads/" . basename($image);
 
-    if (isset($_FILES['ItemImg']) && $_FILES['ItemImg']['error'] == 0) {
-        $image = $_FILES['ItemImg']['name'];
-        $target = "uploads/" . basename($image);
+    if ($_FILES['ItemImg']['error'] == 0) {
         move_uploaded_file($_FILES['ItemImg']['tmp_name'], $target);
-    } else {
-        $target = null;
     }
 
-    $insertQuery = "INSERT INTO coffee_products 
-                    (product_name, category_id, drink_bases, flavor_id, toppings_id, price, product_image, total_sales) 
-                    VALUES ('$name', '$category_id', '$base_id', '$flavor_id', '$toppings_id', '$price', '$target', '$total_sales')";
+    // Update query
+    $updateQuery = "UPDATE coffee_products 
+                    SET product_name = '$name', 
+                        category_id = '$category_id', 
+                        drink_bases = '$base_id', 
+                        flavor_id = '$flavor_id', 
+                        toppings_id = '$toppings_id', 
+                        price = '$price', 
+                        product_image = '$target' 
+                    WHERE id = $product_id";
 
-    if (mysqli_query($conn, $insertQuery)) {
-        echo "Product added successfully!";
+    if (mysqli_query($conn, $updateQuery)) {
+        echo "<script>alert('Product updated successfully!'); window.location = 'admin.php?view_products';</script>";
     } else {
         echo "Error: " . mysqli_error($conn);
     }

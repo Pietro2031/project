@@ -42,7 +42,7 @@
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
                     <img src="img/cup.png" alt="" style=" filter: drop-shadow(0px 0.1px 4px #999); ">
-                    <img src="<?= $logo ?>" style=" width: 150px;height: 150px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                    <img src="<?= $logo ?>" style=" z-index: 99;width: 150px;height: 150px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
                     <div id="cup-content" class="cup-content"></div>
                 </div>
                 <div class="total-price">
@@ -314,7 +314,7 @@
                     const category = button.dataset.category;
                     const ingredientPrice = parseFloat(button.dataset.price);
                     const ingredientName = button.dataset.name;
-                    
+
                     totalPrice += ingredientPrice;
                     updateTotalPrice();
                 });

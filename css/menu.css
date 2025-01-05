@@ -85,6 +85,7 @@
   font-size: 14px;
   color: #9e9b76;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .add-btn {
@@ -697,7 +698,7 @@ div#addonsContainer p {
   left: 0;
   right: 0;
   bottom: 0;
-  background:  #4c4c4c84;
+  background: #4c4c4c84;
   color: white;
   font-size: 2rem;
   text-align: center;

@@ -1,7 +1,10 @@
 .panel-default > .panel-heading {
+  display: flex;
   color: #333;
   background-color: #f5f5f5;
   border-color: #ddd;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .panel-heading {
@@ -10,7 +13,12 @@
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }
-
+.panel-heading a {
+  background: #9e9b76;
+  color: white;
+  padding: 10px;
+  border-radius: 20px;
+}
 .panel-default {
   border-color: #ddd;
 }
