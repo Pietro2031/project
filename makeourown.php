@@ -25,10 +25,10 @@
                     if ($baseResult->num_rows > 0) {
                         while ($base = $baseResult->fetch_assoc()) {
                             echo '<div class="base-item">
- <img src="' . $base['product_image'] . '" alt="' .  $base['product_name'] . '">
- <div class="base-name">' .  $base['product_name'] . '</div>
+ <img src="' . $base['product_image'] . '" alt="' . $base['product_name'] . '">
+ <div class="base-name">' . $base['product_name'] . '</div>
  <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
- <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' .  $base['product_name'] . '" data-price="' . $base['price'] . '">Select</button>
+ <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['product_name'] . '" data-price="' . $base['price'] . '">Select</button>
  </div>';
                         }
                     } else {
@@ -42,7 +42,6 @@
                 <div class="virtual-cup">
                     <img src="img/cup.png" alt="">
                     <img src="<?= $logo ?>" style=" width: 200px; height: 200px; position: absolute; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); ">
-
                     <div id="cup-content" class="cup-content"></div>
                 </div>
                 <div class="total-price">
@@ -78,7 +77,6 @@
                     <button class="tab" data-category="fruity">Fruity</button>
                     <button class="tab" data-category="toppings">Toppings</button>
                     <button class="tab" data-category="unexpected">Unexpected</button>
-
                 </div>
                 <div class="ingredients-list" id="ingredients-list">
                     <?php
@@ -117,21 +115,86 @@
             const checkoutPopup = document.getElementById("checkout-popup");
             const checkoutOverlay = document.getElementById("checkout-overlay");
             const popupTotalPrice = document.getElementById("popup-total-price");
-
             checkoutBtn.addEventListener("click", () => {
                 popupTotalPrice.textContent = document.getElementById("total-price").textContent;
                 checkoutPopup.style.display = "block";
                 checkoutOverlay.style.display = "block";
             });
-
             window.closeCheckout = () => {
                 checkoutPopup.style.display = "none";
                 checkoutOverlay.style.display = "none";
             };
-
             window.confirmOrder = (method) => {
-                alert(`Order confirmed! Payment method: ${method}`);
-                closeCheckout();
+                const totalPrice = parseFloat(popupTotalPrice.textContent.replace('₱', ''));
+                if (isNaN(totalPrice) || totalPrice <= 0) {
+                    alert("Please select a drink base and ingredients before checking out.");
+                    return;
+                }
+
+                const base = document.querySelector(".base");
+                if (!base) {
+                    alert("Please select a drink base.");
+                    return;
+                }
+
+                const ingredients = [];
+                const ingredientElements = document.querySelectorAll("#cup-content .ingredient");
+                ingredientElements.forEach(ingredient => {
+                    const ingredientName = ingredient.querySelector("img").getAttribute("title");
+                    ingredients.push(ingredientName);
+                });
+
+                // AJAX Request to save order
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "save_order.php", true);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.success) {
+                                    alert(`Order confirmed! Payment method: ${method}`);
+                                    closeCheckout();
+                                    // Optionally redirect to an order summary page
+                                    window.location.href = "home.php";
+                                } else {
+                                    // Handle server-side validation or error messages
+                                    const errorMessage = response.message || "Failed to save your order. Please try again.";
+                                    alert(`Error: ${errorMessage}`);
+                                    if (response.error) {
+                                        console.error(`Error details: ${response.error}`);
+                                    }
+                                }
+                            } catch (e) {
+                                alert("An unexpected error occurred while processing your request.");
+                                console.error("Failed to parse server response:", e);
+                            }
+                        } else {
+                            // Handle HTTP errors
+                            alert(`An error occurred: HTTP ${xhr.status}`);
+                            console.error("Server error:", xhr.statusText);
+                        }
+                    }
+                };
+
+                xhr.onerror = function() {
+                    // Handle network errors
+                    alert("A network error occurred. Please check your internet connection and try again.");
+                    console.error("Network error");
+                };
+
+                // Prepare the order data
+                xhr.send(
+                    JSON.stringify({
+                        base: base.textContent,
+                        ingredients: ingredients,
+                        total_price: totalPrice,
+                        payment_method: method,
+                    })
+                );
+
             };
             const cupContent = document.getElementById("cup-content");
             const totalPriceElement = document.getElementById("total-price");
@@ -150,7 +213,7 @@
                     const basePrice = parseFloat(button.dataset.price);
                     totalPrice = basePrice + sizePrice;
                     ingredientsCount = 0;
-                    cupContent.innerHTML = `<div class="base">Base: ${button.dataset.name}</div>`;
+                    cupContent.innerHTML = `<div class="base">${button.dataset.name}</div>`;
                     toggleAlignment = true;
                     updateTotalPrice();
                     updateIngredientIndicator();
