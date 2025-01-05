@@ -1,6 +1,5 @@
 .Itemcart {
-  width: 70vw;
-  margin: 50px 0;
+  width: 90vw;
   display: flex;
   flex-direction: column;
   gap: 50px;
@@ -31,6 +30,7 @@ th {
 td {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   text-align: center;
+  font-size: 12px;
 }
 
 .product {
@@ -49,7 +49,7 @@ td {
 
 .sumtext {
   color: gray;
-  font-size: small;
+  font-size: 10px;
 }
 
 section.center {

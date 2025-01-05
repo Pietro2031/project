@@ -110,7 +110,7 @@ $totalCartValue = 0;
                                     <td>
                                         <div class="product">
                                             <img src="<?= $item['product_image']; ?>" alt="Product Image" class="cart-item-image">
-                                            <div style="text-align: start;"> <?= $item['product_name']; ?></div>
+                                            <div style="text-align: start;font-size: 12px;"> <?= $item['product_name']; ?></div>
                                         </div>
                                     </td>
                                     <td>

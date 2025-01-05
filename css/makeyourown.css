@@ -24,68 +24,44 @@
   font-family: "Arial", sans-serif;
 }
 .virtual-cup {
-  /* margin: 20px auto; */
   position: relative;
+  width: 200px;
+  height: 400px;
+  margin: auto;
 }
-.cup-lid {
-  width: 120px;
-  height: 20px;
-  background-color: #e0e0e0;
-  border-radius: 5px 5px 0 0;
-  border: 2px solid #333;
-  margin: 0 auto;
-  position: relative;
-  top: -5px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-}
-.cup-body {
-  width: 140px;
-  height: 220px;
-  background-color: #fff;
-  border: 2px solid #333;
-  border-radius: 0 0 10px 10px;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-}
-.cup-sleeve {
-  width: 120px;
-  height: 60px;
-  background-color: #c89f74;
-  position: absolute;
-  top: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 5px;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
-  border: 2px solid #333;
-}
-.cup-content {
-  position: absolute;
-  bottom: 40px;
+
+.virtual-cup img {
   width: 100%;
   height: auto;
-  background: transparent;
-  overflow: visible;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  transition: height 0.5s ease-in-out;
+  /* position: absolute; */
+  z-index: 1;
 }
-.cup-body::after {
-  content: "";
+
+.cup-content {
   position: absolute;
-  width: 100px;
-  height: 10px;
-  background-color: rgba(0, 0, 0, 0.2);
-  bottom: -15px;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.cup-content .flavor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+
+.cup-content .topping {
+  position: absolute;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  border-radius: 50%;
-  filter: blur(5px);
-  z-index: -1;
+  z-index: 4;
 }
+
 .ingredient {
   width: 90%;
   height: 50px;
@@ -93,9 +69,10 @@
   animation: dropIn 0.5s ease-in-out;
 }
 .ingredient img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
+  width: 210px;
+  margin-left: -12px;
+  margin-top: -110px;
+  height: auto;
   border-radius: 5px;
   animation: pourIn 0.5s ease-in-out;
 }
@@ -223,6 +200,7 @@
   padding: 20px;
 }
 .base-item {
+  display: flex;
   text-align: center;
   background-color: #fff;
   padding: 15px 20px;
@@ -230,6 +208,8 @@
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-direction: column;
+  justify-content: space-around;
 }
 .base-item img {
   width: 100%;
@@ -531,4 +511,8 @@ button#checkout-btn {
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+}
+.ingredient.flavor img {
+  width: 160px;
+  opacity: 0.5;
 }

@@ -34,42 +34,70 @@ if (!isset($_SESSION['admin_username'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Information</title>
     <link rel="stylesheet" href="userinfo.css">
+    <link rel="stylesheet" href="css/global.css">
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/table.css">
 
 </head>
+
 <body>
     <div class=" sidebar">
-    <div class="profile">
-        <center>
-            <div class="profile-image-container">
-                <img src="<?= !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'default-profile.png' ?>" alt="Admin" class="profile-image">
+        <div class="profile">
+            <center>
+                <div class="profile-image-container">
+                    <img src="<?= !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'default-profile.png' ?>" alt="Admin" class="profile-image">
+                </div>
+            </center>
+            <div class="profile-info">
+                <p class="profile-name">Hello, Admin</p>
+                <p class="profile-role">Administrator</p>
             </div>
-        </center>
-        <div class="profile-info">
-            <p class="profile-name">Hello, Admin</p>
-            <p class="profile-role">Administrator</p>
         </div>
-    </div>
-    <nav>
-        <ul>
-            <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-            <li><a href="themevalidation.php"><i class="fas fa-paint-brush"></i> Theme</a></li>
-            <li><a href="#"><i class="fas fa-box-open"></i> Products</a></li>
-            <li><a href="#"><i class="fas fa-chart-line"></i> Reports</a></li>
-            <li><a href="#"><i class="fas fa-th-list"></i> Inventory</a></li>
-            <li><a href="#"><i class="fas fa-receipt"></i> Payment History</a></li>
-            <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
-        </ul>
-    </nav>
-    <div class="sidebar-bottom">
-        <ul>
-            <li><a href="adminprofile.php"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
-        </ul>
-    </div>
+        <nav>
+            <ul>
+                <li>
+                    <a href="?dashboard" <?php if (isset($_GET['dashboard'])) {
+                                                echo 'class="active"';
+                                            } ?>>
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li><a href="themevalidation.php"><i class="fas fa-paint-brush"></i> Theme</a></li>
+                <li><a href="?insert_products" <?php if (isset($_GET['insert_products'])) {
+                                                    echo 'class="active"';
+                                                } ?>><i class="fas fa-box-open"></i> Products</a></li>
+                <li><a href="?report" <?php if (isset($_GET['report'])) {
+                                            echo 'class="active"';
+                                        } ?>><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li><a href="?inventory" <?php if (isset($_GET['inventory'])) {
+                                                echo 'class="active"';
+                                            } ?>><i class="fas fa-th-list"></i> Inventory</a></li>
+                <li><a href="#"><i class="fas fa-receipt"></i> Payment History</a></li>
+                <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-bottom">
+            <ul>
+                <li><a href="adminprofile.php"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
+            </ul>
+        </div>
     </div>
     <div class="topbar">
         <h1>Admin Dashboard</h1>
         <a href="adminlogout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
-    </body>
+    <div class="dom">
+        <?php
+        if (isset($_GET['view_products'])) {
+            include 'view_products.php';
+        }
+        if (isset($_GET['insert_products'])) {
+            include 'insert_products.php';
+        }
+        ?>
+
+    </div>
+</body>
 
 </html>

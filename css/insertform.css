@@ -1,0 +1,91 @@
+.formdiv {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  gap: 10px;
+  width: fit-content;
+}
+
+.formsection {
+  display: flex;
+  gap: 10px;
+}
+.sectioninsidediv {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sectiondiv {
+  display: flex;
+  gap: 10px;
+}
+label {
+  border: 1px solid #9e9b76;
+  font-size: 12px;
+  transition: all 0.2s ease-in;
+}
+.btn-upload-img {
+  padding: 10px 15px;
+  color: #9e9b76;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+}
+.btn-upload-img input {
+  display: none;
+}
+label:hover {
+  background: #9e9b76;
+  color: white;
+}
+#profileImage {
+  width: 122px;
+  height: 122px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  margin: auto;
+}
+select#category {
+  height: 30px;
+  width: 300px;
+}
+
+input[type="text"] {
+  height: 30px;
+  width: 300px;
+}
+.sectioninsidediv span {
+  font-weight: 700;
+}
+.sectioninsidediv p {
+  color: #333;
+  font-size: 12px;
+}
+.formsectioninside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.submit-btn {
+  padding: 10px;
+  background-color: #9e9b76;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 30px;
+  width: 300px;
+}
+.panel-body {
+  background-color: #e7e7e7;
+}
+.sectioninsidediv select {
+  height: 30px;
+  width: 300px;
+}
+.sectioninsidediv input {
+  height: 30px;
+  width: 300px;
+}
