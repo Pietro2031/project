@@ -1,21 +1,26 @@
 <?php
 session_start();
 include('connection.php');
-
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : null;
 $categoryQuery = "SELECT * FROM coffee_category";
 $categoryResult = $conn->query($categoryQuery);
 $bestSellersQuery = "
-    SELECT * FROM coffee_products
-    ORDER BY total_sales DESC
-    LIMIT 6
+SELECT 
+ coffee_products.*, 
+ coffee_base.base_name, 
+ coffee_flavors.flavor_name, 
+ coffee_toppings.topping_name 
+FROM coffee_products
+LEFT JOIN coffee_base ON coffee_products.drink_bases = coffee_base.id
+LEFT JOIN coffee_flavors ON coffee_products.flavor_id = coffee_flavors.id
+LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
+ORDER BY coffee_products.total_sales DESC
+LIMIT 6
 ";
 $bestSellersResult = $conn->query($bestSellersQuery);
 $bestStampLimit = 3;
-
 if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
-    $quantity = $_POST['quantity'];
     $addons = isset($_POST['addons']) ? $_POST['addons'] : [];
     $size = isset($_POST['size']) ? $_POST['size'] : null;
 
@@ -40,42 +45,39 @@ if (isset($_POST['add_to_cart'])) {
     $userId = $user['id'];
     $userStmt->close();
 
-    // Convert addons array to JSON for comparison
     $addonsJson = json_encode($addons);
 
-    // Check if the cart already has this product with the same size and add-ons
     $checkCartQuery = "
-        SELECT * FROM cart 
-        WHERE user_id = ? 
-        AND product_id = ? 
-        AND size = ? 
-        AND addons = ?
-    ";
+SELECT * FROM cart 
+WHERE user_id = ? 
+AND product_id = ? 
+AND size = ? 
+AND addons = ?
+";
     $stmt = $conn->prepare($checkCartQuery);
     $stmt->bind_param("iiss", $userId, $productId, $size, $addonsJson);
     $stmt->execute();
     $result = $stmt->get_result();
-
     if ($result->num_rows > 0) {
-        // If the item already exists with the same size and addons, update the quantity
+
         $updateCartQuery = "
-            UPDATE cart 
-            SET quantity = quantity + ? 
-            WHERE user_id = ? 
-            AND product_id = ? 
-            AND size = ? 
-            AND addons = ?
-        ";
+UPDATE cart 
+SET quantity = quantity + ? 
+WHERE user_id = ? 
+AND product_id = ? 
+AND size = ? 
+AND addons = ?
+";
         $updateStmt = $conn->prepare($updateCartQuery);
         $updateStmt->bind_param("iisss", $quantity, $userId, $productId, $size, $addonsJson);
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-        // If the item doesn't exist with the same size and addons, insert a new record
+
         $insertCartQuery = "
-            INSERT INTO cart (user_id, product_id, quantity, size, addons) 
-            VALUES (?, ?, ?, ?, ?)
-        ";
+INSERT INTO cart (user_id, product_id, quantity, size, addons) 
+VALUES (?, ?, ?, ?, ?)
+";
         $insertStmt = $conn->prepare($insertCartQuery);
         $insertStmt->bind_param("iiiss", $userId, $productId, $quantity, $size, $addonsJson);
         $insertStmt->execute();
@@ -83,9 +85,17 @@ if (isset($_POST['add_to_cart'])) {
     }
     $stmt->close();
 }
-
-// Product query and other operations
-$productQuery = "SELECT * FROM coffee_products";
+$productQuery = "
+SELECT 
+ coffee_products.*, 
+ coffee_base.base_name, 
+ coffee_flavors.flavor_name, 
+ coffee_toppings.topping_name 
+FROM coffee_products
+LEFT JOIN coffee_base ON coffee_products.drink_bases = coffee_base.id
+LEFT JOIN coffee_flavors ON coffee_products.flavor_id = coffee_flavors.id
+LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
+";
 if ($selectedCategory && $selectedCategory != 'best') {
     $productQuery .= " WHERE category_id = ?";
 }
@@ -96,7 +106,6 @@ if ($selectedCategory && $selectedCategory != 'best') {
 $stmt->execute();
 $productResult = $stmt->get_result();
 $stmt->close();
-
 $addonQuery = "SELECT * FROM addons";
 $addonResult = $conn->query($addonQuery);
 ?>
@@ -127,7 +136,11 @@ $addonResult = $conn->query($addonQuery);
                         <div class="itemname" id="modalProductNameDisplay"></div>
                         <div class="iteminfo" id="modalProductDescription"></div>
                         <div class="iteminfo" id="modalSold"></div>
-                        <div class="iteminfo" id="modalLeft"></div>
+                        <div class="slidedown">
+                            <div class="iteminfo" id="drinkBasesDisplay"></div>,
+                            <div class="iteminfo" id="flavorIdDisplay"></div>,
+                            <div class="iteminfo" id="toppingsIdDisplay"></div>
+                        </div>
                         <div class="div-price">
                             <div class="price" id="modalPrice"></div>
                         </div>
@@ -222,7 +235,17 @@ $addonResult = $conn->query($addonQuery);
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
+                            <button class="add-btn" onclick="openModal(
+ <?php echo $product['id']; ?>, 
+ '<?php echo addslashes($product['product_name']); ?>',
+ '<?php echo addslashes($product['product_description']); ?>', 
+ '<?php echo $product['price']; ?>', 
+ '<?php echo $product['product_image']; ?>', 
+ '<?php echo $product['total_sales']; ?>', 
+ '<?php echo $product['base_name']; ?>',
+ '<?php echo $product['flavor_name']; ?>',
+ '<?php echo $product['topping_name']; ?>'
+ )">Order</button>
                         </div>
                     <?php
                         $counter++;
@@ -251,7 +274,21 @@ $addonResult = $conn->query($addonQuery);
                 $totalProducts = $totalRow['total'];
                 $totalPages = ceil($totalProducts / $productsPerPage);
                 $totalStmt->close();
-                $productQuery = "SELECT * FROM coffee_products";
+                $productQuery = "
+SELECT 
+  coffee_products.*, 
+  coffee_base.base_name, 
+  coffee_base.quantity AS base_quantity,
+  coffee_flavors.flavor_name, 
+  coffee_flavors.quantity AS flavor_quantity,
+  coffee_toppings.topping_name, 
+  coffee_toppings.quantity AS topping_quantity
+FROM coffee_products
+LEFT JOIN coffee_base ON coffee_products.drink_bases = coffee_base.id
+LEFT JOIN coffee_flavors ON coffee_products.flavor_id = coffee_flavors.id
+LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
+";
+
                 if ($selectedCategory) {
                     $productQuery .= " WHERE category_id = ? LIMIT ?, ?";
                     $stmt = $conn->prepare($productQuery);
@@ -267,13 +304,28 @@ $addonResult = $conn->query($addonQuery);
                     while ($product = $productResult->fetch_assoc()):
                     ?>
                         <div class="product">
+                            <?php
+                            $isSoldOut = ($product['base_quantity'] == 0 || $product['flavor_quantity'] == 0 || $product['topping_quantity'] == 0);
+                            if ($isSoldOut): ?>
+                                <div class="sold-out-overlay">Sold Out</div>
+                            <?php endif; ?>
                             <div class="image-container">
                                 <img src="<?php echo $product['product_image']; ?>" alt="<?php echo $product['product_name']; ?>">
                             </div>
                             <h3><?php echo $product['product_name']; ?></h3>
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
-                            <button class="add-btn" onclick="openModal(<?php echo $product['id']; ?>, '<?php echo addslashes($product['product_name']); ?>','<?php echo addslashes($product['product_description']); ?>', '<?php echo $product['price']; ?>', '<?php echo $product['product_image']; ?>', '<?php echo $product['total_sales']; ?>', '<?php echo $product['quantity']; ?>')">Order</button>
+                            <button class="add-btn" <?php echo $isSoldOut ? 'disabled' : ''; ?> onclick="openModal(
+                                <?php echo $product['id']; ?>,
+                                '<?php echo addslashes($product['product_name']); ?>',
+                                '<?php echo addslashes($product['product_description']); ?>',
+                                '<?php echo $product['price']; ?>',
+                                '<?php echo $product['product_image']; ?>',
+                                '<?php echo $product['total_sales']; ?>',
+                                '<?php echo addslashes($product['base_name']); ?>',
+                                '<?php echo addslashes($product['flavor_name']); ?>',
+                                '<?php echo addslashes($product['topping_name']); ?>'
+                                )">Order</button>
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
@@ -299,9 +351,19 @@ $addonResult = $conn->query($addonQuery);
             </div>
         <?php endif; ?>
     </section>
-
     <script>
-        function openModal(productId, productName, productDesc, productPrice, productImage, totalSales, stockQuantity) {
+        function openModal(
+            productId,
+            productName,
+            productDesc,
+            productPrice,
+            productImage,
+            totalSales,
+            stockQuantity,
+            drinkBases,
+            flavorId,
+            toppingsId
+        ) {
             var overlay = document.getElementById("overlay");
             var modal = document.getElementById("quantityModal");
             var productIdInput = document.getElementById("modalProductId");
@@ -311,9 +373,7 @@ $addonResult = $conn->query($addonQuery);
             var productImageInput = document.getElementById("modalProductImage");
             var priceDisplay = document.getElementById("modalPrice");
             var soldDisplay = document.getElementById("modalSold");
-            var leftDisplay = document.getElementById("modalLeft");
             var addonsContainer = document.getElementById("addonsContainer");
-
             productIdInput.value = productId;
             productNameInput.value = productName;
             document.getElementById("modalProductDescription").textContent = productDesc;
@@ -323,29 +383,28 @@ $addonResult = $conn->query($addonQuery);
             document.getElementById("modalProductNameDisplay").textContent = productName;
             priceDisplay.textContent = "₱ " + productPrice;
             soldDisplay.textContent = "Solds: " + totalSales;
-            leftDisplay.textContent = "Quantity Left: " + stockQuantity;
-
+            document.getElementById("drinkBasesDisplay").textContent = drinkBases;
+            document.getElementById("flavorIdDisplay").textContent = flavorId;
+            document.getElementById("toppingsIdDisplay").textContent = toppingsId;
             addonsContainer.innerHTML = '';
             <?php while ($addon = $addonResult->fetch_assoc()): ?>
                 var addonOption = document.createElement("div");
                 addonOption.innerHTML = `
-            <input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>" id="addon-<?php echo $addon['id']; ?>">
-            <label for="addon-<?php echo $addon['id']; ?>"><?= $addon['addon_name'] ?></label>
-            <p>₱<?= $addon['addon_price'] ?></p>
-        `;
+ <input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>" id="addon-<?php echo $addon['id']; ?>">
+ <label for="addon-<?php echo $addon['id']; ?>"><?= $addon['addon_name'] ?></label>
+ <p>₱<?= $addon['addon_price'] ?></p>
+ `;
                 addonsContainer.appendChild(addonOption);
             <?php endwhile; ?>
             overlay.style.display = "block";
             modal.style.display = "flex";
         }
-
         var closeBtn = document.getElementsByClassName("close")[0];
         closeBtn.onclick = function() {
             var modal = document.getElementById("quantityModal");
             modal.style.display = "none";
             overlay.style.display = "none";
         }
-
         window.onclick = function(event) {
             var modal = document.getElementById("quantityModal");
             if (event.target == modal) {
@@ -354,7 +413,6 @@ $addonResult = $conn->query($addonQuery);
             }
         }
     </script>
-
     <?php include 'footer.php'; ?>
 </body>
 
