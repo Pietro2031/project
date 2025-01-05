@@ -301,3 +301,117 @@
 .virtual-cup > img {
   height: 450px;
 }
+.div-22 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  height: 89px;
+  position: relative;
+  margin-top: 20px;
+}
+.modal-confirm-order,
+.modal-confirm-order * {
+  box-sizing: border-box;
+}
+.label-size {
+  color: rgba(0, 0, 0, 0.7);
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  position: relative;
+}
+.div-size {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+}
+.div-size-info {
+  background: #ededed;
+  border-radius: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  position: relative;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease;
+}
+.div-size-info input[type="radio"] {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  opacity: 0;
+}
+.div-size-info label {
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  align-content: center;
+}
+.div-size-info p {
+  position: absolute;
+  top: -9px;
+  right: 0;
+  background-color: #e45353;
+  color: white;
+  border-radius: 10px;
+  padding: 3px;
+  font-size: 10px;
+}
+
+.div-size-info {
+  background: #ededed;
+  border-radius: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  position: relative;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease;
+}
+
+.div-size-info input[type="radio"] {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  opacity: 0;
+}
+
+.div-size-info label {
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  align-content: center;
+}
+
+.div-size-info input[type="radio"]:checked + label {
+  background-color: #a3a0a0;
+  color: white;
+}
+
+.div-size-info label:hover {
+  background-color: #f4f4f4;
+}
+
+.div-size-info input[type="radio"]:checked {
+  background-color: #a3a0a0;
+}

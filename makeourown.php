@@ -2,12 +2,53 @@
 <html lang="en">
 
 <head>
-    <?php include('connection.php'); ?>
+    <?php include('connection.php');
+    session_start(); ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customize Your Drink</title>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/makeyourown.css">
+    <style>
+        .virtual-cup>img {
+            height: 450px;
+            /* Default for S */
+            transition: height 0.3s ease-in-out;
+        }
+
+        .virtual-cup.selected-m>img {
+            height: 500px;
+        }
+
+        .virtual-cup.selected-l>img {
+            height: 550px;
+        }
+
+        .ingredient {
+            animation: dropIn 0.5s ease-in-out;
+            cursor: pointer;
+        }
+
+        @keyframes dropIn {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .ingredient-left {
+            align-self: flex-start;
+        }
+
+        .ingredient-right {
+            align-self: flex-end;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,30 +65,47 @@
                     if ($baseResult->num_rows > 0) {
                         while ($base = $baseResult->fetch_assoc()) {
                             echo '<div class="base-item">
-                <img src="' . $base['image'] . '" alt="' . $base['name'] . '">
-                <div class="base-name">' . $base['name'] . '</div>
-                <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
-                <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['name'] . '" data-price="' . $base['price'] . '">Select</button>
-            </div>';
+                                <img src="' . $base['image'] . '" alt="' . $base['name'] . '">
+                                <div class="base-name">' . $base['name'] . '</div>
+                                <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
+                                <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['name'] . '" data-price="' . $base['price'] . '">Select</button>
+                              </div>';
                         }
                     } else {
                         echo '<p>No drink bases available.</p>';
                     }
                     ?>
                 </div>
-
-
             </div>
             <div class="cup-container">
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
                     <img src="img/cup.png" alt="">
                     <div id="cup-content" class="cup-content"></div>
-
                 </div>
                 <div class="total-price">
                     Total Price: <span id="total-price">₱0.00</span>
                 </div>
+                <div class="div-22">
+                    <div class="label-size">Size</div>
+                    <div class="div-size">
+                        <div class="div-size-info">
+                            <input type="radio" name="size" value="S" id="sizeS" required>
+                            <label for="sizeS">S</label>
+                        </div>
+                        <div class="div-size-info">
+                            <input type="radio" name="size" value="M" id="sizeM" required>
+                            <label for="sizeM">M</label>
+                            <p>+₱10</p>
+                        </div>
+                        <div class="div-size-info">
+                            <input type="radio" name="size" value="L" id="sizeL" required>
+                            <label for="sizeL">L</label>
+                            <p>+₱20</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="checkout-btn" class="checkout-btn">Checkout</button>
             </div>
             <div class="ingredient-selector">
                 <h2>Add Ingredients</h2>
@@ -64,10 +122,10 @@
                     if ($ingredientResult->num_rows > 0) {
                         while ($ingredient = $ingredientResult->fetch_assoc()) {
                             echo '<div class="ingredient-item" data-category="' . $ingredient['category'] . '">
-<img src="' . $ingredient['image'] . '" alt="' . $ingredient['name'] . '">
-<span>' . $ingredient['name'] . ' (₱' . number_format($ingredient['price'], 2) . ')</span>
-<button data-name="' . $ingredient['name'] . '" data-price="' . $ingredient['price'] . '" data-image="' . $ingredient['image'] . '">Add</button>
-</div>';
+                                <img src="' . $ingredient['image'] . '" alt="' . $ingredient['name'] . '">
+                                <span>' . $ingredient['name'] . ' (₱' . number_format($ingredient['price'], 2) . ')</span>
+                                <button data-name="' . $ingredient['name'] . '" data-price="' . $ingredient['price'] . '" data-image="' . $ingredient['image'] . '">Add</button>
+                              </div>';
                         }
                     } else {
                         echo '<p>No ingredients available.</p>';
@@ -79,60 +137,81 @@
     </section>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const MAX_INGREDIENTS = 7;
             const cupContent = document.getElementById("cup-content");
             const totalPriceElement = document.getElementById("total-price");
             const ingredientTabs = document.querySelectorAll(".tab");
             const ingredientsList = document.getElementById("ingredients-list");
             let totalPrice = 0;
             let ingredientsCount = 0;
+            let sizePrice = 0;
+            let maxIngredients = 7; // Default for size S
             let toggleAlignment = true;
 
             // Base Selection
-            const baseItems = document.querySelectorAll(".base-item");
-            const baseButtons = document.querySelectorAll(".base-item button");
-            baseButtons.forEach((button, index) => {
+            document.querySelectorAll(".select-base-btn").forEach(button => {
                 button.addEventListener("click", () => {
-                    // Reset styles for all base items
-                    baseItems.forEach(item => item.classList.remove("selected"));
-
-                    // Add 'selected' class to the parent of the clicked button
-                    baseItems[index].classList.add("selected");
-
-                    // Update cup content and total price
-                    const baseName = button.dataset.name;
+                    document.querySelectorAll(".base-item").forEach(item => item.classList.remove("selected"));
+                    button.parentElement.classList.add("selected");
                     const basePrice = parseFloat(button.dataset.price);
-                    cupContent.innerHTML = `<div class="base">Base: ${baseName}</div>`;
-                    totalPrice = basePrice;
+                    totalPrice = basePrice + sizePrice;
                     ingredientsCount = 0; // Reset ingredient count
-                    toggleAlignment = true; // Reset ingredient alignment
+                    cupContent.innerHTML = `<div class="base">Base: ${button.dataset.name}</div>`;
+                    toggleAlignment = true; // Reset alignment
                     updateTotalPrice();
                 });
             });
 
             // Ingredient Selection
-            const ingredientButtons = document.querySelectorAll(".ingredient-item button");
-            ingredientButtons.forEach(button => {
+            document.querySelectorAll(".ingredient-item button").forEach(button => {
                 button.addEventListener("click", () => {
-                    if (ingredientsCount >= MAX_INGREDIENTS) {
-                        alert(`You can only add up to ${MAX_INGREDIENTS} ingredients.`);
+                    if (ingredientsCount >= maxIngredients) {
+                        alert(`You can only add up to ${maxIngredients} ingredients.`);
                         return;
                     }
-
                     const ingredientName = button.dataset.name;
                     const ingredientPrice = parseFloat(button.dataset.price);
                     const ingredientImage = button.dataset.image;
                     const alignmentClass = toggleAlignment ? "ingredient-left" : "ingredient-right";
                     toggleAlignment = !toggleAlignment;
 
-                    // Add ingredient to the cup
                     const ingredientDiv = document.createElement("div");
                     ingredientDiv.classList.add("ingredient", alignmentClass);
                     ingredientDiv.innerHTML = `<img src="${ingredientImage}" alt="${ingredientName}" title="${ingredientName}">`;
-                    cupContent.appendChild(ingredientDiv);
+                    ingredientDiv.addEventListener("click", () => {
+                        cupContent.removeChild(ingredientDiv);
+                        totalPrice -= ingredientPrice;
+                        ingredientsCount--;
+                        updateTotalPrice();
+                    });
 
+                    cupContent.appendChild(ingredientDiv);
                     totalPrice += ingredientPrice;
                     ingredientsCount++;
+                    updateTotalPrice();
+                });
+            });
+
+            // Size Selection
+            document.querySelectorAll("input[name='size']").forEach(input => {
+                input.addEventListener("change", () => {
+                    const selectedSize = input.value;
+                    const previousSizePrice = sizePrice;
+
+                    if (selectedSize === "S") {
+                        sizePrice = 0;
+                        maxIngredients = 7;
+                    }
+                    if (selectedSize === "M") {
+                        sizePrice = 10;
+                        maxIngredients = 9;
+                    }
+                    if (selectedSize === "L") {
+                        sizePrice = 20;
+                        maxIngredients = 10;
+                    }
+
+                    totalPrice += sizePrice - previousSizePrice; // Adjust price
+                    document.querySelector(".virtual-cup").className = `virtual-cup selected-${selectedSize.toLowerCase()}`;
                     updateTotalPrice();
                 });
             });
@@ -142,14 +221,12 @@
                 tab.addEventListener("click", () => {
                     ingredientTabs.forEach(t => t.classList.remove("active"));
                     tab.classList.add("active");
-
                     const category = tab.dataset.category;
-                    const allIngredients = document.querySelectorAll(".ingredient-item");
-                    allIngredients.forEach(ingredient => {
-                        if (category === "all" || ingredient.dataset.category === category) {
-                            ingredient.style.display = "flex";
+                    document.querySelectorAll(".ingredient-item").forEach(item => {
+                        if (category === "all" || item.dataset.category === category) {
+                            item.style.display = "flex";
                         } else {
-                            ingredient.style.display = "none";
+                            item.style.display = "none";
                         }
                     });
                 });
