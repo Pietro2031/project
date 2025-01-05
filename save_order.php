@@ -6,16 +6,24 @@ header("Content-Type: application/json");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+// Validate incoming data
 if (!isset($data['base'], $data['ingredients'], $data['total_price'], $data['payment_method'])) {
-    echo json_encode(['success' => false, 'message' => 'Invalid order data.']);
+    echo json_encode(['success' => false, 'message' => 'Invalid order data. Missing required fields.']);
     exit();
 }
 
+// Assign data to variables
 $base = $data['base'];
 $ingredients = $data['ingredients'];
 $total_price = $data['total_price'];
 $payment_method = $data['payment_method'];
-$username = $_SESSION['username']; // Retrieve username from session
+$username = $_SESSION['username'];
+
+// Validate user session
+if (empty($username)) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in.']);
+    exit();
+}
 
 try {
     // Fetch user_id based on username
@@ -34,6 +42,7 @@ try {
     $user_id = $user['id'];
     $stmtUser->close();
 
+    // Start transaction
     $conn->begin_transaction();
 
     // Insert into orders table
@@ -51,23 +60,17 @@ try {
     $stmtPayment->execute();
     $stmtPayment->close();
 
-    $updateBaseQuery = "UPDATE coffee_products SET total_sales = total_sales + 1, quantity = quantity - 1 WHERE product_name = ?";
-    $stmtUpdateBase = $conn->prepare($updateBaseQuery);
-    $stmtUpdateBase->bind_param("s", $base);
-    $stmtUpdateBase->execute();
-    $stmtUpdateBase->close();
+    // Update base product quantity and total sales
+    $baseUpdateQuery = "UPDATE coffee_products SET total_sales = total_sales + 1, quantity = quantity - 1 WHERE product_name = ?";
+    $stmtBaseUpdate = $conn->prepare($baseUpdateQuery);
+    $stmtBaseUpdate->bind_param("s", $base);
+    $stmtBaseUpdate->execute();
+    $stmtBaseUpdate->close();
 
+    // Commit transaction
     $conn->commit();
     echo json_encode(['success' => true, 'message' => 'Order saved successfully.']);
 } catch (Exception $e) {
     $conn->rollback();
     echo json_encode(['success' => false, 'message' => 'Failed to save the order.', 'error' => $e->getMessage()]);
-} catch (Exception $e) {
-    $conn->rollback();
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to save the order.',
-        'error' => $e->getMessage(),
-        'sql_error' => $conn->error
-    ]);
 }

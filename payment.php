@@ -163,38 +163,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Payment</title>
- <link rel="stylesheet" href="css/global.css">
- <link rel="stylesheet" href="css/payment.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/payment.css">
 </head>
+
 <body>
- <?php include("header.php"); ?>
- <div class="popupd">
- <div class="done">
- <form method="post" action="" class="payment-form">
- <div class="form-group">
- <label for="paymentMode">Payment Mode:<?= $_SESSION['curenttotal'] ?></label>
- <div class="method_img">
- <img src="uploads/method/link-91720ed84858d490ca62142de0494559.png">
- <img src="uploads/method/link-cf7aaa8b59e07c8548d2f03f0d930acb.png">
- <img src="uploads/method/link-4a1f1c2d9ee1820ccc9621b44f277387.png">
- <img src="uploads/method/link-8efc3b564e08e9e864ea83ab43d9f913.png">
- </div>
- <select name="paymentMode" id="paymentMode" required>
- <option value="GCash">GCash</option>
- <option value="Debit Card">Debit Card</option>
- <option value="Pay on the Counter">Pay on the Counter</option>
- </select>
- </div>
- <div class="payment-button">
- <button class="buybtn" type="submit">Submit Payment</button>
- </div>
- </form>
- </div>
- </div>
- <?php include("footer.php"); ?>
+    <?php include("header.php"); ?>
+    <div class="popupd">
+        <div class="done">
+            <form method="post" action="" class="payment-form">
+                <div class="form-group">
+                    <label for="paymentMode">Payment Mode:</label>
+                    <div class="method_img">
+                        <img src="uploads/method/link-91720ed84858d490ca62142de0494559.png">
+                        <img src="uploads/method/link-cf7aaa8b59e07c8548d2f03f0d930acb.png">
+                        <img src="uploads/method/link-4a1f1c2d9ee1820ccc9621b44f277387.png">
+                        <img src="uploads/method/link-8efc3b564e08e9e864ea83ab43d9f913.png">
+                    </div>
+                    <select name="paymentMode" id="paymentMode" required>
+                        <option value="GCash">GCash</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Pay on the Counter">Pay on the Counter</option>
+                    </select>
+                </div>
+                <div class="payment-button">
+                    <button class="buybtn" type="submit">Submit Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <?php include("footer.php"); ?>
 </body>
+
 </html>

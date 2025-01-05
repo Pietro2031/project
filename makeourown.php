@@ -9,6 +9,7 @@
     <title>Customize Your Drink</title>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/makeyourown.css">
+    <link rel="stylesheet" href="css/payment.css">
 </head>
 
 <body>
@@ -20,16 +21,16 @@
                 <h2>What kind of coffee?</h2>
                 <div class="base-options">
                     <?php
-                    $baseQuery = "SELECT * FROM coffee_products Where drink_bases = '1'";
+                    $baseQuery = "SELECT * FROM coffee_products WHERE drink_bases = '1'";
                     $baseResult = $conn->query($baseQuery);
                     if ($baseResult->num_rows > 0) {
                         while ($base = $baseResult->fetch_assoc()) {
                             echo '<div class="base-item">
- <img src="' . $base['product_image'] . '" alt="' . $base['product_name'] . '">
- <div class="base-name">' . $base['product_name'] . '</div>
- <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
- <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['product_name'] . '" data-price="' . $base['price'] . '">Select</button>
- </div>';
+                                <img src="' . $base['product_image'] . '" alt="' . $base['product_name'] . '">
+                                <div class="base-name">' . $base['product_name'] . '</div>
+                                <div class="base-price">₱' . number_format($base['price'], 2) . '</div>
+                                <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['product_name'] . '" data-price="' . $base['price'] . '">Select</button>
+                            </div>';
                         }
                     } else {
                         echo '<p>No drink bases available.</p>';
@@ -85,11 +86,11 @@
                     if ($ingredientResult->num_rows > 0) {
                         while ($ingredient = $ingredientResult->fetch_assoc()) {
                             echo '<div class="ingredient-item" data-category="' . $ingredient['category'] . '">
- <img src="' . $ingredient['image'] . '" alt="' . $ingredient['name'] . '">
- <span>' . $ingredient['name'] . ' (₱' . number_format($ingredient['price'], 2) . ')</span>
- <button data-id="' . $ingredient['id'] . '" data-name="' . $ingredient['name'] . '" data-price="' . $ingredient['price'] . '" data-image="' . $ingredient['image'] . '">Add</button>
- <span class="ingredient-counter" id="counter-' . $ingredient['id'] . '">x0</span>
- </div>';
+                                <img src="' . $ingredient['image'] . '" alt="' . $ingredient['name'] . '">
+                                <span>' . $ingredient['name'] . ' (₱' . number_format($ingredient['price'], 2) . ')</span>
+                                <button data-id="' . $ingredient['id'] . '" data-name="' . $ingredient['name'] . '" data-price="' . $ingredient['price'] . '" data-image="' . $ingredient['image'] . '">Add</button>
+                                <span class="ingredient-counter" id="counter-' . $ingredient['id'] . '">x0</span>
+                            </div>';
                         }
                     } else {
                         echo '<p>No ingredients available.</p>';
@@ -99,15 +100,34 @@
             </div>
         </div>
     </section>
-    <div class="checkout-popup" id="checkout-popup">
+    <div class="checkout-popup done" id="checkout-popup">
         <h2>Checkout</h2>
         <p>Total: <span id="popup-total-price">₱0.00</span></p>
-        <p>Select Payment Method:</p>
-        <button onclick="confirmOrder('GCash')">GCash</button>
-        <button onclick="confirmOrder('Debit Card')">Debit Card</button>
-        <button onclick="confirmOrder('Pay at Counter')">Pay at Counter</button>
-        <button onclick="closeCheckout()">Cancel</button>
+
+        <form method="post" action="" class="payment-form">
+            <div class="form-group">
+                <label for="paymentMode">Payment Mode:</label>
+                <div class="method_img">
+                    <img src="uploads/method/link-91720ed84858d490ca62142de0494559.png" alt="GCash">
+                    <img src="uploads/method/link-cf7aaa8b59e07c8548d2f03f0d930acb.png" alt="Debit Card">
+                    <img src="uploads/method/link-4a1f1c2d9ee1820ccc9621b44f277387.png" alt="PayPal">
+                    <img src="uploads/method/link-8efc3b564e08e9e864ea83ab43d9f913.png" alt="Counter Payment">
+                </div>
+                <select name="paymentMode" id="paymentMode" required>
+                    <option value="" disabled selected>Select Payment Method</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Pay on the Counter">Pay on the Counter</option>
+                </select>
+            </div>
+            <div class="payment-button">
+                <button class="buybtn" type="button" onclick="confirmOrder()">Submit Payment</button>
+                <button class="cancelbtn" type="button" onclick="closeCheckout()">Cancel</button>
+            </div>
+        </form>
     </div>
+
+
     <div class="checkout-overlay" id="checkout-overlay"></div>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -124,10 +144,12 @@
                 checkoutPopup.style.display = "none";
                 checkoutOverlay.style.display = "none";
             };
-            window.confirmOrder = (method) => {
+            window.confirmOrder = () => {
+                const paymentMethod = document.getElementById("paymentMode").value;
                 const totalPrice = parseFloat(popupTotalPrice.textContent.replace('₱', ''));
-                if (isNaN(totalPrice) || totalPrice <= 0) {
-                    alert("Please select a drink base and ingredients before checking out.");
+
+                if (!paymentMethod) {
+                    alert("Please select a payment method.");
                     return;
                 }
 
@@ -138,13 +160,24 @@
                 }
 
                 const ingredients = [];
-                const ingredientElements = document.querySelectorAll("#cup-content .ingredient");
-                ingredientElements.forEach(ingredient => {
-                    const ingredientName = ingredient.querySelector("img").getAttribute("title");
-                    ingredients.push(ingredientName);
+                document.querySelectorAll("#cup-content .ingredient img").forEach(img => {
+                    ingredients.push(img.getAttribute("title"));
                 });
 
-                // AJAX Request to save order
+                if (!totalPrice || totalPrice <= 0 || ingredients.length === 0) {
+                    alert(totalPrice + "Your order is incomplete. Please add ingredients or select a drink base.");
+                    return;
+                }
+
+                // Prepare the order data
+                const orderData = {
+                    base: base.textContent,
+                    ingredients: ingredients,
+                    total_price: totalPrice,
+                    payment_method: paymentMethod,
+                };
+
+                // AJAX Request to Save Order
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "save_order.php", true);
                 xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -155,24 +188,17 @@
                             try {
                                 const response = JSON.parse(xhr.responseText);
                                 if (response.success) {
-                                    alert(`Order confirmed! Payment method: ${method}`);
-                                    closeCheckout();
-                                    // Optionally redirect to an order summary page
+                                    alert("Your order has been successfully Placed! Thank you for your purchase.");
                                     window.location.href = "home.php";
                                 } else {
-                                    // Handle server-side validation or error messages
-                                    const errorMessage = response.message || "Failed to save your order. Please try again.";
-                                    alert(`Error: ${errorMessage}`);
-                                    if (response.error) {
-                                        console.error(`Error details: ${response.error}`);
-                                    }
+                                    alert(`Failed to process your order: ${response.message}`);
+                                    if (response.error) console.error(`Error details: ${response.error}`);
                                 }
                             } catch (e) {
                                 alert("An unexpected error occurred while processing your request.");
                                 console.error("Failed to parse server response:", e);
                             }
                         } else {
-                            // Handle HTTP errors
                             alert(`An error occurred: HTTP ${xhr.status}`);
                             console.error("Server error:", xhr.statusText);
                         }
@@ -180,22 +206,13 @@
                 };
 
                 xhr.onerror = function() {
-                    // Handle network errors
                     alert("A network error occurred. Please check your internet connection and try again.");
                     console.error("Network error");
                 };
 
-                // Prepare the order data
-                xhr.send(
-                    JSON.stringify({
-                        base: base.textContent,
-                        ingredients: ingredients,
-                        total_price: totalPrice,
-                        payment_method: method,
-                    })
-                );
-
+                xhr.send(JSON.stringify(orderData));
             };
+
             const cupContent = document.getElementById("cup-content");
             const totalPriceElement = document.getElementById("total-price");
             const ingredientTabs = document.querySelectorAll(".tab");
