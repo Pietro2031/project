@@ -87,7 +87,7 @@
                         while ($ingredient = $ingredientResult->fetch_assoc()) {
                             echo '<div class="ingredient-item" data-category="' . $ingredient['category'] . '">
                                 <img src="' . $ingredient['image'] . '" alt="' . $ingredient['name'] . '">
-                                <span>' . $ingredient['name'] . ' (₱' . number_format($ingredient['price'], 2) . ')</span>
+                                <span class="base-name">' . $ingredient['name'] . '<p class="base-price"> ₱' . number_format($ingredient['price'], 2) . '</p></span>
                                 <button data-id="' . $ingredient['id'] . '" data-name="' . $ingredient['name'] . '" data-price="' . $ingredient['price'] . '" data-image="' . $ingredient['image'] . '">Add</button>
                                 <span class="ingredient-counter" id="counter-' . $ingredient['id'] . '">x0</span>
                             </div>';
