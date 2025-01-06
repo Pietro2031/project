@@ -151,7 +151,6 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
 </script>
 <?php
 if (isset($_POST['submit'])) {
-    echo "<script>alert('test!');</script>";
     $name = $_POST['name'];
     $category_id = $_POST['category_id'];
     $base_id = $_POST['drink_bases'];
@@ -159,9 +158,9 @@ if (isset($_POST['submit'])) {
     $toppings_id = $_POST['toppings_id'] ?: null;
     $price = $_POST['price'];
     $total_sales = 0;
-    if (isset($_FILES['ItemImg']) && $_FILES['ItemImg']['error'] == 0) {
-        $image = $_FILES['ItemImg']['name'];
-        $target = "uploads/" . basename($image);
+    $image = $_FILES['ItemImg']['name'];
+    $target = "uploads/" . basename($image);
+    if ($_FILES['ItemImg']['error'] == 0) {
         move_uploaded_file($_FILES['ItemImg']['tmp_name'], $target);
     } else {
         $target = null;
