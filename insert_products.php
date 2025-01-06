@@ -151,6 +151,13 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
 </script>
 <?php
 if (isset($_POST['submit'])) {
+    error_log("Form submitted. Name: " . $_POST['name']);
+    error_log("Category ID: " . $_POST['category_id']);
+    error_log("Base ID: " . $_POST['drink_bases']);
+    error_log("Flavor ID: " . $_POST['flavor_id']);
+    error_log("Toppings ID: " . ($_POST['toppings_id'] ?: 'None'));
+    error_log("Price: " . $_POST['price']);
+
     $name = $_POST['name'];
     $category_id = $_POST['category_id'];
     $base_id = $_POST['drink_bases'];
@@ -158,21 +165,36 @@ if (isset($_POST['submit'])) {
     $toppings_id = $_POST['toppings_id'] ?: null;
     $price = $_POST['price'];
     $total_sales = 0;
+
     $image = $_FILES['ItemImg']['name'];
     $target = "uploads/" . basename($image);
+
     if ($_FILES['ItemImg']['error'] == 0) {
-        move_uploaded_file($_FILES['ItemImg']['tmp_name'], $target);
+        if (move_uploaded_file($_FILES['ItemImg']['tmp_name'], $target)) {
+            error_log("Image uploaded successfully to: " . $target);
+        } else {
+            error_log("Failed to move uploaded image.");
+            $target = null;
+        }
     } else {
+        error_log("No file uploaded or there was an error with the file upload.");
         $target = null;
     }
+
     $insertQuery = "INSERT INTO coffee_products 
                     (product_name, category_id, drink_bases, flavor_id, toppings_id, price, product_image, total_sales) 
                     VALUES ('$name', '$category_id', '$base_id', '$flavor_id', '$toppings_id', '$price', '$target', '$total_sales')";
+
+    error_log("SQL Query: " . $insertQuery);
+
     if (mysqli_query($conn, $insertQuery)) {
         echo "<script>alert('Product added successfully!'); window.location = 'admin.php?view_inventory';</script>";
     } else {
-        echo "<script>alert('test!');</script>";
+        error_log("Error executing query: " . mysqli_error($conn));
+        echo "<script>alert('An error occurred while adding the product.');</script>";
     }
 } else {
+    error_log("Form not submitted properly.");
 }
+
 ?>
