@@ -171,7 +171,7 @@ if (isset($_POST['submit'])) {
     if (mysqli_query($conn, $insertQuery)) {
         echo "<script>alert('Product added successfully!'); window.location = 'admin.php?view_inventory';</script>";
     } else {
-        echo "Error: " . mysqli_error($conn);
+        echo "<script>alert('test!');</script>";
     }
 } else {
 }
