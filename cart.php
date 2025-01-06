@@ -31,19 +31,19 @@ $userId = $user['id'];
 $userStmt->close();
 $getCartItemsQuery = " 
     SELECT 
-    cart.id AS cart_id, 
-    cart.user_id, 
-    cart.product_id, 
-    cart.quantity, 
-    cart.size, 
-    cart.addons AS addon_ids, 
-    coffee_products.product_name AS product_name, 
-    coffee_products.product_image AS product_image, 
-    coffee_products.price AS price 
+        cart.id AS cart_id, 
+        cart.user_id, 
+        cart.product_id, 
+        cart.quantity, 
+        cart.size, 
+        cart.addons AS addon_ids, 
+        coffee_products.product_name AS product_name, 
+        coffee_products.product_image AS product_image, 
+        coffee_products.price AS price 
     FROM cart 
     INNER JOIN coffee_products ON cart.product_id = coffee_products.id 
     WHERE cart.user_id = ? 
-    ";
+";
 $cartStmt = $conn->prepare($getCartItemsQuery);
 $cartStmt->bind_param("i", $userId);
 $cartStmt->execute();
@@ -76,30 +76,60 @@ $totalCartValue = 0;
                                 $productPrice = $item['price'];
                                 $totalPrice = $item['quantity'] * $productPrice;
 
+                                // Size charge logic
                                 $sizeCharge = 0;
                                 if ($item['size'] == 'M') {
                                     $sizeCharge = 10;
                                 } elseif ($item['size'] == 'L') {
                                     $sizeCharge = 20;
                                 }
+
+                                // Add-ons handling
                                 $addonIds = json_decode($item['addon_ids'], true);
                                 $addonPrice = 0;
                                 $addonNames = [];
                                 if (!empty($addonIds)) {
-                                    $placeholders = implode(',', array_fill(0, count($addonIds), '?'));
-                                    $addonQuery = "SELECT addon_name, addon_price FROM addons WHERE id IN ($placeholders)";
-                                    $addonStmt = $conn->prepare($addonQuery);
-                                    $addonStmt->bind_param(str_repeat('i', count($addonIds)), ...$addonIds);
-                                    $addonStmt->execute();
-                                    $addonResult = $addonStmt->get_result();
-                                    while ($addon = $addonResult->fetch_assoc()) {
-                                        $addonNames[] = $addon['addon_name'];
-                                        $addonPrice += $addon['addon_price'];
+                                    $flavorIds = [];
+                                    $toppingIds = [];
+                                    foreach ($addonIds as $addon) {
+                                        if (str_starts_with($addon, 'flavor-')) {
+                                            $flavorIds[] = intval(str_replace('flavor-', '', $addon));
+                                        } elseif (str_starts_with($addon, 'topping-')) {
+                                            $toppingIds[] = intval(str_replace('topping-', '', $addon));
+                                        }
                                     }
-                                    $addonStmt->close();
+
+                                    if (!empty($flavorIds)) {
+                                        $flavorPlaceholders = implode(',', array_fill(0, count($flavorIds), '?'));
+                                        $flavorQuery = "SELECT flavor_name, price FROM coffee_flavors WHERE id IN ($flavorPlaceholders)";
+                                        $flavorStmt = $conn->prepare($flavorQuery);
+                                        $flavorStmt->bind_param(str_repeat('i', count($flavorIds)), ...$flavorIds);
+                                        $flavorStmt->execute();
+                                        $flavorResult = $flavorStmt->get_result();
+                                        while ($flavor = $flavorResult->fetch_assoc()) {
+                                            $addonNames[] = $flavor['flavor_name'];
+                                            $addonPrice += $flavor['price'];
+                                        }
+                                        $flavorStmt->close();
+                                    }
+
+                                    if (!empty($toppingIds)) {
+                                        $toppingPlaceholders = implode(',', array_fill(0, count($toppingIds), '?'));
+                                        $toppingQuery = "SELECT topping_name, price FROM coffee_toppings WHERE id IN ($toppingPlaceholders)";
+                                        $toppingStmt = $conn->prepare($toppingQuery);
+                                        $toppingStmt->bind_param(str_repeat('i', count($toppingIds)), ...$toppingIds);
+                                        $toppingStmt->execute();
+                                        $toppingResult = $toppingStmt->get_result();
+                                        while ($topping = $toppingResult->fetch_assoc()) {
+                                            $addonNames[] = $topping['topping_name'];
+                                            $addonPrice += $topping['price'];
+                                        }
+                                        $toppingStmt->close();
+                                    }
                                 }
                                 $addonsText = $addonNames ? implode(", ", $addonNames) : "None";
 
+                                // Final price calculation
                                 $totalPrice += ($addonPrice + $sizeCharge) * $item['quantity'];
                                 $totalCartValue += $totalPrice;
                             ?>

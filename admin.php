@@ -69,7 +69,7 @@ if (!isset($_SESSION['admin_username'])) {
                 <li><a href="?report" <?php if (isset($_GET['report'])) {
                                             echo 'class="active"';
                                         } ?>><i class="fas fa-chart-line"></i> Reports</a></li>
-                <li><a href="?inventory" <?php if (isset($_GET['inventory'])) {
+                <li><a href="?view_inventory" <?php if (isset($_GET['view_inventory'])) {
                                                 echo 'class="active"';
                                             } ?>><i class="fas fa-th-list"></i> Inventory</a></li>
                 <li><a href="#"><i class="fas fa-receipt"></i> Payment History</a></li>

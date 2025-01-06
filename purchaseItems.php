@@ -69,7 +69,6 @@ $totalPurchaseValue = 0;
 <body>
     <?php include("header.php"); ?>
     <section class="cashoutsec">
-
         <div class="checkout">
             <div class="user-info">
                 <h1>Account Information</h1>
@@ -87,23 +86,68 @@ $totalPurchaseValue = 0;
                     $addonNames = [];
                     $addonIds = json_decode($row['addon_ids'], true);
                     if (!empty($addonIds)) {
-                        $placeholders = implode(',', array_fill(0, count($addonIds), '?'));
-                        $addonQuery = "SELECT addon_name, addon_price FROM addons WHERE id IN ($placeholders)";
-                        $addonStmt = $conn->prepare($addonQuery);
-                        $addonStmt->bind_param(str_repeat('i', count($addonIds)), ...$addonIds);
-                        $addonStmt->execute();
-                        $addonResult = $addonStmt->get_result();
-                        while ($addon = $addonResult->fetch_assoc()) {
-                            $addonPrice += $addon['addon_price'];
-                            $addonNames[] = $addon['addon_name'];
+                        $flavorIds = [];
+                        $toppingIds = [];
+
+                        foreach ($addonIds as $addon) {
+                            if (str_starts_with($addon, 'flavor-')) {
+                                $flavorIds[] = intval(str_replace('flavor-', '', $addon));
+                            } elseif (str_starts_with($addon, 'topping-')) {
+                                $toppingIds[] = intval(str_replace('topping-', '', $addon));
+                            }
                         }
-                        $addonStmt->close();
+
+                        if (!empty($flavorIds)) {
+                            $flavorPlaceholders = implode(',', array_fill(0, count($flavorIds), '?'));
+                            $flavorQuery = "SELECT flavor_name, price  FROM coffee_flavors WHERE id IN ($flavorPlaceholders)";
+                            $flavorStmt = $conn->prepare($flavorQuery);
+                            $flavorStmt->bind_param(str_repeat('i', count($flavorIds)), ...$flavorIds);
+                            $flavorStmt->execute();
+                            $flavorResult = $flavorStmt->get_result();
+                            while ($flavor = $flavorResult->fetch_assoc()) {
+                                $addonNames[] = $flavor['flavor_name'];
+                                $addonPrice += $flavor['price'];
+                            }
+                            $flavorStmt->close();
+                        }
+
+                        if (!empty($toppingIds)) {
+                            $toppingPlaceholders = implode(',', array_fill(0, count($toppingIds), '?'));
+                            $toppingQuery = "SELECT topping_name, price  FROM coffee_toppings WHERE id IN ($toppingPlaceholders)";
+                            $toppingStmt = $conn->prepare($toppingQuery);
+                            $toppingStmt->bind_param(str_repeat('i', count($toppingIds)), ...$toppingIds);
+                            $toppingStmt->execute();
+                            $toppingResult = $toppingStmt->get_result();
+                            while ($topping = $toppingResult->fetch_assoc()) {
+                                $addonNames[] = $topping['topping_name'];
+                                $addonPrice += $topping['price'];
+                            }
+                            $toppingStmt->close();
+                        }
                     }
+
                     if ($row['size'] == 'M') {
-                        $productPrice += 10;
+                        // Query the cup_size table for size 'M'
+                        $cupSizeQuery = "SELECT price FROM cup_size WHERE size = 'M'";
+                        $cupSizeStmt = $conn->prepare($cupSizeQuery);
+                        $cupSizeStmt->execute();
+                        $cupSizeResult = $cupSizeStmt->get_result();
+                        if ($cupSizeRow = $cupSizeResult->fetch_assoc()) {
+                            $productPrice += floatval($cupSizeRow['price']); // Add price for size 'M'
+                        }
+                        $cupSizeStmt->close();
                     } elseif ($row['size'] == 'L') {
-                        $productPrice += 20;
+                        // Query the cup_size table for size 'L'
+                        $cupSizeQuery = "SELECT price FROM cup_size WHERE size = 'L'";
+                        $cupSizeStmt = $conn->prepare($cupSizeQuery);
+                        $cupSizeStmt->execute();
+                        $cupSizeResult = $cupSizeStmt->get_result();
+                        if ($cupSizeRow = $cupSizeResult->fetch_assoc()) {
+                            $productPrice += floatval($cupSizeRow['price']); // Add price for size 'L'
+                        }
+                        $cupSizeStmt->close();
                     }
+
                     $totalPrice = $row['quantity'] * ($productPrice + $addonPrice);
                     $totalPurchaseValue += $totalPrice;
                 ?>
@@ -117,14 +161,29 @@ $totalPurchaseValue = 0;
                                 <div class="itemname"><?= htmlspecialchars($row['product_name']); ?></div>
                                 <div class="itemdetails">
                                     <p><strong>Base Price:</strong> ₱<?= number_format($row['Price'], 2); ?></p>
-                                    <?php if ($row['size'] == 'M' || $row['size'] == 'L'): ?>
-                                        <p><strong>Size Adjustment (<?= $row['size']; ?>):</strong> ₱<?= $row['size'] == 'M' ? '10.00' : '20.00'; ?></p>
+
+                                    <?php
+                                    if ($row['size'] == 'M' || $row['size'] == 'L'):
+                                        $cupSizeQuery = "SELECT price FROM cup_size WHERE size = ?";
+                                        $cupSizeStmt = $conn->prepare($cupSizeQuery);
+                                        $cupSizeStmt->bind_param("s", $row['size']);
+                                        $cupSizeStmt->execute();
+                                        $cupSizeResult = $cupSizeStmt->get_result();
+
+                                        if ($cupSizeRow = $cupSizeResult->fetch_assoc()):
+                                            $sizeAdjustmentPrice = floatval($cupSizeRow['price']);
+                                        endif;
+                                        $cupSizeStmt->close();
+                                    ?>
+                                        <p><strong>Size Adjustment (<?= $row['size']; ?>):</strong> ₱<?= number_format($sizeAdjustmentPrice, 2); ?></p>
                                     <?php endif; ?>
+
                                     <?php if (!empty($addonNames)): ?>
                                         <p><strong>Add-ons:</strong> <?= implode(', ', $addonNames); ?></p>
                                         <p><strong>Add-on Total:</strong> ₱<?= number_format($addonPrice, 2); ?></p>
                                     <?php endif; ?>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -132,20 +191,27 @@ $totalPurchaseValue = 0;
                 <div class="total">
                     <p><b>Total</b></p>
                     <p><b>₱<?= number_format($totalPurchaseValue, 2); ?></b></p>
-                    <?php $_SESSION['curenttotal'] = number_format($totalPurchaseValue, 2) ?>
                 </div>
-                <p class="itemname">Click to proceed to payment and finalize your purchase.</p>
-                <button class="buybtn" onclick="checkout()">Checkout</button>
+
+                <!-- Payment Method Section -->
+                <div class="payment-method">
+                    <h2>Payment Method</h2>
+                    <form action="process_order.php" method="POST">
+                        <input type="hidden" name="total" value="<?= $totalPurchaseValue ?>">
+                        <label for="payment">Select Payment Method:</label>
+                        <select name="payment_method" id="payment">
+                            <option value="cash">Cash</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="gcash">GCash</option>
+                        </select>
+                        <button type="submit" class="buybtn">Submit Order</button>
+                    </form>
+                </div>
             <?php else: ?>
                 <p>No items in the cart.</p>
             <?php endif; ?>
         </div>
     </section>
-    <script>
-        function checkout() {
-            window.location.href = "payment.php";
-        }
-    </script>
 </body>
 
 </html>

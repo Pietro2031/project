@@ -330,7 +330,7 @@ html {
 }
 .left-text {
   position: absolute;
-  top: 130%;
+  top: 150%;
   left: 2%;
   color: #29412a;
   letter-spacing: 1px;
@@ -347,7 +347,7 @@ html {
 .right-text {
   position: absolute;
   left: 76%;
-  top: 93%;
+  top: 101%;
   color: #29412a;
   letter-spacing: 1px;
   font-size: 14px;

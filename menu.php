@@ -23,15 +23,13 @@ if (isset($_POST['add_to_cart'])) {
     $productId = $_POST['product_id'];
     $addons = isset($_POST['addons']) ? $_POST['addons'] : [];
     $size = isset($_POST['size']) ? $_POST['size'] : null;
-
+    $quantity = $_POST['quantity'];
     if (!isset($_SESSION['username'])) {
         die("Error: You must be logged in to add items to the cart.");
     }
-
     if (!$size) {
         die("Error: Please select a size.");
     }
-
     $username = $_SESSION['username'];
     $userQuery = "SELECT id FROM user_account WHERE username = ?";
     $userStmt = $conn->prepare($userQuery);
@@ -44,9 +42,7 @@ if (isset($_POST['add_to_cart'])) {
     $user = $userResult->fetch_assoc();
     $userId = $user['id'];
     $userStmt->close();
-
     $addonsJson = json_encode($addons);
-
     $checkCartQuery = "
 SELECT * FROM cart 
 WHERE user_id = ? 
@@ -59,7 +55,6 @@ AND addons = ?
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
-
         $updateCartQuery = "
 UPDATE cart 
 SET quantity = quantity + ? 
@@ -73,7 +68,6 @@ AND addons = ?
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-
         $insertCartQuery = "
 INSERT INTO cart (user_id, product_id, quantity, size, addons) 
 VALUES (?, ?, ?, ?, ?)
@@ -156,26 +150,82 @@ $addonResult = $conn->query($addonQuery);
                     <div class="div-22">
                         <div class="label-size">Size</div>
                         <div class="div-size">
-                            <div class="div-size-info">
-                                <input type="radio" name="size" value="S" id="sizeS" required>
-                                <label for="sizeS">S</label>
-                            </div>
-                            <div class="div-size-info">
-                                <input type="radio" name="size" value="M" id="sizeM" required>
-                                <label for="sizeM">M</label>
-                                <p>+₱10</p>
-                            </div>
-                            <div class="div-size-info">
-                                <input type="radio" name="size" value="L" id="sizeL" required>
-                                <label for="sizeL">L</label>
-                                <p>+₱20</p>
-                            </div>
+                            <?php
+                            $cupSizesQuery = "SELECT id, size, quantity, price, img FROM cup_size";
+                            $cupSizesResult = $conn->query($cupSizesQuery);
+                            if ($cupSizesResult && $cupSizesResult->num_rows > 0):
+                                while ($cupSize = $cupSizesResult->fetch_assoc()):
+                                    $isDisabled = $cupSize['quantity'] == 0 ? 'disabled' : '';
+                            ?>
+                                    <div class="div-size-info">
+                                        <input type="radio" name="size"
+                                            value="<?php echo $cupSize['id']; ?>"
+                                            id="size-<?php echo $cupSize['id']; ?>"
+                                            <?php echo $isDisabled; ?> required>
+                                        <label for="size-<?php echo $cupSize['id']; ?>">
+                                            <?php echo $cupSize['size']; ?>
+                                        </label>
+                                        <p><?php echo $cupSize['quantity'] > 0 ? '+₱' . number_format($cupSize['price'], 2) : 'Out of Stock'; ?></p>
+                                    </div>
+                            <?php
+                                endwhile;
+                            endif;
+                            ?>
                         </div>
                     </div>
                     <div class="div-23">
                         <div class="label-size">Add-ons</div>
+                        <?php
+                        $flavorsQuery = "SELECT id, flavor_name, quantity, price FROM coffee_flavors";
+                        $flavorsResult = $conn->query($flavorsQuery);
+
+                        $toppingsQuery = "SELECT id, topping_name, quantity, price FROM coffee_toppings";
+                        $toppingsResult = $conn->query($toppingsQuery);
+                        ?>
                         <div class="div-add-ons" id="addonsContainer">
+                            <h4>Flavors</h4>
+                            <div class="sliderights">
+                                <?php if ($flavorsResult && $flavorsResult->num_rows > 0): ?>
+                                    <?php while ($flavor = $flavorsResult->fetch_assoc()): ?>
+                                        <?php $isDisabled = $flavor['quantity'] == 0 ? 'disabled' : ''; ?>
+                                        <div class="addon-item">
+                                            <input type="checkbox" name="addons[]" value="flavor-<?php echo $flavor['id']; ?>" id="flavor-<?php echo $flavor['id']; ?>" <?php echo $isDisabled; ?>>
+                                            <label for="flavor-<?php echo $flavor['id']; ?>">
+                                                <?php echo $flavor['flavor_name']; ?>
+                                                (₱<?php echo number_format($flavor['price'], 2); ?>)
+                                            </label>
+                                            <?php if ($flavor['quantity'] == 0): ?>
+                                                <span class="out-of-stock">Out of Stock</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <p>No flavors available.</p>
+                                <?php endif; ?>
+                            </div>
+
+                            <h4>Toppings</h4>
+                            <div class="sliderights">
+                                <?php if ($toppingsResult && $toppingsResult->num_rows > 0): ?>
+                                    <?php while ($topping = $toppingsResult->fetch_assoc()): ?>
+                                        <?php $isDisabled = $topping['quantity'] == 0 ? 'disabled' : ''; ?>
+                                        <div class="addon-item">
+                                            <input type="checkbox" name="addons[]" value="topping-<?php echo $topping['id']; ?>" id="topping-<?php echo $topping['id']; ?>" <?php echo $isDisabled; ?>>
+                                            <label for="topping-<?php echo $topping['id']; ?>">
+                                                <?php echo $topping['topping_name']; ?>
+                                                (₱<?php echo number_format($topping['price'], 2); ?>)
+                                            </label>
+                                            <?php if ($topping['quantity'] == 0): ?>
+                                                <span class="out-of-stock">Out of Stock</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <p>No toppings available.</p>
+                                <?php endif; ?>
+                            </div>
                         </div>
+
                     </div>
                 </div>
                 <div class="button">
@@ -275,20 +325,19 @@ $addonResult = $conn->query($addonQuery);
                 $totalPages = ceil($totalProducts / $productsPerPage);
                 $totalStmt->close();
                 $productQuery = "
-SELECT 
-  coffee_products.*, 
-  coffee_base.base_name, 
-  coffee_base.quantity AS base_quantity,
-  coffee_flavors.flavor_name, 
-  coffee_flavors.quantity AS flavor_quantity,
-  coffee_toppings.topping_name, 
-  coffee_toppings.quantity AS topping_quantity
-FROM coffee_products
-LEFT JOIN coffee_base ON coffee_products.drink_bases = coffee_base.id
-LEFT JOIN coffee_flavors ON coffee_products.flavor_id = coffee_flavors.id
-LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
-";
-
+ SELECT 
+ coffee_products.*, 
+ coffee_base.base_name, 
+ coffee_base.quantity AS base_quantity,
+ coffee_flavors.flavor_name, 
+ coffee_flavors.quantity AS flavor_quantity,
+ coffee_toppings.topping_name, 
+ coffee_toppings.quantity AS topping_quantity
+ FROM coffee_products
+ LEFT JOIN coffee_base ON coffee_products.drink_bases = coffee_base.id
+ LEFT JOIN coffee_flavors ON coffee_products.flavor_id = coffee_flavors.id
+ LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
+ ";
                 if ($selectedCategory) {
                     $productQuery .= " WHERE category_id = ? LIMIT ?, ?";
                     $stmt = $conn->prepare($productQuery);
@@ -316,16 +365,16 @@ LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
                             <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                             <p class="price">Solds: <?= $product['total_sales'] ?></p>
                             <button class="add-btn" <?php echo $isSoldOut ? 'disabled' : ''; ?> onclick="openModal(
-                                <?php echo $product['id']; ?>,
-                                '<?php echo addslashes($product['product_name']); ?>',
-                                '<?php echo addslashes($product['product_description']); ?>',
-                                '<?php echo $product['price']; ?>',
-                                '<?php echo $product['product_image']; ?>',
-                                '<?php echo $product['total_sales']; ?>',
-                                '<?php echo addslashes($product['base_name']); ?>',
-                                '<?php echo addslashes($product['flavor_name']); ?>',
-                                '<?php echo addslashes($product['topping_name']); ?>'
-                                )">Order</button>
+ <?php echo $product['id']; ?>,
+ '<?php echo addslashes($product['product_name']); ?>',
+ '<?php echo addslashes($product['product_description']); ?>',
+ '<?php echo $product['price']; ?>',
+ '<?php echo $product['product_image']; ?>',
+ '<?php echo $product['total_sales']; ?>',
+ '<?php echo addslashes($product['base_name']); ?>',
+ '<?php echo addslashes($product['flavor_name']); ?>',
+ '<?php echo addslashes($product['topping_name']); ?>'
+ )">Order</button>
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
@@ -373,7 +422,6 @@ LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
             var productImageInput = document.getElementById("modalProductImage");
             var priceDisplay = document.getElementById("modalPrice");
             var soldDisplay = document.getElementById("modalSold");
-            var addonsContainer = document.getElementById("addonsContainer");
             productIdInput.value = productId;
             productNameInput.value = productName;
             document.getElementById("modalProductDescription").textContent = productDesc;
@@ -386,16 +434,6 @@ LEFT JOIN coffee_toppings ON coffee_products.toppings_id = coffee_toppings.id
             document.getElementById("drinkBasesDisplay").textContent = drinkBases;
             document.getElementById("flavorIdDisplay").textContent = flavorId;
             document.getElementById("toppingsIdDisplay").textContent = toppingsId;
-            addonsContainer.innerHTML = '';
-            <?php while ($addon = $addonResult->fetch_assoc()): ?>
-                var addonOption = document.createElement("div");
-                addonOption.innerHTML = `
- <input type="checkbox" name="addons[]" value="<?php echo $addon['id']; ?>" id="addon-<?php echo $addon['id']; ?>">
- <label for="addon-<?php echo $addon['id']; ?>"><?= $addon['addon_name'] ?></label>
- <p>₱<?= $addon['addon_price'] ?></p>
- `;
-                addonsContainer.appendChild(addonOption);
-            <?php endwhile; ?>
             overlay.style.display = "block";
             modal.style.display = "flex";
         }
