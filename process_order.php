@@ -56,7 +56,7 @@ if (!$cartItemsResult) {
 }
 $baseFlavor = '';
 $toppings = [];
-$totalPurchaseValue = 0; 
+$totalPurchaseValue = 0;
 $productIds = [];
 $orderQuantity = 0;
 $sizePrice = 0;
@@ -147,7 +147,7 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         }
     }
     if (!empty($flavorNames)) {
-        $baseFlavor = $flavorNames[0]; 
+        $baseFlavor = $flavorNames[0];
     }
     if (!empty($toppingNames)) {
         $toppings[] = implode(', ', $toppingNames);
@@ -184,13 +184,12 @@ $orderStmt->bind_param("idsssisdss", $userId, $totalPurchaseValue, $paymentMetho
 $orderStmt->execute();
 $orderStmt->close();
 
-// $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
-// $clearCartStmt = $conn->prepare($clearCartQuery);
-// $clearCartStmt->bind_param($types, ...$params);
-// $clearCartStmt->execute();
-// $clearCartStmt->close();
+$clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
+$clearCartStmt = $conn->prepare($clearCartQuery);
+$clearCartStmt->bind_param($types, ...$params);
+$clearCartStmt->execute();
+$clearCartStmt->close();
 
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);
 echo "<script>alert('Order placed successfully!'); window.location.href = 'order_history.php';</script>";
-?>

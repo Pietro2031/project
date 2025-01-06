@@ -85,7 +85,7 @@
                         if ($ingredientResult->num_rows > 0) {
                             while ($ingredient = $ingredientResult->fetch_assoc()) {
                                 $nameField = ($table == "coffee_flavors") ? "flavor_name" : "topping_name";
-                                $imgPath = $ingredient['img']; // Ensure this column exists in your database
+                                $imgPath = $ingredient['img']; 
                                 echo '<div class="ingredient-item" data-category="' . $category . '">
                                     <img src="' . $imgPath . '" alt="' . $ingredient[$nameField] . '">
                                     <span class="base-name">' . $ingredient[$nameField] . ' - ₱' . number_format($ingredient['price'], 2) . '</span>
