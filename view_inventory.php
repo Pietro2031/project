@@ -38,7 +38,6 @@ $totalFlavors = mysqli_fetch_assoc($totalFlavorsResult)['count'];
 $totalToppings = mysqli_fetch_assoc($totalToppingsResult)['count'];
 $totalCupSizes = mysqli_fetch_assoc($totalCupSizesResult)['count'];
 
-// Calculate the total number of pages
 $total_items = max($totalBases, $totalFlavors, $totalToppings, $totalCupSizes);
 $total_pages = ceil($total_items / $items_per_page);
 ?>
@@ -48,6 +47,9 @@ $total_pages = ceil($total_items / $items_per_page);
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">View Inventory</h3>
+                <div style="display: flex; gap: 5px;">
+                    <a href="?insert_inventory">Add Ingredients</a>
+                </div>
             </div>
             <div class="panel-body">
 

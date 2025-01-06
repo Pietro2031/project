@@ -106,6 +106,9 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['view_category'])) {
             include 'view_category.php';
         }
+        if (isset($_GET['insert_inventory'])) {
+            include 'insert_inventory.php';
+        }
 
 
 
