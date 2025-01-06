@@ -212,12 +212,13 @@
   justify-content: space-around;
 }
 .base-item img {
-  width: 100%;
-  height: auto;
-  max-height: 150px;
-  object-fit: cover;
+  /* width: 100%; */
+  /* height: auto; */
+  /* max-height: 150px; */
+  /* object-fit: contain; */
   /* margin-bottom: 10px; */
   border-radius: 8px;
+  aspect-ratio: 1/1;
 }
 .base-name {
   font-weight: bold;
