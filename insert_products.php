@@ -151,6 +151,7 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
 </script>
 <?php
 if (isset($_POST['submit'])) {
+    echo "<script>alert('test!');</script>";
     $name = $_POST['name'];
     $category_id = $_POST['category_id'];
     $base_id = $_POST['drink_bases'];
@@ -174,6 +175,5 @@ if (isset($_POST['submit'])) {
         echo "Error: " . mysqli_error($conn);
     }
 } else {
-    echo "<script>alert('test!'); window.location = 'admin.php?view_inventory';</script>";
 }
 ?>
