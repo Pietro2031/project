@@ -45,6 +45,7 @@ if (isset($_POST['delete_selected'])) {
                 <div style="display: flex; gap: 5px;">
                     <a href="?insert_products">Add Products</a>
                     <a href="?view_inventory">Inventory</a>
+                    <a href="?view_category">Category</a>
                 </div>
             </div>
             <div class="panel-body">

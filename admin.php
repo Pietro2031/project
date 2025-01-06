@@ -70,8 +70,8 @@ if (!isset($_SESSION['admin_username'])) {
                                             echo 'class="active"';
                                         } ?>><i class="fas fa-chart-line"></i> Reports</a></li>
                 <li><a href="?view_inventory" <?php if (isset($_GET['view_inventory'])) {
-                                                echo 'class="active"';
-                                            } ?>><i class="fas fa-th-list"></i> Inventory</a></li>
+                                                    echo 'class="active"';
+                                                } ?>><i class="fas fa-th-list"></i> Inventory</a></li>
                 <li><a href="#"><i class="fas fa-receipt"></i> Payment History</a></li>
                 <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
             </ul>
@@ -102,6 +102,9 @@ if (!isset($_SESSION['admin_username'])) {
         }
         if (isset($_GET['item_type'])) {
             include 'edit_inventory.php';
+        }
+        if (isset($_GET['view_category'])) {
+            include 'view_category.php';
         }
 
 
