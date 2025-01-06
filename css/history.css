@@ -176,3 +176,6 @@ div#pagination-container_category {
 section.center {
   margin-top: 130px;
 }
+table {
+  font-size: 12px;
+}

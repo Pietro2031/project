@@ -56,16 +56,25 @@ if (!$cartItemsResult) {
 }
 $baseFlavor = '';
 $toppings = [];
-$totalPurchaseValue = 0;
+$totalPurchaseValue = 0; 
+$productIds = [];
+$orderQuantity = 0;
+$sizePrice = 0;
+$addonPrice = 0;
+$sizeNames = [];
 while ($row = $cartItemsResult->fetch_assoc()) {
     $productId = $row['product_id'];
+    $productIds[] = $productId;
     $quantity = $row['quantity'];
+    $orderQuantity += $quantity;
     $size = $row['size'];
+    $sizeNames[] = $size;
     $addonIds = json_decode($row['addon_ids'], true);
     $addonIds = is_array($addonIds) ? $addonIds : [];
     $productPrice = floatval($row['product_price']);
     $drinkBaseId = $row['drink_bases'];
     $totalPurchaseValue += $productPrice * $quantity;
+    $sizePrice += $productPrice * $quantity;
 
     // Deduct the quantity of selected cup size from cup_size table
     if ($size === 'M' || $size === 'L') {
@@ -98,7 +107,9 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $baseStmt->execute();
         $baseResult = $baseStmt->get_result();
         if ($baseRow = $baseResult->fetch_assoc()) {
-            $totalPurchaseValue += floatval($baseRow['price']) * $quantity;
+            $basePrice = floatval($baseRow['price']) * $quantity;
+            $totalPurchaseValue += $basePrice;
+            $addonPrice += $basePrice;
             $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - ? WHERE id = ?";
             $updateBaseStmt = $conn->prepare($updateBaseQuery);
             $updateBaseStmt->bind_param("ii", $quantity, $drinkBaseId);
@@ -136,7 +147,7 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         }
     }
     if (!empty($flavorNames)) {
-        $baseFlavor = $flavorNames[0];
+        $baseFlavor = $flavorNames[0]; 
     }
     if (!empty($toppingNames)) {
         $toppings[] = implode(', ', $toppingNames);
@@ -161,22 +172,25 @@ while ($row = $cartItemsResult->fetch_assoc()) {
 }
 
 $orderQuery = "
-INSERT INTO `orders` (user_id, total_amount, payment_method, flavor, toppings, created_at) 
-VALUES (?, ?, ?, ?, ?, NOW())
+INSERT INTO `orders` (user_id, total_amount, payment_method, flavor, toppings, order_quantity, product_ids, size_price, addon_price, size) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ";
 $orderStmt = $conn->prepare($orderQuery);
+$productIdsStr = implode(',', $productIds);
 $baseFlavor = !empty($baseFlavor) ? $baseFlavor : NULL;
 $toppingsStr = !empty($toppings) ? implode(', ', $toppings) : NULL;
-$orderStmt->bind_param("idsss", $userId, $totalPurchaseValue, $paymentMethod, $baseFlavor, $toppingsStr);
+$sizeNamesStr = implode(',', $sizeNames);
+$orderStmt->bind_param("idsssisdss", $userId, $totalPurchaseValue, $paymentMethod, $baseFlavor, $toppingsStr, $orderQuantity, $productIdsStr, $sizePrice, $addonPrice, $sizeNamesStr);
 $orderStmt->execute();
 $orderStmt->close();
 
-$clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
-$clearCartStmt = $conn->prepare($clearCartQuery);
-$clearCartStmt->bind_param($types, ...$params);
-$clearCartStmt->execute();
-$clearCartStmt->close();
+// $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
+// $clearCartStmt = $conn->prepare($clearCartQuery);
+// $clearCartStmt->bind_param($types, ...$params);
+// $clearCartStmt->execute();
+// $clearCartStmt->close();
 
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);
 echo "<script>alert('Order placed successfully!'); window.location.href = 'order_history.php';</script>";
+?>

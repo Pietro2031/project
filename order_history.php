@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <?php
 include("connection.php");
-
 session_start();
+
+// Get user ID based on the logged-in username
+$stmt = $conn->prepare("SELECT id FROM user_account WHERE userName = ?");
+if ($stmt) {
+    $stmt->bind_param("s", $_SESSION['username']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $userId = $result->fetch_assoc()['id'];
+    }
+    $stmt->close();
+}
 ?>
 
 <head>
@@ -129,36 +139,34 @@ session_start();
     $items_per_page = 4;
     $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $offset = ($current_page - 1) * $items_per_page;
-
     $total_items_query = "
         SELECT COUNT(DISTINCT orders.id) AS count 
-        FROM coffee_products 
-        JOIN orders ON FIND_IN_SET(coffee_products.id, orders.id) 
+        FROM orders 
         WHERE orders.user_id = '$userId'";
     $total_items_result = mysqli_query($conn, $total_items_query);
     $total_items = mysqli_fetch_assoc($total_items_result)['count'];
-
     $total_pages = ceil($total_items / $items_per_page);
 
-    $get_pro = "
+    $get_orders = "
     SELECT 
-        orders.id AS order_id, 
-        orders.order_date, 
-        orders.order_quantity, 
+        orders.id AS order_id,
+        orders.order_date,
+        orders.order_quantity,
         orders.status,
+        orders.size,
         GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
         GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
-        SUM(payment.amount_paid) AS amount_paid,
-        payment.payment_mode
+        SUM(orders.total_amount) AS amount_paid,
+        orders.payment_method
     FROM orders
-    JOIN coffee_products ON coffee_products.id = orders.product_ids
-    JOIN payment ON orders.id = payment.order_id
+    LEFT JOIN coffee_products ON FIND_IN_SET(coffee_products.id, orders.product_ids) > 0
+    LEFT JOIN payment ON orders.id = payment.order_id
     WHERE orders.user_id = '$userId'
-    GROUP BY orders.id, orders.order_date, orders.order_quantity, orders.status, payment.payment_mode
+    GROUP BY orders.id, orders.order_date, orders.order_quantity, orders.status, payment.payment_mode, orders.size
     ORDER BY orders.order_date DESC
     LIMIT $offset, $items_per_page";
-    $run_pro = mysqli_query($conn, $get_pro);
-    // echo $get_pro;
+
+    $run_orders = mysqli_query($conn, $get_orders);
     ?>
 
     <section class="center">
@@ -166,70 +174,69 @@ session_start();
             <h1>Purchase History</h1>
             <div class="cart-container">
                 <table class="itemtable">
-    <thead>
-        <tr>
-            <th>Ref #</th>
-            <th>Product</th>
-            <th>Quantity</th>  
-            <th>Details</th>
-            <th>Order Date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php while ($row_pro = mysqli_fetch_array($run_pro)) : ?>
-            <?php
-            $order_date = date('F j, Y', strtotime($row_pro['order_date']));
-            $price = "₱ " . $row_pro['amount_paid'];
-            $status_text = [
-                "-1" => "Processing",
-                "0" => "Placed",
-                "1" => "Received",
-                "2" => "Pending Return",
-                "3" => "Return Approved",
-                "4" => "Request Rejected"
-            ][$row_pro['status']];
-            ?>
-            <tr>
-                <td><?= $row_pro['order_id'] ?></td>
-                <td>
-                    <div>
-                        <?php
-                        $names = explode(', ', $row_pro['item_names']);
-                        $images = explode(', ', $row_pro['item_images']);
-                        foreach ($images as $index => $image) :
-                        ?>
-                            <div>
-                                <img src="<?= $image ?>" alt="<?= $names[$index] ?>">
-                                <?= $names[$index] ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </td>
-                <td><?= $row_pro['order_quantity'] ?></td> 
-                <td><?= $price ?> - <?= $row_pro['payment_mode'] ?></td>
-                <td><?= $order_date ?></td>
-                <td><?= $status_text ?></td>
-            </tr>
-        <?php endwhile; ?>
-    </tbody>
-</table>
-
+                    <thead>
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Size</th>
+                            <th>Details</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = mysqli_fetch_array($run_orders)) : ?>
+                            <?php
+                            $order_date = date('F j, Y', strtotime($row['order_date']));
+                            $price = "₱ " . $row['amount_paid'];
+                            $status_text = [
+                                "-1" => "Processing",
+                                "0" => "Placed",
+                                "1" => "Received",
+                                "2" => "Pending Return",
+                                "3" => "Return Approved",
+                                "4" => "Request Rejected"
+                            ][$row['status']];
+                            ?>
+                            <tr>
+                                <td><?= $row['order_id'] ?></td>
+                                <td>
+                                    <div >
+                                        <?php
+                                        $names = explode(', ', $row['item_names']);
+                                        $images = explode(', ', $row['item_images']);
+                                        foreach ($images as $index => $image) :
+                                        ?>
+                                            <div style=" display: flex; flex-direction: row; align-items: center; ">
+                                                <img src="<?= $image ?>" alt="<?= $names[$index] ?>">
+                                                <?= $names[$index] ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                                <td><?= $row['order_quantity'] ?></td>
+                                <td><?= $row['size'] ?></td>
+                                <td><?= $price ?> - <?= $row['payment_method'] ?></td>
+                                <td><?= $order_date ?></td>
+                                <td><?= $status_text ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
 
             <div id="pagination-container_category" class="pageno">
                 <?php if ($current_page > 1) : ?>
-                    <div><a href="history.php?page=<?= $current_page - 1 ?>">&laquo; Previous</a></div>
+                    <div><a href="order_history.php?page=<?= $current_page - 1 ?>">&laquo; Previous</a></div>
                 <?php endif; ?>
-
                 <?php for ($page = 1; $page <= $total_pages; $page++) : ?>
                     <div class="<?= $page == $current_page ? 'active' : '' ?>">
-                        <a href="history.php?page=<?= $page ?>"><?= $page ?></a>
+                        <a href="order_history.php?page=<?= $page ?>"><?= $page ?></a>
                     </div>
                 <?php endfor; ?>
-
                 <?php if ($current_page < $total_pages) : ?>
-                    <div><a href="history.php?page=<?= $current_page + 1 ?>">Next &raquo;</a></div>
+                    <div><a href="order_history.php?page=<?= $current_page + 1 ?>">Next &raquo;</a></div>
                 <?php endif; ?>
             </div>
         </div>
@@ -251,51 +258,6 @@ session_start();
             <button onclick="closeReturnModal()">Cancel</button>
         </div>
     </div>
-
-    <script>
-        function recivedorder(order_id) {
-            if (confirm("Are you sure you have received the order?")) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "update_order_status.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        alert(xhr.responseText);
-                        location.reload();
-                    }
-                };
-                xhr.send("action=received&order_id=" + order_id);
-            }
-        }
-
-        function returnOrder(order_id) {
-            document.getElementById('returnModal').style.display = 'flex';
-            currentOrderId = order_id;
-        }
-
-        function closeReturnModal() {
-            document.getElementById('returnModal').style.display = 'none';
-        }
-
-        function submitReturnOrder() {
-            const reason = document.getElementById('returnReason').value;
-            if (reason) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "update_order_status.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        alert(xhr.responseText);
-                        location.reload();
-                    }
-                };
-                xhr.send("action=return&order_id=" + currentOrderId + "&reason=" + encodeURIComponent(reason));
-            } else {
-                alert("Please select a reason for the return.");
-            }
-        }
-    </script>
-
 </body>
 
 </html>
