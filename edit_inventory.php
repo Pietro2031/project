@@ -79,9 +79,9 @@ if (isset($_POST['submit'])) {
 }
 if ($item_type == 'edit_base') {
     $item_name = $item['base_name'];
-} elseif ($item_type == 'edit_flavors') {
+} elseif ($item_type == 'edit_flavor') {
     $item_name = $item['flavor_name'];
-} elseif ($item_type == 'edit_toppings') {
+} elseif ($item_type == 'edit_topping') {
     $item_name = $item['topping_name'];
 } elseif ($item_type == 'edit_cup_size') {
     $item_name = $item['size'];
