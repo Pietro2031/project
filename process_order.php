@@ -1,24 +1,18 @@
 <?php
 session_start();
 include('connection.php');
-
 if (!isset($_SESSION['username'])) {
     die("Error: You must be logged in to place an order.");
 }
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Error: Invalid request method.");
 }
-
 $username = $_SESSION['username'];
 $totalPurchaseValue = isset($_SESSION['curenttotal']) ? floatval($_SESSION['curenttotal']) : 0;
 $paymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] : '';
-
 if (!$paymentMethod) {
     die("Error: Payment method is required.");
 }
-
-// Fetch user information
 $userQuery = "SELECT id FROM user_account WHERE username = ?";
 $userStmt = $conn->prepare($userQuery);
 $userStmt->bind_param("s", $username);
@@ -30,25 +24,20 @@ if ($userResult->num_rows === 0) {
 $user = $userResult->fetch_assoc();
 $userId = $user['id'];
 $userStmt->close();
-
-// Check if selected items are available
 if (!isset($_SESSION['selectedItems']) || !is_array($_SESSION['selectedItems']) || empty($_SESSION['selectedItems'])) {
     die("Error: No items selected for purchase.");
 }
-
 $selectedItems = $_SESSION['selectedItems'];
 $placeholders = implode(',', array_fill(0, count($selectedItems), '?'));
-
-// Fetch cart items
 $getCartItemsQuery = "
 SELECT 
-    cart.id AS cart_id, 
-    cart.product_id, 
-    cart.quantity, 
-    cart.size, 
-    cart.addons AS addon_ids,
-    coffee_products.price AS product_price,
-    coffee_products.drink_bases
+cart.id AS cart_id, 
+cart.product_id, 
+cart.quantity, 
+cart.size, 
+cart.addons AS addon_ids,
+coffee_products.price AS product_price,
+coffee_products.drink_bases
 FROM cart
 INNER JOIN coffee_products ON cart.product_id = coffee_products.id
 WHERE cart.user_id = ? AND cart.id IN ($placeholders)
@@ -65,12 +54,9 @@ $cartItemsResult = $stmt->get_result();
 if (!$cartItemsResult) {
     die("Error retrieving selected items.");
 }
-
-// Initialize variables
 $baseFlavor = '';
 $toppings = [];
-$totalPurchaseValue = 0; // Reset total calculation
-
+$totalPurchaseValue = 0;
 while ($row = $cartItemsResult->fetch_assoc()) {
     $productId = $row['product_id'];
     $quantity = $row['quantity'];
@@ -79,11 +65,32 @@ while ($row = $cartItemsResult->fetch_assoc()) {
     $addonIds = is_array($addonIds) ? $addonIds : [];
     $productPrice = floatval($row['product_price']);
     $drinkBaseId = $row['drink_bases'];
-
-    // Add base price to total
     $totalPurchaseValue += $productPrice * $quantity;
 
-    // Get the drink base price and deduct quantity
+    // Deduct the quantity of selected cup size from cup_size table
+    if ($size === 'M' || $size === 'L') {
+        $cupSizeQuery = "SELECT quantity FROM cup_size WHERE size = ?";
+        $cupSizeStmt = $conn->prepare($cupSizeQuery);
+        $cupSizeStmt->bind_param("s", $size);
+        $cupSizeStmt->execute();
+        $cupSizeResult = $cupSizeStmt->get_result();
+        if ($cupSizeRow = $cupSizeResult->fetch_assoc()) {
+            $currentQuantity = $cupSizeRow['quantity'];
+            if ($currentQuantity >= $quantity) {
+                // Deduct the quantity
+                $newQuantity = $currentQuantity - $quantity;
+                $updateCupSizeQuery = "UPDATE cup_size SET quantity = ? WHERE size = ?";
+                $updateCupSizeStmt = $conn->prepare($updateCupSizeQuery);
+                $updateCupSizeStmt->bind_param("is", $newQuantity, $size);
+                $updateCupSizeStmt->execute();
+                $updateCupSizeStmt->close();
+            } else {
+                die("Error: Insufficient stock for the selected cup size.");
+            }
+        }
+        $cupSizeStmt->close();
+    }
+
     if ($drinkBaseId) {
         $baseQuery = "SELECT price FROM coffee_base WHERE id = ?";
         $baseStmt = $conn->prepare($baseQuery);
@@ -92,7 +99,6 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $baseResult = $baseStmt->get_result();
         if ($baseRow = $baseResult->fetch_assoc()) {
             $totalPurchaseValue += floatval($baseRow['price']) * $quantity;
-            // Deduct the quantity of the selected base
             $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - ? WHERE id = ?";
             $updateBaseStmt = $conn->prepare($updateBaseQuery);
             $updateBaseStmt->bind_param("ii", $quantity, $drinkBaseId);
@@ -102,14 +108,11 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $baseStmt->close();
     }
 
-    // Process add-ons (flavors and toppings)
     $flavorNames = [];
     $toppingNames = [];
-
     foreach ($addonIds as $addon) {
         $addonType = explode('-', $addon)[0];
         $addonId = intval(explode('-', $addon)[1]);
-
         if ($addonType === 'flavor') {
             $flavorQuery = "SELECT flavor_name FROM coffee_flavors WHERE id = ?";
             $flavorStmt = $conn->prepare($flavorQuery);
@@ -132,18 +135,12 @@ while ($row = $cartItemsResult->fetch_assoc()) {
             $toppingStmt->close();
         }
     }
-
-    // Assuming the first flavor is the base flavor
     if (!empty($flavorNames)) {
-        $baseFlavor = $flavorNames[0]; 
+        $baseFlavor = $flavorNames[0];
     }
-
-    // Add toppings to the array
     if (!empty($toppingNames)) {
         $toppings[] = implode(', ', $toppingNames);
     }
-
-    // Deduct quantities for each add-on
     foreach ($addonIds as $addonId) {
         $addonType = explode('-', $addonId)[0];
         $addonId = intval(explode('-', $addonId)[1]);
@@ -163,7 +160,6 @@ while ($row = $cartItemsResult->fetch_assoc()) {
     }
 }
 
-// Insert order into the database
 $orderQuery = "
 INSERT INTO `orders` (user_id, total_amount, payment_method, flavor, toppings, created_at) 
 VALUES (?, ?, ?, ?, ?, NOW())
@@ -175,16 +171,12 @@ $orderStmt->bind_param("idsss", $userId, $totalPurchaseValue, $paymentMethod, $b
 $orderStmt->execute();
 $orderStmt->close();
 
-// Clear the cart
 $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
 $clearCartStmt = $conn->prepare($clearCartQuery);
 $clearCartStmt->bind_param($types, ...$params);
 $clearCartStmt->execute();
 $clearCartStmt->close();
 
-// Clean session data
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);
-
 echo "<script>alert('Order placed successfully!'); window.location.href = 'order_history.php';</script>";
-?>
