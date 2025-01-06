@@ -56,7 +56,7 @@ if (isset($_POST['delete_selected'])) {
                             <option value="">All Categories</option>
                             <?php while ($category_row = mysqli_fetch_assoc($categories_result)) : ?>
                                 <option value="<?php echo $category_row['id']; ?>" <?php if ($selected_category == $category_row['id']) echo 'selected'; ?>>
-                                    <?php echo $category_row['category_name']; ?> <!-- Display category name from category table -->
+                                    <?php echo $category_row['category_name']; ?>
                                 </option>
                             <?php endwhile; ?>
                         </select>
