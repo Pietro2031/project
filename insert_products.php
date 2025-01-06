@@ -173,5 +173,7 @@ if (isset($_POST['submit'])) {
     } else {
         echo "Error: " . mysqli_error($conn);
     }
+} else {
+    echo "<script>alert('test!'); window.location = 'admin.php?view_inventory';</script>";
 }
 ?>
