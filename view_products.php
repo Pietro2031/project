@@ -1,5 +1,6 @@
 <?php
-$categories_query = "SELECT DISTINCT category_id FROM coffee_products";
+// Fetch category names from the category table
+$categories_query = "SELECT DISTINCT coffee_category.id, coffee_category.category_name FROM coffee_category JOIN coffee_products ON coffee_category.id = coffee_products.category_id";
 $categories_result = mysqli_query($conn, $categories_query);
 
 $selected_category = isset($_GET['category_id']) ? $_GET['category_id'] : '';
@@ -12,7 +13,7 @@ $offset = ($current_page - 1) * $items_per_page;
 
 $where_clause = '';
 if ($selected_category) {
-    $where_clause = "WHERE category_id = '" . mysqli_real_escape_string($conn, $selected_category) . "'";
+    $where_clause = "WHERE coffee_products.category_id = '" . mysqli_real_escape_string($conn, $selected_category) . "'";
 }
 
 $total_items_query = "SELECT COUNT(*) AS count FROM coffee_products $where_clause";
@@ -54,8 +55,8 @@ if (isset($_POST['delete_selected'])) {
                         <select name="category_id" id="category" class="form-control" onchange="this.form.submit()">
                             <option value="">All Categories</option>
                             <?php while ($category_row = mysqli_fetch_assoc($categories_result)) : ?>
-                                <option value="<?php echo $category_row['category_id']; ?>" <?php if ($selected_category == $category_row['category_id']) echo 'selected'; ?>>
-                                    <?php echo $category_row['category_id']; ?>
+                                <option value="<?php echo $category_row['id']; ?>" <?php if ($selected_category == $category_row['id']) echo 'selected'; ?>>
+                                    <?php echo $category_row['category_name']; ?> <!-- Display category name from category table -->
                                 </option>
                             <?php endwhile; ?>
                         </select>
