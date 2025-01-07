@@ -66,6 +66,9 @@ if (!isset($_SESSION['admin_username'])) {
                 <li><a href="?view_products" <?php if (isset($_GET['view_products']) || isset($_GET['insert_products']) || isset($_GET['edit_product'])) {
                                                     echo 'class="active"';
                                                 } ?>><i class="fas fa-box-open"></i> Products</a></li>
+                <li><a href="?POS" <?php if (isset($_GET['poit_of_sale'])) {
+                                        echo 'class="active"';
+                                    } ?>><i class="fas fa-box-open"></i> Point Of Sale</a></li>
                 <li><a href="?report" <?php if (isset($_GET['report'])) {
                                             echo 'class="active"';
                                         } ?>><i class="fas fa-chart-line"></i> Reports</a></li>
@@ -108,6 +111,9 @@ if (!isset($_SESSION['admin_username'])) {
         }
         if (isset($_GET['insert_inventory'])) {
             include 'insert_inventory.php';
+        }
+        if (isset($_GET['POS'])) {
+            include 'point_of_sale.php';
         }
 
 

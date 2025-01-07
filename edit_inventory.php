@@ -2,16 +2,13 @@
 
 include 'connection.php';
 
-
 $item_id = isset($_GET['id']) ? $_GET['id'] : '';
 $item_type = isset($_GET['item_type']) ? $_GET['item_type'] : '';
-
 
 if (!$item_id || !$item_type) {
     echo "<script>window.location = 'admin.php?view_inventory';</script>";
     exit();
 }
-
 
 switch ($item_type) {
     case 'edit_base':
@@ -31,38 +28,34 @@ switch ($item_type) {
         exit();
 }
 
-
 $result = mysqli_query($conn, $query);
 $item = mysqli_fetch_assoc($result);
-
 
 if (!$item) {
     echo "<script>window.location = 'admin.php?view_inventory';</script>";
     exit();
 }
 
-
 if (isset($_POST['submit'])) {
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $price = mysqli_real_escape_string($conn, $_POST['price']);
     $quantity = mysqli_real_escape_string($conn, $_POST['quantity']);
+
     $image = $_FILES['ItemImg']['name'] ? $_FILES['ItemImg']['name'] : $item['img'];
+    $target = "uploads/" . basename($image);
 
-
-    if ($_FILES['ItemImg']['error'] == 0) {
-        $target = "uploads/" . basename($image);
+    if ($_FILES['ItemImg']['error'] == 0 && $_FILES['ItemImg']['name']) {
         move_uploaded_file($_FILES['ItemImg']['tmp_name'], $target);
     }
-
 
     switch ($item_type) {
         case 'edit_base':
             $updateQuery = "UPDATE coffee_base SET base_name = '$name', price = '$price', quantity = '$quantity', img = '$target' WHERE id = $item_id";
             break;
-        case 'edit_flavors':
+        case 'edit_flavor':
             $updateQuery = "UPDATE coffee_flavors SET flavor_name = '$name', price = '$price', quantity = '$quantity', img = '$target' WHERE id = $item_id";
             break;
-        case 'edit_toppings':
+        case 'edit_topping':
             $updateQuery = "UPDATE coffee_toppings SET topping_name = '$name', price = '$price', quantity = '$quantity', img = '$target' WHERE id = $item_id";
             break;
         case 'edit_cup_size':
@@ -70,13 +63,14 @@ if (isset($_POST['submit'])) {
             break;
     }
 
-
     if (mysqli_query($conn, $updateQuery)) {
         echo "<script>alert('Item updated successfully!'); window.location = 'admin.php?view_inventory';</script>";
     } else {
         echo "<script>alert('Error updating item!');</script>";
     }
 }
+
+$item_name = '';
 if ($item_type == 'edit_base') {
     $item_name = $item['base_name'];
 } elseif ($item_type == 'edit_flavor') {
@@ -85,9 +79,8 @@ if ($item_type == 'edit_base') {
     $item_name = $item['topping_name'];
 } elseif ($item_type == 'edit_cup_size') {
     $item_name = $item['size'];
-} else {
-    $item_name = '';
 }
+
 ?>
 
 <div class="row">

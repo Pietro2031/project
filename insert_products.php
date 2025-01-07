@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include 'connection.php';
 $categoryQuery = "SELECT id, category_name FROM coffee_category";
 $categoryResult = mysqli_query($conn, $categoryQuery);
@@ -188,7 +191,7 @@ if (isset($_POST['submit'])) {
     error_log("SQL Query: " . $insertQuery);
 
     if (mysqli_query($conn, $insertQuery)) {
-        echo "<script>alert('Product added successfully!'); window.location = 'admin.php?view_inventory';</script>";
+        echo "<script>alert('Product added successfully!'); window.location = 'admin.php?view_products';</script>";
     } else {
         error_log("Error executing query: " . mysqli_error($conn));
         echo "<script>alert('An error occurred while adding the product.');</script>";

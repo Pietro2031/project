@@ -1,28 +1,22 @@
 <?php
-// Connect to the database
 include 'connection.php';
 
-// Get selected type from GET request
 $selected_type = isset($_GET['item_types']) ? $_GET['item_types'] : '';
 
-// Items per page and current page setup
 $items_per_page = 8;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
-// Queries for fetching items for each table (without category filter)
 $baseQuery = "SELECT * FROM coffee_base LIMIT $offset, $items_per_page";
 $flavorQuery = "SELECT * FROM coffee_flavors LIMIT $offset, $items_per_page";
 $toppingQuery = "SELECT * FROM coffee_toppings LIMIT $offset, $items_per_page";
 $cupSizeQuery = "SELECT * FROM cup_size LIMIT $offset, $items_per_page";
 
-// Fetch the data for each table
 $baseResult = mysqli_query($conn, $baseQuery);
 $flavorResult = mysqli_query($conn, $flavorQuery);
 $toppingResult = mysqli_query($conn, $toppingQuery);
 $cupSizeResult = mysqli_query($conn, $cupSizeQuery);
 
-// Fetch total count of records for pagination
 $totalBasesQuery = "SELECT COUNT(*) AS count FROM coffee_base";
 $totalFlavorsQuery = "SELECT COUNT(*) AS count FROM coffee_flavors";
 $totalToppingsQuery = "SELECT COUNT(*) AS count FROM coffee_toppings";
@@ -67,7 +61,6 @@ $total_pages = ceil($total_items / $items_per_page);
                     </div>
                 </form>
 
-                <!-- Display Inventory Table -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
                         <thead>
@@ -81,7 +74,6 @@ $total_pages = ceil($total_items / $items_per_page);
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Coffee Base Items -->
                             <?php if ($selected_type == 'coffee_base' || !$selected_type) {
                                 $i = $offset;
                                 while ($row_base = mysqli_fetch_array($baseResult)) {
@@ -103,7 +95,6 @@ $total_pages = ceil($total_items / $items_per_page);
                             <?php }
                             } ?>
 
-                            <!-- Coffee Flavor Items -->
                             <?php if ($selected_type == 'coffee_flavors' || !$selected_type) {
                                 $i = $offset;
                                 while ($row_flavor = mysqli_fetch_array($flavorResult)) {
@@ -125,7 +116,6 @@ $total_pages = ceil($total_items / $items_per_page);
                             <?php }
                             } ?>
 
-                            <!-- Coffee Topping Items -->
                             <?php if ($selected_type == 'coffee_toppings' || !$selected_type) {
                                 $i = $offset;
                                 while ($row_topping = mysqli_fetch_array($toppingResult)) {
@@ -147,7 +137,6 @@ $total_pages = ceil($total_items / $items_per_page);
                             <?php }
                             } ?>
 
-                            <!-- Cup Size Items -->
                             <?php if ($selected_type == 'cup_size' || !$selected_type) {
                                 $i = $offset;
                                 while ($row_cup_size = mysqli_fetch_array($cupSizeResult)) {
