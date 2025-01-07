@@ -92,7 +92,6 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
             <button type="submit">Filter</button>
         </form>
 
-        <!-- Payment History Table -->
         <div class="payment-history-table">
             <table>
                 <thead>

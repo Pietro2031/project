@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 06, 2025 at 11:43 AM
+-- Generation Time: Jan 07, 2025 at 02:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -95,8 +95,8 @@ CREATE TABLE `cart` (
 --
 
 INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `size`, `addons`, `created_at`, `updated_at`) VALUES
-(89, 2, 1, 1, 'L', '[\"flavor-1\",\"topping-1\",\"topping-4\"]', '2025-01-06 09:21:36', '2025-01-06 09:21:36'),
-(90, 2, 3, 1, 'S', '[\"flavor-1\",\"topping-1\",\"topping-3\"]', '2025-01-06 09:21:42', '2025-01-06 09:21:42');
+(94, 2, 3, 2, 'L', '[\"flavor-1\"]', '2025-01-07 04:41:55', '2025-01-07 06:59:55'),
+(95, 2, 1, 1, 'L', '[\"flavor-2\",\"flavor-3\",\"topping-2\",\"topping-3\",\"topping-4\"]', '2025-01-07 04:42:26', '2025-01-07 04:42:26');
 
 -- --------------------------------------------------------
 
@@ -118,10 +118,11 @@ CREATE TABLE `coffee_base` (
 --
 
 INSERT INTO `coffee_base` (`id`, `base_name`, `quantity`, `img`, `price`) VALUES
-(1, 'Espresso', 998, 'img/espresso.png', 70.00),
-(2, 'Cold Brew', 999, 'img/cold_brew.png', 80.00),
+(1, 'Espresso', 976, 'img/espresso.png', 70.00),
+(2, 'Cold Brew', 998, 'img/cold_brew.png', 80.00),
 (3, 'Blended Latte', 999, 'img/blended_latte.png', 40.00),
-(4, 'French Press', 980, 'img/cold_brew.png', 50.00);
+(4, 'French Press', 961, 'img/cold_brew.png', 50.00),
+(5, 'Test', 9, 'uploads/espresso.png', 0.00);
 
 -- --------------------------------------------------------
 
@@ -142,7 +143,7 @@ CREATE TABLE `coffee_category` (
 --
 
 INSERT INTO `coffee_category` (`id`, `category_name`, `category_image`, `created_at`) VALUES
-(1, 'Espresso', 'uploads/category/espresso.png', '2024-12-31 06:17:06'),
+(1, 'Espresso', 'uploads/category/cup.png', '2024-12-31 06:17:06'),
 (2, 'Latte', 'uploads/category/espresso.png', '2024-12-31 06:17:06'),
 (3, 'Cappuccino', 'uploads/category/espresso.png', '2024-12-31 06:17:06'),
 (4, 'Americano', 'uploads/category/espresso.png', '2024-12-31 06:17:06');
@@ -167,9 +168,9 @@ CREATE TABLE `coffee_flavors` (
 --
 
 INSERT INTO `coffee_flavors` (`id`, `flavor_name`, `quantity`, `price`, `img`) VALUES
-(1, 'Vanilla', 979, 10.00, 'img/flavor_vanilla.png'),
-(2, 'Caramel', 0, 15.00, 'img/flavor_caramel.png'),
-(3, 'Hazelnut', 999, 20.00, 'img/flavor_hazelnut.png');
+(1, 'Vanilla', 972, 10.00, 'uploads/flavor_vanilla.png'),
+(2, 'Caramel', -7, 15.00, 'img/flavor_caramel.png'),
+(3, 'Hazelnut', 984, 20.00, 'img/flavor_hazelnut.png');
 
 -- --------------------------------------------------------
 
@@ -196,7 +197,7 @@ CREATE TABLE `coffee_products` (
 --
 
 INSERT INTO `coffee_products` (`id`, `product_name`, `category_id`, `product_image`, `product_description`, `price`, `total_sales`, `drink_bases`, `flavor_id`, `toppings_id`) VALUES
-(1, 'Cold Brew', 1, 'uploads/cold_brew.webp', 'A refreshing cold brew coffee with smooth and bold flavors.', 80.50, 73, 4, 1, 3),
+(1, 'Cold Brew', 1, 'uploads/iced_americano.webp', 'A refreshing cold brew coffee with smooth and bold flavors.', 80.50, 73, 4, 1, 3),
 (2, 'Pumpkin Spice Cream', 1, 'img/americano.webp', 'A creamy, pumpkin spice-infused beverage perfect for the fall season.', 125.25, 23, 2, 1, 3),
 (3, 'Salted Caramel Cold Brew', 1, 'img/Salted Caramel Cold Brew.webp', 'A delicious cold brew with a hint of salted caramel for a sweet and savory experience.', 120.00, 8, 1, 2, 3),
 (4, 'Vanilla Sweet Cream', 1, 'img/Vanilla Sweet Cream.webp', 'A rich, smooth vanilla cream added to cold brew coffee for a sweet indulgence.', 100.00, 9, 1, 1, 3),
@@ -209,7 +210,8 @@ INSERT INTO `coffee_products` (`id`, `product_name`, `category_id`, `product_ima
 (11, 'Iced Latte', 1, 'img/iced_latte.webp', 'A chilled version of the classic latte, served over ice for a refreshing treat.', 110.00, 0, 1, 1, 3),
 (12, 'Iced Americano', 3, 'img/iced_americano.webp', 'A refreshing americano served over ice, perfect for hot weather.', 85.00, 0, 1, 1, 3),
 (13, 'Blended Latte', 2, 'img/blended_latte.webp', 'A creamy and smooth latte blended with ice, creating a rich and frothy drink.', 125.00, 4, 1, 1, 2),
-(19, '33', 1, 'uploads/ice.png', '', 3.00, 0, 2, 1, 2);
+(21, 'dsad', 1, 'uploads/almond.png', '', 0.00, 0, 3, 2, 4),
+(22, 'dsadasdas', 3, 'uploads/Espresso.webp', '', 11.00, 0, 2, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -231,10 +233,10 @@ CREATE TABLE `coffee_toppings` (
 --
 
 INSERT INTO `coffee_toppings` (`id`, `topping_name`, `quantity`, `price`, `img`) VALUES
-(1, 'Whipped Cream', 996, 10.00, 'img/whip_cream.png'),
-(2, 'Cinnamon Powder', 982, 15.00, 'img/cinnamon_powder.png'),
-(3, 'Chocolate Drizzle', 998, 10.00, 'img/chocolate_drizzle.png'),
-(4, 'Caramel Drizzle', 997, 5.00, 'img/caramel_drizzle.png');
+(1, 'Whipped Cream', 993, 10.00, 'uploads/whip_cream.png'),
+(2, 'Cinnamon Powder', 985, 15.00, 'uploads/cinnamon_powder.png'),
+(3, 'Chocolate Drizzle', 982, 10.00, 'img/chocolate_drizzle.png'),
+(4, 'Caramel Drizzle', 978, 5.00, 'img/caramel_drizzle.png');
 
 -- --------------------------------------------------------
 
@@ -256,9 +258,9 @@ CREATE TABLE `cup_size` (
 --
 
 INSERT INTO `cup_size` (`id`, `size`, `quantity`, `price`, `img`) VALUES
-(1, 'S', 50, 0.00, 'img/cup.png'),
+(1, 'S', 999, 0.00, 'uploads/cup.png'),
 (2, 'M', 0, 10.00, 'uploads/cup.png'),
-(3, 'L', 55, 20.00, 'uploads/cup.png');
+(3, 'L', 17, 20.00, 'uploads/cup.png');
 
 -- --------------------------------------------------------
 
@@ -282,7 +284,8 @@ CREATE TABLE `custom_drink` (
 --
 
 INSERT INTO `custom_drink` (`id`, `customer_id`, `base`, `ingredients`, `total_price`, `payment_method`, `order_date`) VALUES
-(5, 0, '', 'Caramel, Chocolate Drizzle, Whipped Cream', 140.00, 'GCash', '2025-01-06 18:23:58');
+(5, 0, '', 'Caramel, Chocolate Drizzle, Whipped Cream', 140.00, 'GCash', '2025-01-06 18:23:58'),
+(6, 0, '', 'Hazelnut, Whipped Cream, Chocolate Drizzle, Caramel Drizzle', 195.00, 'Debit Card', '2025-01-07 13:52:34');
 
 -- --------------------------------------------------------
 
@@ -340,7 +343,7 @@ CREATE TABLE `orders` (
   `product_ids` text NOT NULL,
   `status` int(11) NOT NULL DEFAULT 0,
   `size` varchar(10) DEFAULT NULL,
-  `size_price` decimal(10,2) DEFAULT 0.00,
+  `base_price` decimal(10,2) DEFAULT 0.00,
   `addon_price` decimal(10,2) DEFAULT 0.00,
   `payment_method` varchar(255) NOT NULL,
   `flavor` varchar(255) DEFAULT NULL,
@@ -352,10 +355,21 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `order_date`, `total_amount`, `order_quantity`, `product_ids`, `status`, `size`, `size_price`, `addon_price`, `payment_method`, `flavor`, `toppings`, `created_at`) VALUES
-(122, 2, '2025-01-06 09:21:14', 130.50, 1, '1', 0, 'L', 80.50, 50.00, 'cash', 'Vanilla', 'Cinnamon Powder', '2025-01-06 09:21:14'),
-(123, 2, '2025-01-06 09:21:53', 320.50, 2, '1,3', 0, 'L,S', 200.50, 120.00, 'credit_card', 'Vanilla', 'Whipped Cream, Caramel Drizzle, Whipped Cream, Chocolate Drizzle', '2025-01-06 09:21:53'),
-(128, 2, '2025-01-06 10:20:47', 130.50, 1, '1', 0, 'L', 80.50, 50.00, 'cash', 'Vanilla', 'Whipped Cream, Caramel Drizzle', '2025-01-06 10:20:47');
+INSERT INTO `orders` (`id`, `user_id`, `order_date`, `total_amount`, `order_quantity`, `product_ids`, `status`, `size`, `base_price`, `addon_price`, `payment_method`, `flavor`, `toppings`, `created_at`) VALUES
+(161, 0, '2024-12-31 22:41:05', 155.00, 1, '3', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:41:05'),
+(162, 0, '2025-01-06 22:41:16', 115.50, 1, '1', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:41:16'),
+(163, 0, '2025-01-06 22:41:42', 465.00, 3, '3,3', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:41:42'),
+(164, 0, '2025-01-06 22:42:55', 240.00, 2, '12', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:42:55'),
+(165, 0, '2025-01-06 22:43:49', 112.00, 2, '22', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:43:49'),
+(166, 0, '2025-01-06 22:44:34', 290.00, 2, '4', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2024-12-29 22:44:34'),
+(167, 0, '2025-01-06 22:45:11', 185.25, 1, '2', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:45:11'),
+(168, 0, '2025-01-06 22:46:17', 305.00, 2, '3,5', 1, NULL, 0.00, 0.00, 'gcash', NULL, NULL, '2025-01-06 22:46:17'),
+(170, 0, '2025-01-06 22:49:54', 100.50, 1, '1', 1, NULL, 0.00, 0.00, 'admin', NULL, NULL, '2023-12-27 22:49:54'),
+(171, 0, '2025-01-06 22:54:57', 1441.00, 14, '6,4,5,8,7,11,12,21,22,13,21,8,8,8', 1, NULL, 0.00, 0.00, 'pay on conter', NULL, NULL, '2025-01-06 22:54:57'),
+(174, 2, '2025-01-07 07:10:56', 300.00, 2, '3', 1, 'L', 240.00, 20.00, 'cash', 'Vanilla', NULL, '2025-01-07 07:10:56'),
+(175, 2, '2024-12-27 07:28:26', 300.00, 2, '3', 2, 'L', 240.00, 20.00, 'cash', 'Vanilla', NULL, '2025-01-07 07:28:26'),
+(176, 0, '2024-12-25 04:42:28', 875.75, 5, '1,3,5,5,2', 1, NULL, 0.00, 0.00, 'pay on conter', NULL, NULL, '2024-12-25 04:42:28'),
+(177, 2, '2025-01-07 11:43:58', 465.50, 3, '3,1', 0, 'L,L', 320.50, 85.00, 'credit_card', 'Caramel', 'Cinnamon Powder, Chocolate Drizzle, Caramel Drizzle', '2025-01-07 11:43:58');
 
 -- --------------------------------------------------------
 
@@ -444,6 +458,7 @@ CREATE TABLE `user_account` (
 --
 
 INSERT INTO `user_account` (`id`, `userName`, `email`, `passwords`, `statuss`, `attempt`, `Addresss`, `ContactNum`, `profile_picture`, `Fname`, `Lname`, `addresss2`, `verified`) VALUES
+(0, 'Peter Beans', 'Peter.Beans@gmail.com', '123', '', 0, 'Bulacan', '09911180759', 'uploads/6777dcac301e0_1735113987052.png', 'Peter', 'Beans', 'baliwag', 'verified'),
 (1, 'peter', 'maravillapeter123@gmail.com', '123', '', 4, 'bustos', '09602558220', 'uploads/675f9d1ac54b1_wall3.jpg', 'John Peter', 'maravilla', 'baliwag', 'verified'),
 (2, 'gray', 'lance.musngi@gmail.com', '123', '', 0, 'Bulacan', '09911180759', 'uploads/6777dcac301e0_1735113987052.png', 'Lance', 'Musngi', 'baliwag', 'verified');
 
@@ -571,19 +586,19 @@ ALTER TABLE `addons`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `coffee_base`
 --
 ALTER TABLE `coffee_base`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `coffee_category`
 --
 ALTER TABLE `coffee_category`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `coffee_flavors`
@@ -595,7 +610,7 @@ ALTER TABLE `coffee_flavors`
 -- AUTO_INCREMENT for table `coffee_products`
 --
 ALTER TABLE `coffee_products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `coffee_toppings`
@@ -613,7 +628,7 @@ ALTER TABLE `cup_size`
 -- AUTO_INCREMENT for table `custom_drink`
 --
 ALTER TABLE `custom_drink`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ingredients`
@@ -625,7 +640,7 @@ ALTER TABLE `ingredients`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=179;
 
 --
 -- AUTO_INCREMENT for table `payment`
@@ -649,7 +664,7 @@ ALTER TABLE `theme`
 -- AUTO_INCREMENT for table `user_account`
 --
 ALTER TABLE `user_account`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
