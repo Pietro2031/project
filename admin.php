@@ -37,6 +37,8 @@ if (!isset($_SESSION['admin_username'])) {
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/table.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 
 </head>
 
@@ -78,16 +80,11 @@ if (!isset($_SESSION['admin_username'])) {
                                                     echo 'class="active"';
                                                 } ?>><i class="fas fa-chart-line"></i>Payment History</a></li>
                 <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
-            </ul>
-        </nav>
-        <div class="sidebar-bottom">
-            <ul>
                 <li><a href="adminprofile.php"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
             </ul>
-        </div>
+        </nav>
     </div>
     <div class="topbar">
-
         <a href="adminlogout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
     <div class="dom">
