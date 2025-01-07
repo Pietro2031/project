@@ -209,3 +209,6 @@ p.text3 {
 .info {
   padding: 0 10px 0 0;
 }
+.reportselected {
+  background-color: #5e5b40 !important;
+}

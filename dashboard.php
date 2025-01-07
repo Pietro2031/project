@@ -27,90 +27,278 @@ LIMIT 5
 ";
 $topProductsResult = $conn->query($topProductsQuery);
 ?>
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    .dashboard-container {
+        padding: 20px;
+    }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/table.css">
-</head>
+    .dashboard-header h2 {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
 
-<body>
-    <div class="dashboard-container">
-        <h1>Admin Dashboard</h1>
-        <div class="stats">
-            <div class="stat-box">
-                <h2><?php echo $productCount; ?></h2>
-                <p>Total Products</p>
+    .dashboard-header p {
+        font-size: 16px;
+        color: #666;
+    }
+
+    .dashboard-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: calc(50% - 10px);
+    }
+
+    .dashcir {
+        display: flex;
+        background-color: #007bff;
+        height: 100px;
+        aspect-ratio: 1 / 1;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+    }
+
+    .dashcir p {
+        border-radius: 50%;
+        background: white;
+        width: 80%;
+        aspect-ratio: 1/1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .stat-card-body h5 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .stat-card-body p {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .stat-card-body {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+    }
+
+    .stat-card-footer {
+        margin-top: 15px;
+    }
+
+    .stat-card-footer a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .chart-section {
+        margin-bottom: 40px;
+    }
+
+    .recent-activity h4 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .table th,
+    .table td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    canvas {
+        max-width: 100% !important;
+        margin: 0 auto;
+        height: auto;
+    }
+
+    .chart-section {
+        display: flex;
+    }
+
+    #chartdiv {
+        width: 40vw;
+        height: 60vh;
+        margin-top: 20px;
+    }
+
+    .panel.panel-default {
+        margin: 0 0 5px 0;
+    }
+
+    .col-lg-6 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .col-lg-3.col-md-6 {
+        width: 15%;
+    }
+
+    .graph {
+        background: #ccc;
+        width: 400px;
+        aspect-ratio: 2 / 1;
+        margin: 5px 0;
+    }
+
+    .dashtotal {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .dashtotal {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    div#issues p {
+        padding: 5px 0;
+        border-bottom: solid 1px #ccc;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Admin Dashboard</h3>
             </div>
-            <div class="stat-box">
-                <h2><?php echo $categoryCount; ?></h2>
-                <p>Total Categories</p>
-            </div>
-            <div class="stat-box">
-                <h2><?php echo $orderCount; ?></h2>
-                <p>Total Orders</p>
-            </div>
-        </div>
-        <div class="recent-orders">
-            <h2>Recent Orders</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($order = $recentOrdersResult->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $order['id']; ?></td>
-                            <td><?php echo $order['username']; ?></td>
-                            <td><?php echo $order['order_date']; ?></td>
-                            <td>₱<?php echo number_format($order['total_amount'], 2); ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="top-products-section">
-            <h2>Top 5 Most Sold Products</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Total Sales</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($product = $topProductsResult->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $product['product_name']; ?></td>
-                            <td><?php echo $product['total_sales']; ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="addons-section">
-            <h2>Add-ons</h2>
-            <div class="addons-list">
-                <?php while ($addon = $addonsResult->fetch_assoc()): ?>
-                    <div class="addon-item">
-                        <p><strong><?php echo $addon['addon_name']; ?></strong></p>
-                        <p>₱<?php echo number_format($addon['addon_price'], 2); ?></p>
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Count</h3>
                     </div>
-                <?php endwhile; ?>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <div class="dashtotal">
+                                <div class="stat-card">
+                                    <div class="stat-card-body">
+                                        <div class="dashcir">
+                                            <p id="totalMeals"><?= $productCount ?></p>
+                                        </div>
+                                        <h5>Total Products</h5>
+                                    </div>
+                                    <div class="stat-card-footer">
+                                        <a href="?view_products">View all Product</a>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-card-body">
+                                        <div class="dashcir">
+                                            <p id="totalCategories"><?= $categoryCount ?></p>
+                                        </div>
+                                        <h5>Total Categories</h5>
+                                    </div>
+                                    <div class="stat-card-footer">
+                                        <a href="?view_category">View all categories</a>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-card-body">
+                                        <div class="dashcir">
+                                            <p id="totalUsers"><?= $orderCount ?></p>
+                                        </div>
+                                        <h5>Total Orders</h5>
+                                    </div>
+                                    <div class="stat-card-footer">
+                                        <a href="?view_user">View all Orders</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
-</body>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Recent Orders</h3>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($order = $recentOrdersResult->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $order['id']; ?></td>
+                                    <td><?php echo $order['username']; ?></td>
+                                    <td><?php echo $order['order_date']; ?></td>
+                                    <td>₱<?php echo number_format($order['total_amount'], 2); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Top 5 Most Sold Products</h3>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Total Sales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($product = $topProductsResult->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $product['product_name']; ?></td>
+                                    <td><?php echo $product['total_sales']; ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 </html>

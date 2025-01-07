@@ -1,5 +1,4 @@
 <?php
-// Fetch category names from the category table
 $categories_query = "SELECT DISTINCT coffee_category.id, coffee_category.category_name FROM coffee_category JOIN coffee_products ON coffee_category.id = coffee_products.category_id";
 $categories_result = mysqli_query($conn, $categories_query);
 

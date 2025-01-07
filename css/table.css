@@ -280,3 +280,17 @@ img {
   text-decoration: none;
   transition: background-color 0.3s;
 }
+.panel-heading > div a {
+  all: unset;
+  padding: 5px 10px;
+  background: #9e9b76;
+  color: white;
+  border-radius: 5px;
+}
+.panel-body>form button {
+  all: unset;
+  padding: 5px 10px;
+  background: #9e9b76;
+  color: white;
+  border-radius: 5px;
+}

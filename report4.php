@@ -44,16 +44,18 @@ $result = $conn->query($query);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Report</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Inventory Report</h1>
     <form method="GET" action="">
-    <input type="hidden" name="report4" value="1">
+        <input type="hidden" name="report4" value="1">
 
         <label for="category">Category:</label>
         <select name="category" id="category">
@@ -92,7 +94,7 @@ $result = $conn->query($query);
                     echo "<td>{$row['category']}</td>";
                     echo "<td>{$row['item_name']}</td>";
                     echo "<td>{$row['quantity']}</td>";
-                    echo "<td>\${$row['price']}</td>";
+                    echo "<td>₱{$row['price']}</td>";
                     echo "<td><img src='{$row['img']}' alt='{$row['item_name']}' width='50'></td>";
                     echo "</tr>";
                 }
@@ -103,6 +105,7 @@ $result = $conn->query($query);
         </tbody>
     </table>
 </body>
+
 </html>
 
 <?php

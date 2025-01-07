@@ -31,11 +31,11 @@ $result = $conn->query($query);
 
 <body>
     <h1>Custom Drink Report</h1>
-    <a href="?report1">Product</a>
+    <a href="?report">Product</a>
     <a href="?report2">Orders</a>
     <a href="?report4">Inventory</a>
     <form method="GET" action="">
-    <input type="hidden" name="report3" value="1">
+        <input type="hidden" name="report3" value="1">
 
         <label for="time_frame">Time Frame:</label>
         <select name="time_frame" id="time_frame">
@@ -75,7 +75,7 @@ $result = $conn->query($query);
                     echo "<td>{$row['customer_id']}</td>";
                     echo "<td>{$row['base']}</td>";
                     echo "<td>{$row['ingredients']}</td>";
-                    echo "<td>\${$row['total_price']}</td>";
+                    echo "<td>₱{$row['total_price']}</td>";
                     echo "<td>{$row['payment_method']}</td>";
                     echo "<td>{$row['order_date']}</td>";
                     echo "</tr>";
