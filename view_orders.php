@@ -1,16 +1,16 @@
 <?php
-$items_per_page = 2;
+$items_per_page = 3;
 
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 $offset = ($current_page - 1) * $items_per_page;
-$total_items_query = "SELECT COUNT(*) AS count FROM orders WHERE status = '-1'";
+$total_items_query = "SELECT COUNT(*) AS count FROM orders WHERE status = '0'";
 $total_items_result = mysqli_query($conn, $total_items_query);
 $total_items_row = mysqli_fetch_assoc($total_items_result);
 $total_items = $total_items_row['count'];
 $total_pages = ceil($total_items / $items_per_page);
 
-$get_pro = "SELECT * FROM orders WHERE status = 0 ORDER BY order_date DESC LIMIT $offset, $items_per_page";
+$get_pro = "SELECT * FROM orders WHERE status = 0 ORDER BY order_date ASC LIMIT $offset, $items_per_page";
 $run_pro = mysqli_query($conn, $get_pro);
 ?>
 
@@ -25,7 +25,6 @@ $run_pro = mysqli_query($conn, $get_pro);
                     <table class="table table-bordered table-hover table-striped">
                         <tbody>
                             <?php
-
                             while ($row_pro = mysqli_fetch_array($run_pro)) {
                                 $counter = 0;
                                 $order_id = $row_pro['id'];
@@ -145,8 +144,8 @@ $run_pro = mysqli_query($conn, $get_pro);
                                             <?php if ($status == 0) : ?>
                                                 <p class="text3">A new order has been placed. Please review the details and to release the order.</p>
                                                 <div class="div3">
-                                                    <a href="update_status.php?status=2&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Mark as Released</a>
-                                                    <a href="update_status.php?status=3&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Cancel</a>
+                                                    <a href="update_status.php?status=1&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Mark as Released</a>
+                                                    <a href="update_status.php?status=2&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Cancel</a>
                                                 </div>
                                             <?php else : ?>
                                                 <p class="text3">The status of this order is not applicable for this section.</p>
@@ -154,7 +153,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                         </div>
                                     </td>
                                 </tr>
-
+                                
                             <?php
                             }
                             ?>
@@ -164,17 +163,17 @@ $run_pro = mysqli_query($conn, $get_pro);
                 <div class="pagination">
                     <ul class="pagination">
                         <?php if ($current_page > 1) : ?>
-                            <li><a href="admin.php?view_orders&page=<?php echo $current_page - 1; ?>">&laquo; Previous</a></li>
+                            <li><a href="admin.php?view_order&page=<?php echo $current_page - 1; ?>">&laquo; Previous</a></li>
                         <?php endif; ?>
 
                         <?php for ($page = 1; $page <= $total_pages; $page++) : ?>
                             <li <?php if ($page == $current_page) echo 'class="active"'; ?>>
-                                <a href="admin.php?view_orders&page=<?php echo $page; ?>"><?php echo $page; ?></a>
+                                <a href="admin.php?view_order&page=<?php echo $page; ?>"><?php echo $page; ?></a>
                             </li>
                         <?php endfor; ?>
 
                         <?php if ($current_page < $total_pages) : ?>
-                            <li><a href="admin.php?view_orders&page=<?php echo $current_page + 1; ?>">Next &raquo;</a></li>
+                            <li><a href="admin.php?view_order&page=<?php echo $current_page + 1; ?>">Next &raquo;</a></li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -182,133 +181,3 @@ $run_pro = mysqli_query($conn, $get_pro);
         </div>
     </div>
 </div>
-<style>
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .pagination ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    .pagination li {
-        display: inline;
-        margin: 0 5px;
-    }
-
-    .pagination li a {
-        text-decoration: none;
-        color: #007bff;
-    }
-
-    .pagination li.active a {
-        font-weight: bold;
-        text-decoration: underline;
-    }
-
-    .returninfo {
-        display: flex;
-        gap: 10px;
-        justify-content: space-between;
-        margin: 0 50px 0 0;
-    }
-
-    .returnitemdiv {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 15px;
-        background-color: white;
-        border: solid 1px #ddd;
-        border-radius: 5px;
-        min-width: 250px;
-    }
-
-    .panel-body {
-        background-color: #e7e7e7;
-    }
-
-    .infos1 {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        width: 350px;
-    }
-
-    .infos2 {
-        display: flex;
-        flex-direction: row;
-        gap: 40px;
-    }
-
-    .infos2 h4 {
-        color: #666;
-    }
-
-    .textheader {
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        padding: 10px 0;
-    }
-
-    .textheader img {
-        width: 20px;
-        height: 20px;
-    }
-
-    .infos2 div {
-        min-width: 100px;
-    }
-
-    .info p {
-        font-size: 12px;
-        color: #333;
-    }
-
-    .div1 {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .div2 {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-    }
-
-    .div1 .text {
-        color: #666;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    p.text1 {
-        font-weight: 700;
-        font-size: 14px;
-    }
-
-    p.text2 {
-        font-weight: 700;
-        font-size: 12px;
-        color: #666;
-    }
-
-    p.text3 {
-        font-weight: 700;
-        font-size: 12px;
-        color: #666;
-    }
-
-    .div3 {
-        display: flex;
-        gap: 15px;
-    }
-
-    .info {
-        padding: 0 10px 0 0;
-    }
-</style>

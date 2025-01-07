@@ -195,12 +195,10 @@ if ($stmt) {
                             $order_date = date('F j, Y', strtotime($row['order_date']));
                             $price = "₱ " . $row['amount_paid'];
                             $status_text = [
-                                "-1" => "Processing",
+
                                 "0" => "Placed",
-                                "1" => "Received",
-                                "2" => "Pending Return",
-                                "3" => "Return Approved",
-                                "4" => "Request Rejected"
+                                "1" => "Deliverd",
+                                "2" => "Canceled"
                             ][$row['status']];
                             ?>
                             <tr>
