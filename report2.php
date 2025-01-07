@@ -65,8 +65,7 @@ $result = $stmt->get_result();
                             <option value="ASC" <?= $sortOrder === 'ASC' ? 'selected' : '' ?>>Oldest First</option>
                         </select>
                     </div>
-                    <button type="submit">Apply</button>
-                </form>
+                    <input type="submit" value="Apply">                </form>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">

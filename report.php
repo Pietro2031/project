@@ -69,7 +69,7 @@ $result = $stmt->get_result();
                             <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>High to Low</option>
                         </select>
                     </div>
-                    <button type="submit">Apply</button>
+                    <input type="submit" value="Apply">
                 </form>
 
                 <form method="GET" action="delete_product.php">

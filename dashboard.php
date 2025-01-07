@@ -225,7 +225,7 @@ $topProductsResult = $conn->query($topProductsQuery);
                                         <h5>Total Orders</h5>
                                     </div>
                                     <div class="stat-card-footer">
-                                        <a href="?view_user">View all Orders</a>
+                                        <a href="admin.php?report2">View all Orders</a>
                                     </div>
                                 </div>
                             </div>

@@ -51,7 +51,7 @@ $result = $conn->query($query);
             <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Descending</option>
         </select>
 
-        <button type="submit">Filter</button>
+        <input type="submit" value="Apply">
     </form>
 
     <table>

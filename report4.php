@@ -73,7 +73,7 @@ $result = $conn->query($query);
             <option value="high" <?= $quantityFilter === 'high' ? 'selected' : '' ?>>High (More than 200)</option>
         </select>
 
-        <button type="submit">Filter</button>
+        <input type="submit" value="Apply">
     </form>
 
     <table>

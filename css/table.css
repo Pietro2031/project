@@ -286,11 +286,13 @@ img {
   background: #9e9b76;
   color: white;
   border-radius: 5px;
+  cursor: pointer;
 }
-.panel-body>form button {
+.panel-body > form input {
   all: unset;
   padding: 5px 10px;
   background: #9e9b76;
   color: white;
   border-radius: 5px;
+  cursor: pointer;
 }
