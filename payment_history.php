@@ -1,7 +1,7 @@
 <?php
 include('connection.php');
 
-$items_per_page = 199;
+$items_per_page = 10;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
