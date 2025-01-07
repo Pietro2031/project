@@ -55,26 +55,13 @@ if (!isset($_SESSION['admin_username'])) {
         </div>
         <nav>
             <ul>
-                <li>
-                    <a href="?dashboard" <?php if (isset($_GET['dashboard'])) {
-                                                echo 'class="active"';
-                                            } ?>>
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                    </a>
-                </li>
+                <li><a href="?dashboard" <?php if (isset($_GET['dashboard'])) {echo 'class="active"';} ?>><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="themevalidation.php"><i class="fas fa-paint-brush"></i> Theme</a></li>
-                <li><a href="?view_products" <?php if (isset($_GET['view_products']) || isset($_GET['insert_products']) || isset($_GET['edit_product'])) {
-                                                    echo 'class="active"';
-                                                } ?>><i class="fas fa-box-open"></i> Products</a></li>
-                <li><a href="?POS" <?php if (isset($_GET['poit_of_sale'])) {
-                                        echo 'class="active"';
-                                    } ?>><i class="fas fa-box-open"></i> Point Of Sale</a></li>
-                <li><a href="?report" <?php if (isset($_GET['report'])) {
-                                            echo 'class="active"';
-                                        } ?>><i class="fas fa-chart-line"></i> Reports</a></li>
-                <li><a href="?view_inventory" <?php if (isset($_GET['view_inventory'])) {
-                                                    echo 'class="active"';
-                                                } ?>><i class="fas fa-th-list"></i> Inventory</a></li>
+                <li><a href="?view_order" <?php if (isset($_GET['order'])) {echo 'class="active"';} ?>><i class="fas fa-chart-line"></i>Orders</a></li>
+                <li><a href="?view_products" <?php if (isset($_GET['view_products']) || isset($_GET['insert_products']) || isset($_GET['edit_product'])) {echo 'class="active"';} ?>><i class="fas fa-box-open"></i> Products</a></li>
+                <li><a href="?view_inventory" <?php if (isset($_GET['view_inventory'])) {echo 'class="active"';} ?>><i class="fas fa-th-list"></i> Inventory</a></li>
+                <li><a href="?POS" <?php if (isset($_GET['poit_of_sale'])) {echo 'class="active"';} ?>><i class="fas fa-box-open"></i> Point Of Sale</a></li>
+                <li><a href="?report" <?php if (isset($_GET['report'])) {echo 'class="active"';} ?>><i class="fas fa-chart-line"></i> Reports</a></li>
                 <li><a href="#"><i class="fas fa-receipt"></i> Payment History</a></li>
                 <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
             </ul>
@@ -93,6 +80,9 @@ if (!isset($_SESSION['admin_username'])) {
         <?php
         if (isset($_GET['dashboard'])) {
             include("dashboard.php");
+        }
+        if (isset($_GET['view_order'])) {
+            include 'view_orders.php';
         }
         if (isset($_GET['view_products'])) {
             include 'view_products.php';
@@ -118,7 +108,7 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['POS'])) {
             include 'point_of_sale.php';
         }
-        
+
         ?>
 
     </div>
