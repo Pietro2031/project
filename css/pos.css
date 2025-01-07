@@ -15,6 +15,7 @@
 .checkout {
   background: white;
   padding: 49px 10px;
+  width: 620px;
 }
 
 .itemrow {
@@ -171,4 +172,8 @@ section.products {
 }
 .total-payment {
   float: right;
+}
+.product {
+  display: flex;
+  flex-direction: column;
 }

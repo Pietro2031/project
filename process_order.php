@@ -56,7 +56,6 @@ if (!$cartItemsResult) {
 }
 $baseFlavor = '';
 $toppings = [];
-$totalPurchaseValue = 0;
 $productIds = [];
 $orderQuantity = 0;
 $sizePrice = 0;
@@ -73,10 +72,9 @@ while ($row = $cartItemsResult->fetch_assoc()) {
     $addonIds = is_array($addonIds) ? $addonIds : [];
     $productPrice = floatval($row['product_price']);
     $drinkBaseId = $row['drink_bases'];
-    $totalPurchaseValue += $productPrice * $quantity;
+    $totalPurchaseValue = $_POST['total'];
     $sizePrice += $productPrice * $quantity;
 
-    // Deduct the quantity of selected cup size from cup_size table
     if ($size === 'M' || $size === 'L') {
         $cupSizeQuery = "SELECT quantity FROM cup_size WHERE size = ?";
         $cupSizeStmt = $conn->prepare($cupSizeQuery);
@@ -86,7 +84,6 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         if ($cupSizeRow = $cupSizeResult->fetch_assoc()) {
             $currentQuantity = $cupSizeRow['quantity'];
             if ($currentQuantity >= $quantity) {
-                // Deduct the quantity
                 $newQuantity = $currentQuantity - $quantity;
                 $updateCupSizeQuery = "UPDATE cup_size SET quantity = ? WHERE size = ?";
                 $updateCupSizeStmt = $conn->prepare($updateCupSizeQuery);
@@ -99,7 +96,29 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         }
         $cupSizeStmt->close();
     }
+    foreach ($addonIds as $addon) {
+        $addonType = explode('-', $addon)[0]; // Extract the addon type (flavor/topping)
+        $addonId = intval(explode('-', $addon)[1]); // Extract the addon ID
 
+        if ($addonType === 'flavor') {
+            $addonQuery = "SELECT price FROM coffee_flavors WHERE id = ?";
+        } elseif ($addonType === 'topping') {
+            $addonQuery = "SELECT price FROM coffee_toppings WHERE id = ?";
+        } else {
+            continue; // Skip unknown addon types
+        }
+
+        $addonStmt = $conn->prepare($addonQuery);
+        $addonStmt->bind_param("i", $addonId);
+        $addonStmt->execute();
+        $addonResult = $addonStmt->get_result();
+
+        if ($addonRow = $addonResult->fetch_assoc()) {
+            $addonPrice += floatval($addonRow['price']) * $quantity; // Multiply by quantity
+        }
+
+        $addonStmt->close();
+    }
     if ($drinkBaseId) {
         $baseQuery = "SELECT price FROM coffee_base WHERE id = ?";
         $baseStmt = $conn->prepare($baseQuery);
@@ -108,8 +127,6 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $baseResult = $baseStmt->get_result();
         if ($baseRow = $baseResult->fetch_assoc()) {
             $basePrice = floatval($baseRow['price']) * $quantity;
-            $totalPurchaseValue += $basePrice;
-            $addonPrice += $basePrice;
             $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - ? WHERE id = ?";
             $updateBaseStmt = $conn->prepare($updateBaseQuery);
             $updateBaseStmt->bind_param("ii", $quantity, $drinkBaseId);
@@ -172,7 +189,7 @@ while ($row = $cartItemsResult->fetch_assoc()) {
 }
 
 $orderQuery = "
-INSERT INTO `orders` (user_id, total_amount, payment_method, flavor, toppings, order_quantity, product_ids, size_price, addon_price, size) 
+INSERT INTO `orders` (user_id, total_amount, payment_method, flavor, toppings, order_quantity, product_ids, base_price, addon_price, size) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ";
 $orderStmt = $conn->prepare($orderQuery);
@@ -184,11 +201,11 @@ $orderStmt->bind_param("idsssisdss", $userId, $totalPurchaseValue, $paymentMetho
 $orderStmt->execute();
 $orderStmt->close();
 
-$clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
-$clearCartStmt = $conn->prepare($clearCartQuery);
-$clearCartStmt->bind_param($types, ...$params);
-$clearCartStmt->execute();
-$clearCartStmt->close();
+// $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
+// $clearCartStmt = $conn->prepare($clearCartQuery);
+// $clearCartStmt->bind_param($types, ...$params);
+// $clearCartStmt->execute();
+// $clearCartStmt->close();
 
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);
