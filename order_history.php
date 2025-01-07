@@ -34,7 +34,7 @@ if ($stmt) {
         .cart-container td {
             text-align: left;
             padding: 10px;
-            border: 1px solid #ddd;
+            border-bottom: 2px solid #ddd;
         }
 
         .cart-container th {
@@ -154,6 +154,8 @@ if ($stmt) {
         orders.order_quantity,
         orders.status,
         orders.size,
+        orders.flavor,
+        orders.toppings,
         GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
         GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
         SUM(orders.total_amount) AS amount_paid,
@@ -181,6 +183,8 @@ if ($stmt) {
                             <th>Quantity</th>
                             <th>Size</th>
                             <th>Details</th>
+                            <th>Favor</th>
+                            <th>Toppings</th>
                             <th>Order Date</th>
                             <th>Status</th>
                         </tr>
@@ -202,7 +206,7 @@ if ($stmt) {
                             <tr>
                                 <td><?= $row['order_id'] ?></td>
                                 <td>
-                                    <div >
+                                    <div>
                                         <?php
                                         $names = explode(', ', $row['item_names']);
                                         $images = explode(', ', $row['item_images']);
@@ -218,7 +222,9 @@ if ($stmt) {
                                 <td><?= $row['order_quantity'] ?></td>
                                 <td><?= $row['size'] ?></td>
                                 <td><?= $price ?> - <?= $row['payment_method'] ?></td>
-                                <td><?= $order_date ?></td>
+                                <td><?= $row['flavor'] ?></td>
+                                <td><?= $row['toppings'] ?></td>
+                                <td><?= $order_date . "<br>" . $row['order_date'] ?></td>
                                 <td><?= $status_text ?></td>
                             </tr>
                         <?php endwhile; ?>

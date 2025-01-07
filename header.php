@@ -50,6 +50,7 @@ if (isset($_SESSION['username'])) {
         <a href="contactus.php"><strong>Contact Us</strong></a>
         <div class="slideright" style="gap: 20px;">
             <?php if ($userLoggedIn): ?>
+                <a href="order_history.php"><strong>History</strong></a>
                 <div class="cart" style="cursor: pointer;" onclick="goToCart()">
                     <img src="img/icon/cart.png" alt="">
                     <div class="count"><?= $cartCount ?></div>

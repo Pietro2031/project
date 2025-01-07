@@ -91,6 +91,9 @@ if (!isset($_SESSION['admin_username'])) {
     </div>
     <div class="dom">
         <?php
+        if (isset($_GET['dashboard'])) {
+            include("dashboard.php");
+        }
         if (isset($_GET['view_products'])) {
             include 'view_products.php';
         }
@@ -115,9 +118,7 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['POS'])) {
             include 'point_of_sale.php';
         }
-
-
-
+        
         ?>
 
     </div>
