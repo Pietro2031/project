@@ -142,19 +142,12 @@ $run_pro = mysqli_query($conn, $get_pro);
                                                     <p class="text2"><?= $CustomerName ?></p>
                                                 </div>
                                             </div>
-                                            <?php if ($status == -1) : ?>
-                                                <p class="text3">The order is ready for shipment. Please review the details and confirm the shipment or release the order.</p>
-                                                <div class="div3">
-                                                    <a href="update_status.php?status=0&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Ship Out</a>
-                                                    <a href="update_status.php?status=-2&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Cancel</a>
-                                                </div>
-                                            <?php elseif ($status == 0) : ?>
-                                                <p class="text3">The order has been shipped out. Review the details if any further action is required.</p>
+                                            <?php if ($status == 0) : ?>
+                                                <p class="text3">A new order has been placed. Please review the details and to release the order.</p>
                                                 <div class="div3">
                                                     <a href="update_status.php?status=2&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Mark as Released</a>
+                                                    <a href="update_status.php?status=3&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Cancel</a>
                                                 </div>
-                                            <?php elseif ($status == 1) : ?>
-                                                <p class="text3">The order has been released. No further action required at this time.</p>
                                             <?php else : ?>
                                                 <p class="text3">The status of this order is not applicable for this section.</p>
                                             <?php endif; ?>
