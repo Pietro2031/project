@@ -73,7 +73,7 @@ div#pagination-container_category {
   color: white;
   background: var(--primary);
   font-weight: bold;
-  height: 100%;
+  /* height: 100%; */
 }
 .ratingtd {
   display: flex;

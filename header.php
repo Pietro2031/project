@@ -246,7 +246,7 @@ if (isset($_SESSION['username'])) {
         position: absolute;
         top: 70px;
         right: 0;
-        left: 20px;
+        /* left: 20px; */
         padding: 10px 20px;
         background: #c9c9a6;
         width: 200px;

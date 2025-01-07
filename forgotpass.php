@@ -422,7 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     position: absolute;
     top: 70px;
     right: 0;
-    left: 20px;
+    /* left: 20px; */
     padding: 10px 20px;
     background: #C9C9A6;
     width: 200px;
