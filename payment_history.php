@@ -22,7 +22,7 @@ if (!empty($selected_method)) {
     $query .= " AND orders.payment_method = '" . mysqli_real_escape_string($conn, $selected_method) . "'";
 }
 
-// Apply Time Frame Filter (Fixing Date Comparisons)
+// Apply Time Frame Filter
 if (!empty($selected_time_frame)) {
     $current_date = date('Y-m-d');
     switch ($selected_time_frame) {
@@ -62,6 +62,20 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment History</title>
     <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        @media print {
+
+            .filter-form,
+            .pagination,
+            .print-btn {
+                display: none;
+            }
+
+            .payment-history-table {
+                margin-top: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -92,7 +106,10 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
             <button type="submit">Filter</button>
         </form>
 
-        <div class="payment-history-table">
+        <!-- Print Button -->
+        <a href="print-payment_history.php">Print Table</a>
+
+        <div class="payment-history-table" id="printableTable">
             <table>
                 <thead>
                     <tr>

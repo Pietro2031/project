@@ -122,7 +122,18 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['payment_history'])) {
             include 'payment_history.php';
         }
-
+        if (isset($_GET['report'])) {
+            include 'report.php';
+        }
+        if (isset($_GET['report2'])) {
+            include 'report2.php';
+        }
+        if (isset($_GET['report3'])) {
+            include 'report3.php';
+        }
+        if (isset($_GET['report4'])) {
+            include 'report4.php';
+        }
         ?>
 
     </div>

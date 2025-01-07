@@ -117,7 +117,6 @@
                     <img src="uploads/method/link-8efc3b564e08e9e864ea83ab43d9f913.png" alt="Counter Payment">
                 </div>
                 <select name="paymentMode" id="paymentMode" required>
-                    <option value="" disabled selected>Select Payment Method</option>
                     <option value="GCash">GCash</option>
                     <option value="Debit Card">Debit Card</option>
                     <option value="Pay on the Counter">Pay on the Counter</option>

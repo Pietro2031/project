@@ -135,13 +135,14 @@ nav ul li a.active {
   color: #333;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 30px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   position: fixed; /* Fixed the topbar at the top */
   top: 0;
   left: 0;
   z-index: 1000; /* Lower z-index than sidebar so sidebar overlaps */
+  justify-content: flex-end;
+  flex-direction: row;
 }
 
 /* Topbar Heading */
@@ -156,18 +157,18 @@ nav ul li a.active {
 
 /* Logout Button */
 .logout-btn {
-  margin-top: 20px;
-  background-color: transparent;
+  /* margin-top: 20px; */
+  /* background-color: transparent; */
   color: #333;
-  float: left;
+  /* float: left; */
   font-size: 25px;
-  border: none;
+  /* border: none; */
   cursor: pointer;
   display: flex;
   align-items: center;
-  width: 100%;
-  padding-right: 20px;
-  justify-content: flex-end;
+  /* width: 100%; */
+  /* padding-right: 20px; */
+  /* justify-content: flex-end; */
 }
 
 .logout-btn i {
