@@ -2,10 +2,7 @@
 require_once('tcpdf/tcpdf.php');
 include('connection.php');
 
-class MYPDF extends TCPDF
-{
-    
-}
+class MYPDF extends TCPDF {}
 
 
 $pdf = new MYPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -31,7 +28,7 @@ $pdf->Cell(0, 10, 'Payment History', 0, 1, 'C');
 $pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(0, 10, 'Generated on ' . date('Y-m-d H:i:s'), 0, 1, 'C');
 
-$pdf->Ln(10);  
+$pdf->Ln(10);
 
 
 $pdf->SetFont('helvetica', 'B', 11);
@@ -52,7 +49,7 @@ ORDER BY orders.order_date DESC
 
 $result = mysqli_query($conn, $query);
 
-$total_sum = 0;  
+$total_sum = 0;
 
 
 $pdf->SetFont('helvetica', '', 11);
@@ -63,7 +60,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $pdf->Cell(40, 8, '₱' . number_format($row['total_amount'], 2), 1, 0, 'C');
     $pdf->Cell(30, 8, $row['payment_method'], 1, 1, 'C');
 
-    
+
     $total_sum += $row['total_amount'];
 }
 
@@ -80,4 +77,3 @@ $pdf->Cell(0, 10, 'Report generated using Peter Beans System. All rights reserve
 
 
 $pdf->Output('payment_history.pdf', 'I');
-?>

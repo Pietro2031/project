@@ -288,7 +288,7 @@ img {
   border-radius: 5px;
   cursor: pointer;
 }
-.panel-body > form > input {
+.panel-body .submit-btn-filter {
   all: unset;
   padding: 5px 10px;
   background: #9e9b76;

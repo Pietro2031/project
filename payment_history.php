@@ -76,8 +76,11 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Payment History</h3>
+
+
             </div>
             <div class="panel-body">
+
                 <form method="GET" action="admin.php" class="filter-form">
                     <input type="hidden" name="payment_history" value="1">
                     <div class="slideright">
@@ -102,7 +105,8 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
                                 <option value="this_month" <?php if ($selected_time_frame == 'this_month') echo 'selected'; ?>>This Month</option>
                             </select>
                         </div>
-                        <input type="submit" value="Apply">
+                        <input type="submit" value="Apply" class="submit-btn-filter">
+                        <a href="print-payment_history.php" target="_blank" class="submit-btn-filter">Print</a>
                     </div>
                 </form>
 

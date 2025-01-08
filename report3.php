@@ -43,7 +43,7 @@ $result = $conn->query($query);
             </div>
             <div class="panel-body">
                 <form method="GET" action="" class="slideright">
-                    <input type="hidden" name="report2" value="1">
+                    <input type="hidden" name="report3" value="1">
                     <div class="slidedown">
                         <label for="time_frame">Time Frame:</label>
                         <select name="time_frame" id="time_frame" class="form-control">
@@ -60,7 +60,8 @@ $result = $conn->query($query);
                             <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Descending</option>
                         </select>
                     </div>
-                    <input type="submit" value="Apply">
+                    <input type="submit" value="Apply" class="submit-btn-filter">
+                    <a href="print-payment_history.php" target="_blank" class="submit-btn-filter">Print</a>
                 </form>
 
                 <div class="table-responsive">

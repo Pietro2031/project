@@ -65,7 +65,8 @@ $result = $stmt->get_result();
                             <option value="ASC" <?= $sortOrder === 'ASC' ? 'selected' : '' ?>>Oldest First</option>
                         </select>
                     </div>
-                    <input type="submit" value="Apply">
+                    <input type="submit" value="Apply" class="submit-btn-filter">
+                    <a href="print-payment_history.php" target="_blank" class="submit-btn-filter">Print</a>
                 </form>
 
                 <div class="table-responsive">

@@ -60,8 +60,8 @@ $result = $conn->query($query);
                 <div style="display: flex; gap: 5px;">
                     <a href="?report">Product</a>
                     <a href="?report2">Orders</a>
-                    <a href="?report3" class="reportselected">Customize</a>
-                    <a href="?report4">Inventory</a>
+                    <a href="?report3">Customize</a>
+                    <a href="?report4" class="reportselected">Inventory</a>
                 </div>
             </div>
             <div class="panel-body">
@@ -85,7 +85,8 @@ $result = $conn->query($query);
                             <option value="high" <?= $quantityFilter === 'high' ? 'selected' : '' ?>>High (More than 200)</option>
                         </select>
                     </div>
-                    <input type="submit" value="Apply">
+                    <input type="submit" value="Apply" class="submit-btn-filter">
+                    <a href="print-payment_history.php" target="_blank" class="submit-btn-filter">Print</a>
                 </form>
 
                 <div class="table-responsive">
