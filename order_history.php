@@ -1,8 +1,6 @@
 <?php
 include("connection.php");
 session_start();
-
-// Get user ID based on the logged-in username
 $stmt = $conn->prepare("SELECT id FROM user_account WHERE userName = ?");
 if ($stmt) {
     $stmt->bind_param("s", $_SESSION['username']);
@@ -13,8 +11,6 @@ if ($stmt) {
     }
     $stmt->close();
 }
-
-// Handle status update when Cancel button is clicked
 if (isset($_POST['cancel_order'])) {
     $order_id = $_POST['order_id'];
     $update_status_query = "UPDATE orders SET status = 2 WHERE id = ? AND user_id = ?";
@@ -25,11 +21,18 @@ if (isset($_POST['cancel_order'])) {
     header("Location: order_history.php");
     exit();
 }
-
-// Handle filters
+if (isset($_POST['mark_received'])) {
+    $order_id = $_POST['order_id'];
+    $update_status_query = "UPDATE orders SET status = 3 WHERE id = ? AND user_id = ?";
+    $stmt = $conn->prepare($update_status_query);
+    $stmt->bind_param("ii", $order_id, $userId);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: order_history.php");
+    exit();
+}
 $status_filter = isset($_GET['status']) ? (int)$_GET['status'] : -1;
 $time_filter = isset($_GET['time_frame']) ? $_GET['time_frame'] : 'any';
-
 $time_conditions = "";
 if ($time_filter === '3d') {
     $time_conditions = "AND orders.order_date >= NOW() - INTERVAL 3 DAY";
@@ -38,14 +41,10 @@ if ($time_filter === '3d') {
 } elseif ($time_filter === '1m') {
     $time_conditions = "AND orders.order_date >= NOW() - INTERVAL 1 MONTH";
 }
-
 $status_conditions = $status_filter >= 0 ? "AND orders.status = $status_filter" : "";
-
-// Pagination
 $items_per_page = 10;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
-
 $total_items_query = "
     SELECT COUNT(DISTINCT orders.id) AS count 
     FROM orders 
@@ -53,7 +52,6 @@ $total_items_query = "
 $total_items_result = mysqli_query($conn, $total_items_query);
 $total_items = mysqli_fetch_assoc($total_items_result)['count'];
 $total_pages = ceil($total_items / $items_per_page);
-
 $get_orders = "
     SELECT 
         orders.id AS order_id,
@@ -73,135 +71,21 @@ $get_orders = "
     GROUP BY orders.id
     ORDER BY orders.order_date DESC
     LIMIT $offset, $items_per_page";
-
 $run_orders = mysqli_query($conn, $get_orders);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/history.css">
-    <style>
-        .filter-container {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .cart-container table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .cart-container th,
-        .cart-container td {
-            text-align: left;
-            padding: 10px;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .cart-container th {
-            background-color: #f4f4f4;
-        }
-
-        .cart-container .itemtable img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-
-        .cart-container .status-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .status-container .status-step {
-            margin: 5px 0;
-        }
-
-        /* Pagination styles */
-        .pageno {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .pageno div {
-            margin: 0 5px;
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .pageno .active {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .pageno a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .pageno a:hover {
-            color: #007bff;
-        }
-
-        /* Modal styles */
-        #returnModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #returnModal .modal-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        #returnModal select {
-            margin-top: 10px;
-            padding: 5px;
-            width: 80%;
-        }
-
-        #returnModal button {
-            margin: 10px 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #returnModal button:first-child {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        #returnModal button:last-child {
-            background-color: #f44336;
-            color: #fff;
-        }
-    </style>
-    <?php include("header.php"); ?>
 </head>
 
 <body>
+    <?php include("header.php"); ?>
     <section class="center">
         <div class="Itemcart">
             <h1>Purchase History</h1>
-
             <div class="filter-container">
                 <form method="GET" action="order_history.php">
                     <label for="status">Status:</label>
@@ -212,7 +96,6 @@ $run_orders = mysqli_query($conn, $get_orders);
                         <option value="2" <?= $status_filter === 2 ? 'selected' : '' ?>>Canceled</option>
                         <option value="3" <?= $status_filter === 3 ? 'selected' : '' ?>>Canceled by User</option>
                     </select>
-
                     <label for="time_frame">Time Frame:</label>
                     <select name="time_frame" id="time_frame">
                         <option value="any" <?= $time_filter === 'any' ? 'selected' : '' ?>>Any</option>
@@ -220,11 +103,9 @@ $run_orders = mysqli_query($conn, $get_orders);
                         <option value="7d" <?= $time_filter === '7d' ? 'selected' : '' ?>>Last 7 Days</option>
                         <option value="1m" <?= $time_filter === '1m' ? 'selected' : '' ?>>Last 1 Month</option>
                     </select>
-
                     <button type="submit">Filter</button>
                 </form>
             </div>
-
             <div class="cart-container">
                 <table class="itemtable">
                     <thead>
@@ -246,9 +127,9 @@ $run_orders = mysqli_query($conn, $get_orders);
                             $order_date = date('F j, Y', strtotime($row['order_date']));
                             $status_text = [
                                 "0" => "Placed",
-                                "1" => "Delivered",
+                                "1" => "To Recive",
                                 "2" => "Canceled",
-                                "3" => "Canceled by User"
+                                "3" => "Delivered"
                             ][$row['status']];
                         ?>
                             <tr>
@@ -278,14 +159,19 @@ $run_orders = mysqli_query($conn, $get_orders);
                                             <input type="hidden" name="order_id" value="<?= $row['order_id'] ?>">
                                             <button type="submit" name="cancel_order" class="cancel-btn">Cancel</button>
                                         </form>
+                                    <?php elseif ($row['status'] == 1) : ?>
+                                        <form method="POST">
+                                            <input type="hidden" name="order_id" value="<?= $row['order_id'] ?>">
+                                            <button type="submit" name="mark_received" class="received-btn">Received</button>
+                                        </form>
                                     <?php endif; ?>
+
                                 </td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>
-
             <div id="pagination-container_category" class="pageno">
                 <?php if ($current_page > 1) : ?>
                     <div><a href="order_history.php?page=<?= $current_page - 1 ?>&status=<?= $status_filter ?>&time_frame=<?= $time_filter ?>">&laquo; Previous</a></div>
@@ -301,7 +187,6 @@ $run_orders = mysqli_query($conn, $get_orders);
             </div>
         </div>
     </section>
-
     <script>
         function confirmCancel() {
             return confirm("Are you sure you want to cancel this order?");

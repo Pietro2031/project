@@ -18,7 +18,7 @@ $run_pro = mysqli_query($conn, $get_pro);
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">View Orders</h3>
+                <h3 class="panel-title">In Queue</h3>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">

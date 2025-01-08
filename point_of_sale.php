@@ -1,7 +1,9 @@
 <?php
 include('connection.php');
+
 $categoryQuery = "SELECT * FROM coffee_category";
 $categoryResult = $conn->query($categoryQuery);
+
 $productQuery = "
 SELECT coffee_products.*, coffee_base.base_name, coffee_flavors.flavor_name, coffee_toppings.topping_name 
 FROM coffee_products
@@ -67,6 +69,7 @@ $productResult = $conn->query($productQuery);
                 <div class="div-23">
                     <div class="label-size">Add-ons</div>
                     <?php
+                    
                     $flavorsQuery = "SELECT id, flavor_name, quantity, price FROM coffee_flavors";
                     $flavorsResult = $conn->query($flavorsQuery);
                     $toppingsQuery = "SELECT id, topping_name, quantity, price FROM coffee_toppings";
@@ -147,7 +150,6 @@ $productResult = $conn->query($productQuery);
     <section class="cashoutsec">
         <div class="checkout">
             <div class="itemrow">
-                <!-- Cart items will be dynamically added here -->
             </div>
             <div class="checkout-info">
                 <div class="total-payment">
@@ -171,107 +173,75 @@ $productResult = $conn->query($productQuery);
         document.getElementById('modalProductImage').value = image;
         document.getElementById('modalProductNameDisplay').textContent = name;
         document.getElementById('modalProductDescription').textContent = description;
-        document.getElementById('modalPrice').textContent = '₱' + price;
+        document.getElementById('modalPrice').textContent = "₱" + price;
         document.getElementById('modalProductImageDisplay').src = image;
         document.getElementById('quantityModal').style.display = 'block';
     }
 
-    document.getElementById('quantityModal').addEventListener('click', function(event) {
-        if (event.target == document.getElementById('quantityModal')) {
-            document.getElementById('quantityModal').style.display = 'none';
-        }
-    });
-
     function addToCart() {
-        const productId = document.getElementById('modalProductId').value;
-        const productName = document.getElementById('modalProductName').value;
-        const productPrice = parseFloat(document.getElementById('modalProductPrice').value);
-        const productImage = document.getElementById('modalProductImage').value;
-        const quantity = parseInt(document.getElementById('quantityInput').value);
+        var productId = document.getElementById('modalProductId').value;
+        var productName = document.getElementById('modalProductName').value;
+        var productPrice = parseFloat(document.getElementById('modalProductPrice').value);
+        var quantity = parseInt(document.getElementById('quantityInput').value);
+        var totalPrice = productPrice * quantity;
 
-        const sizeInput = document.querySelector('input[name="size"]:checked');
-        if (!sizeInput) {
-            alert('Please select a size.');
-            return;
-        }
-        const sizeId = sizeInput.value;
-        const sizeText = sizeInput.nextElementSibling.innerText;
-        const sizeAdjustment = parseFloat(sizeInput.nextElementSibling.nextElementSibling.innerText.replace('₱', ''));
-
-        const addonInputs = document.querySelectorAll('input[name="addons[]"]:checked');
-        let addons = [];
-        let addonCost = 0;
-        addonInputs.forEach(function(addon) {
-            const addonLabel = document.querySelector('label[for="' + addon.id + '"]').innerText;
-            const addonPrice = parseFloat(addonLabel.match(/₱(\d+.\d+)/)[1]);
-            addons.push(addonLabel);
-            addonCost += addonPrice;
+        
+        var addons = [];
+        var checkboxes = document.querySelectorAll('input[name="addons[]"]:checked');
+        checkboxes.forEach(function(checkbox) {
+            addons.push(checkbox.value);
         });
 
-        const totalPrice = (productPrice + sizeAdjustment + addonCost) * quantity;
+        
+        var selectedSize = document.querySelector('input[name="size"]:checked');
+        if (!selectedSize) {
+            alert('Please select a cup size!');
+            return;
+        }
+        var cupSizeId = selectedSize.value;
+        var cupSizeText = selectedSize.nextElementSibling.textContent;
 
-        const checkoutSection = document.querySelector('.checkout .itemrow');
-        const newCheckoutItem = `
-        <div class="itemproduct" data-product-id="${productId}" data-total-price="${totalPrice}">
-            <img src="img/icon/remove.png" alt="" class="remove-btn" onclick="removeFromCart(this)" style="margin:5px;">
-            <div class="itemimg">
-                <img src="${productImage}" alt="${productName}">
-                <div class="itemqnty">${quantity}</div>
-            </div>
-            <div class="slidedown">
-                <div class="itemname">${productName}</div>
-                <div class="itemdetails">
-                    <p><strong>Base Price:</strong> ₱${productPrice.toFixed(2)}</p>
-                    <p><strong>Size Adjustment (${sizeText}):</strong> ₱${sizeAdjustment.toFixed(2)}</p>
-                    <p><strong>Add-ons:</strong> ${addons.join(', ') || 'None'}</p>
-                </div>
-            </div>
-            <div class="price">₱${totalPrice.toFixed(2)}</div>
-        </div>
-    `;
-        checkoutSection.insertAdjacentHTML('beforeend', newCheckoutItem);
+        
+        var cartItem = {
+            productId: productId,
+            productName: productName,
+            quantity: quantity,
+            addons: addons,
+            size: {
+                id: cupSizeId,
+                name: cupSizeText
+            },
+            price: totalPrice
+        };
 
-        updateTotalPrice(totalPrice);
+        
+        var cartData = document.getElementById('cartData').value;
+        var cart = cartData ? JSON.parse(cartData) : [];
+        cart.push(cartItem);
+        document.getElementById('cartData').value = JSON.stringify(cart);
+
+        
+        var itemRow = document.createElement('div');
+        itemRow.classList.add('itemrow');
+        itemRow.innerHTML = '<p>' + productName + ' (' + cupSizeText + ') (x' + quantity + ')</p><p>₱' + totalPrice.toFixed(2) + '</p>';
+        document.querySelector('.checkout .itemrow').appendChild(itemRow);
+
+        
+        var currentTotal = parseFloat(document.querySelector('.total-payment span:last-child').textContent.replace('₱', ''));
+        var newTotal = currentTotal + totalPrice;
+        document.querySelector('.total-payment span:last-child').textContent = '₱' + newTotal.toFixed(2);
+
+        
         document.getElementById('quantityModal').style.display = 'none';
     }
 
-    function removeFromCart(button) {
-        const cartItem = button.closest('.itemproduct');
-        const itemTotalPrice = parseFloat(cartItem.getAttribute('data-total-price'));
-        cartItem.remove();
-        updateTotalPrice(-itemTotalPrice);
-    }
-
-    function updateTotalPrice(amount) {
-        const totalPriceElement = document.querySelector('.total-payment span:last-child');
-        const currentTotal = parseFloat(totalPriceElement.innerText.replace('₱', ''));
-        const newTotal = currentTotal + amount;
-        totalPriceElement.innerText = '₱' + newTotal.toFixed(2);
-    }
 
     function proceedToCheckout() {
-        const cartItems = document.querySelectorAll('.itemproduct');
-        const cartData = [];
-
-        cartItems.forEach((item) => {
-            const productId = item.getAttribute('data-product-id');
-            const quantity = parseInt(item.querySelector('.itemqnty').innerText);
-            const price = parseFloat(item.querySelector('.price').innerText.replace('₱', ''));
-            const productName = item.querySelector('.itemname').innerText;
-            const size = item.querySelector('.itemdetails p:nth-child(2)').innerText;
-            const addons = item.querySelector('.itemdetails p:nth-child(3)').innerText.replace('Add-ons: ', '');
-
-            cartData.push({
-                productId,
-                productName,
-                quantity,
-                price,
-                size,
-                addons,
-            });
-        });
-
-        document.getElementById('cartData').value = JSON.stringify(cartData);
-        document.getElementById('checkoutForm').submit();
+        var cartData = document.getElementById('cartData').value;
+        if (cartData.length === 0) {
+            alert('Your cart is empty!');
+        } else {
+            document.getElementById('checkoutForm').submit();
+        }
     }
 </script>

@@ -75,27 +75,7 @@ while ($row = $cartItemsResult->fetch_assoc()) {
     $totalPurchaseValue = $_POST['total'];
     $sizePrice += $productPrice * $quantity;
 
-    if ($size === 'M' || $size === 'L') {
-        $cupSizeQuery = "SELECT quantity FROM cup_size WHERE size = ?";
-        $cupSizeStmt = $conn->prepare($cupSizeQuery);
-        $cupSizeStmt->bind_param("s", $size);
-        $cupSizeStmt->execute();
-        $cupSizeResult = $cupSizeStmt->get_result();
-        if ($cupSizeRow = $cupSizeResult->fetch_assoc()) {
-            $currentQuantity = $cupSizeRow['quantity'];
-            if ($currentQuantity >= $quantity) {
-                $newQuantity = $currentQuantity - $quantity;
-                $updateCupSizeQuery = "UPDATE cup_size SET quantity = ? WHERE size = ?";
-                $updateCupSizeStmt = $conn->prepare($updateCupSizeQuery);
-                $updateCupSizeStmt->bind_param("is", $newQuantity, $size);
-                $updateCupSizeStmt->execute();
-                $updateCupSizeStmt->close();
-            } else {
-                die("Error: Insufficient stock for the selected cup size.");
-            }
-        }
-        $cupSizeStmt->close();
-    }
+    // Removed stock updates for cup size and product base
     foreach ($addonIds as $addon) {
         $addonType = explode('-', $addon)[0];
         $addonId = intval(explode('-', $addon)[1]);
@@ -119,23 +99,8 @@ while ($row = $cartItemsResult->fetch_assoc()) {
 
         $addonStmt->close();
     }
-    if ($drinkBaseId) {
-        $baseQuery = "SELECT price FROM coffee_base WHERE id = ?";
-        $baseStmt = $conn->prepare($baseQuery);
-        $baseStmt->bind_param("i", $drinkBaseId);
-        $baseStmt->execute();
-        $baseResult = $baseStmt->get_result();
-        if ($baseRow = $baseResult->fetch_assoc()) {
-            $basePrice = floatval($baseRow['price']) * $quantity;
-            $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - ? WHERE id = ?";
-            $updateBaseStmt = $conn->prepare($updateBaseQuery);
-            $updateBaseStmt->bind_param("ii", $quantity, $drinkBaseId);
-            $updateBaseStmt->execute();
-            $updateBaseStmt->close();
-        }
-        $baseStmt->close();
-    }
 
+    // Removed drink base updates
     $flavorNames = [];
     $toppingNames = [];
     foreach ($addonIds as $addon) {
@@ -169,23 +134,6 @@ while ($row = $cartItemsResult->fetch_assoc()) {
     if (!empty($toppingNames)) {
         $toppings[] = implode(', ', $toppingNames);
     }
-    foreach ($addonIds as $addonId) {
-        $addonType = explode('-', $addonId)[0];
-        $addonId = intval(explode('-', $addonId)[1]);
-        if ($addonType === 'flavor') {
-            $updateFlavorQuery = "UPDATE coffee_flavors SET quantity = quantity - ? WHERE id = ?";
-            $updateFlavorStmt = $conn->prepare($updateFlavorQuery);
-            $updateFlavorStmt->bind_param("ii", $quantity, $addonId);
-            $updateFlavorStmt->execute();
-            $updateFlavorStmt->close();
-        } elseif ($addonType === 'topping') {
-            $updateToppingQuery = "UPDATE coffee_toppings SET quantity = quantity - ? WHERE id = ?";
-            $updateToppingStmt = $conn->prepare($updateToppingQuery);
-            $updateToppingStmt->bind_param("ii", $quantity, $addonId);
-            $updateToppingStmt->execute();
-            $updateToppingStmt->close();
-        }
-    }
 }
 
 $orderQuery = "
@@ -201,12 +149,13 @@ $orderStmt->bind_param("idsssisdss", $userId, $totalPurchaseValue, $paymentMetho
 $orderStmt->execute();
 $orderStmt->close();
 
-$clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
-$clearCartStmt = $conn->prepare($clearCartQuery);
-$clearCartStmt->bind_param($types, ...$params);
-$clearCartStmt->execute();
-$clearCartStmt->close();
+// $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
+// $clearCartStmt = $conn->prepare($clearCartQuery);
+// $clearCartStmt->bind_param($types, ...$params);
+// $clearCartStmt->execute();
+// $clearCartStmt->close();
 
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);
 echo "<script>alert('Order placed successfully!'); window.location.href = 'order_history.php';</script>";
+?>

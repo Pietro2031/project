@@ -2,7 +2,6 @@
 
 include('connection.php');
 
-
 $cartData = isset($_POST['cartData']) ? json_decode($_POST['cartData'], true) : [];
 $totalPrice = isset($_POST['totalPrice']) ? $_POST['totalPrice'] : 0;
 
@@ -11,64 +10,93 @@ if (empty($cartData)) {
     exit();
 }
 
-
 session_start();
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
-
+$userId = 0; // Modify this based on your session management
 
 $productIds = [];
 $totalQuantity = 0;
 $flavors = [];
 $toppings = [];
-$size = '';
+$sizes = []; // Store multiple sizes
 $basePrice = 0.00;
 $addonPrice = 0.00;
 
 foreach ($cartData as $cartItem) {
     $productIds[] = $cartItem['productId'];
     $totalQuantity += $cartItem['quantity'];
-    $size = $cartItem['size'];
-    $flavors[] = !empty($cartItem['addons']['flavor']) ? $cartItem['addons']['flavor'] : '';
-    $toppings[] = !empty($cartItem['addons']['topping']) ? $cartItem['addons']['topping'] : '';
-    $basePrice += $cartItem['price'];
-    $addonPrice += !empty($cartItem['addons']) ? array_sum(array_column($cartItem['addons'], 'price')) : 0.00;
-}
 
+    $sizes[] = isset($cartItem['size']['name']) ? trim($cartItem['size']['name']) : '';
+
+    $productId = $cartItem['productId'];
+    $quantity = $cartItem['quantity'];
+
+    $baseQuery = "SELECT drink_bases, flavor_id, toppings_id FROM coffee_products WHERE id = $productId";
+    $baseResult = $conn->query($baseQuery);
+
+    while ($row = $baseResult->fetch_assoc()) {
+        $productId = $row['drink_bases'];
+        $flavor_id = $row['flavor_id'];
+        $toppings_id = $row['toppings_id'];
+        $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - $quantity WHERE id = $productId";
+        // $conn->query($updateBaseQuery);
+        $updateBaseQuery = "UPDATE coffee_flavors SET quantity = quantity - $quantity WHERE id = $flavor_id";
+        // $conn->query($updateBaseQuery);
+        $updateBaseQuery = "UPDATE coffee_toppings SET quantity = quantity - $quantity WHERE id = $toppings_id";
+        // $conn->query($updateBaseQuery);
+    }
+
+    foreach ($cartItem['addons'] as $addon) {
+        if (strpos($addon, 'flavor') !== false) {
+            $flavorId = str_replace('flavor-', '', $addon);
+            $flavorQuery = "SELECT flavor_name, quantity FROM coffee_flavors WHERE id = $flavorId";
+            $flavorResult = $conn->query($flavorQuery);
+            $flavorRow = $flavorResult->fetch_assoc();
+
+            $flavorName = $flavorRow['flavor_name'];
+            $flavorQuantity = $flavorRow['quantity'];
+
+            $newFlavorQuantity = $flavorQuantity - $quantity;
+            $updateFlavorQuery = "UPDATE coffee_flavors SET quantity = $newFlavorQuantity WHERE id = $flavorId";
+            // $conn->query($updateFlavorQuery);
+
+            $flavors[] = $flavorName;
+        } elseif (strpos($addon, 'topping') !== false) {
+            $toppingId = str_replace('topping-', '', $addon);
+            $toppingQuery = "SELECT topping_name, quantity FROM coffee_toppings WHERE id = $toppingId";
+            $toppingResult = $conn->query($toppingQuery);
+            $toppingRow = $toppingResult->fetch_assoc();
+
+            $toppingName = $toppingRow['topping_name'];
+            $toppingQuantity = $toppingRow['quantity'];
+
+            $newToppingQuantity = $toppingQuantity - $quantity;
+            $updateToppingQuery = "UPDATE coffee_toppings SET quantity = $newToppingQuantity WHERE id = $toppingId";
+            // $conn->query($updateToppingQuery);
+
+            $toppings[] = $toppingName;
+        }
+    }
+
+    $basePrice += $cartItem['price'];
+}
 
 $productIdsString = implode(',', $productIds);
 $flavorsString = implode(', ', $flavors);
 $toppingsString = implode(', ', $toppings);
-
+$sizesString = implode(', ', $sizes);
 
 $paymentMethod = "Cash";
-
-
 $orderQuery = "
     INSERT INTO orders (
-        user_id, total_amount, order_quantity, product_ids, size, base_price, addon_price, payment_method, flavor, toppings, order_date
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        user_id, total_amount, order_quantity, product_ids, size, base_price, payment_method, flavor, toppings, order_date, addon_price
+    ) VALUES (
+        $userId, $totalPrice, $totalQuantity, '$productIdsString', '$sizesString', $basePrice, '$paymentMethod', '$flavorsString', '$toppingsString', NOW(), {$_POST['addonsprice']}
+    )
 ";
-$stmt = $conn->prepare($orderQuery);
-$stmt->bind_param(
-    "idissddsss",
-    $userId,
-    $totalPrice,
-    $totalQuantity,
-    $productIdsString,
-    $size,
-    $basePrice,
-    $addonPrice,
-    $paymentMethod,
-    $flavorsString,
-    $toppingsString
-);
-$stmt->execute();
+$conn->query($orderQuery);
 
+$orderId = $conn->insert_id;
 
-$orderId = $stmt->insert_id;
-
-
-$stmt->close();
 $conn->close();
 ?>
 
@@ -92,7 +120,6 @@ $conn->close();
                     <th>Quantity</th>
                     <th>Size</th>
                     <th>Add-ons</th>
-                    <th>Price</th>
                 </tr>
             </thead>
             <tbody>
@@ -100,19 +127,20 @@ $conn->close();
                     <tr>
                         <td><?php echo $cartItem['productName']; ?></td>
                         <td><?php echo $cartItem['quantity']; ?></td>
-                        <td><?php echo $cartItem['size']; ?></td>
+                        <td><?php echo isset($cartItem['size']['name']) ? trim($cartItem['size']['name']) : ''; ?></td>
                         <td>
                             <?php
                             $addons = [];
-                            if (!empty($cartItem['addons'])) {
-                                foreach ($cartItem['addons'] as $addonType => $addon) {
-                                    $addons[] = ucfirst($addonType) . ': ' . implode(', ', $addon);
+                            foreach ($cartItem['addons'] as $addon) {
+                                if (strpos($addon, 'flavor') !== false) {
+                                    $addons[] = "Flavor: " . $flavorName;
+                                } elseif (strpos($addon, 'topping') !== false) {
+                                    $addons[] = "Topping: " . $toppingName;
                                 }
                             }
                             echo !empty($addons) ? implode('<br>', $addons) : 'None';
                             ?>
                         </td>
-                        <td>₱<?php echo number_format($cartItem['price'], 2); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

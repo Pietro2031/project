@@ -7,12 +7,9 @@ if (empty($cartData)) {
     exit();
 }
 
-
 include('connection.php');
 
-
 $totalPrice = 0;
-
 
 function getAddonDetails($addonId, $conn)
 {
@@ -32,7 +29,6 @@ function getAddonDetails($addonId, $conn)
 
     return $addon;
 }
-
 
 function getCupSizeDetails($sizeId, $conn)
 {
@@ -62,44 +58,65 @@ function getCupSizeDetails($sizeId, $conn)
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th>Size</th> <!-- New column for cup size -->
+                    <th>Size</th>
                     <th>Quantity</th>
                     <th>Add-ons</th>
                     <th>Price</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($cartData as $cartItem): ?>
-                    <?php
-
+                <?php
+                // Prepare data to pass to the front-end
+                $consoleData = [];
+                foreach ($cartData as $cartItem):
                     $cupSize = getCupSizeDetails($cartItem['size']['id'], $conn);
-                    ?>
+
+                    // Capture details for debugging in JS
+                    $itemDetails = [
+                        'product' => $cartItem['productName'],
+                        'size' => $cupSize['name'],
+                        'sizePrice' => $cupSize['price'],
+                        'quantity' => $cartItem['quantity'],
+                        'addons' => [],
+                        'itemPrice' => 0
+                    ];
+
+                    $addonsPrice = 0;
+                    if (!empty($cartItem['addons'])) {
+                        foreach ($cartItem['addons'] as $addonId) {
+                            $addon = getAddonDetails($addonId, $conn);
+                            $itemDetails['addons'][] = [
+                                'name' => $addon['name'],
+                                'price' => $addon['price']
+                            ];
+                            $addonsPrice += $addon['price'];
+                        }
+                    }
+
+                    $itemPrice = $cartItem['price'] + ($cupSize['price'] * $cartItem['quantity']) + $addonsPrice * $cartItem['quantity'];
+                    $itemDetails['itemPrice'] = $itemPrice;
+                    $totalPrice += $itemPrice;
+
+                    // Add item details to console log data
+                    $consoleData[] = $itemDetails;
+                ?>
                     <tr>
                         <td><?php echo $cartItem['productName']; ?></td>
-                        <td><?php echo $cupSize['name']; ?> (₱<?php echo number_format($cupSize['price'], 2); ?>)</td> <!-- Display cup size name and price -->
+                        <td><?php echo $cupSize['name']; ?> (₱<?php echo number_format($cupSize['price'], 2); ?>)</td>
                         <td><?php echo $cartItem['quantity']; ?></td>
                         <td>
                             <?php
-                            $addonsPrice = 0;
                             if (!empty($cartItem['addons'])) {
                                 foreach ($cartItem['addons'] as $addonId) {
                                     $addon = getAddonDetails($addonId, $conn);
                                     echo $addon['name'] . " (₱" . number_format($addon['price'], 2) . ")<br>";
-                                    $addonsPrice += $addon['price'];
                                 }
                             } else {
                                 echo "None";
                             }
                             ?>
                         </td>
-                        <td>
-                            <?php
-
-                            $itemPrice = ($cartItem['price'] + $cupSize['price'] + $addonsPrice) * $cartItem['quantity'];
-                            echo "₱" . number_format($itemPrice, 2);
-                            $totalPrice += $itemPrice;
-                            ?>
-                        </td>
+                        <td>₱<?php echo number_format($itemPrice, 2); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -112,9 +129,19 @@ function getCupSizeDetails($sizeId, $conn)
         <form action="place_order.php" method="POST">
             <input type="hidden" name="cartData" value='<?php echo json_encode($cartData); ?>'>
             <input type="hidden" name="totalPrice" value="<?php echo $totalPrice; ?>">
+            <input type="hidden" name="addonsprice" value="<?= $addonsPrice ?>">
             <button type="submit" class="checkout-btn">Place Order</button>
         </form>
     </div>
+
+    <script>
+        // Log the PHP data to the browser console
+        const consoleData = <?php echo json_encode($consoleData); ?>;
+        console.log("Order Details:", consoleData);
+
+        // Log the total price as well
+        console.log("Total Price: ₱<?php echo number_format($totalPrice, 2); ?>");
+    </script>
 </body>
 
 </html>

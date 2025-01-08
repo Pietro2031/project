@@ -3,7 +3,7 @@ include 'connection.php';
 
 $selected_type = isset($_GET['item_types']) ? $_GET['item_types'] : '';
 
-$items_per_page = 3;
+$items_per_page = 5;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 

@@ -45,14 +45,14 @@
             <div class="cup-container">
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
-                    <img src="img/cup2.png" alt="" style=" filter: drop-shadow(0px 0.1px 4px #999); ">
+                    <img src="img/cup.png" alt="" style=" filter: drop-shadow(0px 0.1px 4px #999); ">
                     <img src="<?= $logo ?>" style=" z-index: 99;width: 150px;height: 150px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
                     <div id="cup-content" class="cup-content"></div>
                 </div>
                 <div class="total-price">
                     Total Price: <span id="total-price">₱0.00</span>
                 </div>
-                <div class="indicator" id="ingredient-indicator">Remaining Ingredients: 7</div>
+                <!-- <div class="indicator" id="ingredient-indicator">Remaining Ingredients: 7</div> -->
                 <div class="div-22">
                     <div class="label-size">Size</div>
                     <div class="div-size">
