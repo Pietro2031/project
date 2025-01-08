@@ -47,39 +47,30 @@ $paymentMethodsQuery = "SELECT DISTINCT payment_method FROM orders";
 $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    @media print {
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment History</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-    <style>
-        @media print {
-
-            .filter-form,
-            .pagination,
-            .print-btn {
-                display: none;
-            }
-
-            .payment-history-table {
-                margin-top: 20px;
-            }
+        .filter-form,
+        .pagination,
+        .print-btn {
+            display: none;
         }
 
-        .slideright .slidedown {
-            width: 100%;
+        .payment-history-table {
+            margin-top: 20px;
         }
+    }
 
-        .slideright {
-            gap: 10px;
-            padding: 10px;
-            align-items: flex-end;
-        }
-    </style>
-</head>
+    .slideright .slidedown {
+        width: 100%;
+    }
+
+    .slideright {
+        gap: 10px;
+        padding: 10px;
+        align-items: flex-end;
+    }
+</style>
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default">
