@@ -39,9 +39,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require '/Applications/XAMPP/htdocs/PHPMailer/PHPMailer/src/Exception.php';
-require '/Applications/XAMPP/htdocs/PHPMailer/PHPMailer/src/PHPMailer.php';
-require '/Applications/XAMPP/htdocs/PHPMailer/PHPMailer/src/SMTP.php';
+require 'PHPMailer/PHPMailer/src/Exception.php';
+require 'PHPMailer/PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/PHPMailer/src/SMTP.php';
 
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -68,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Reset link
         $resetLink = "http://localhost/project/resetpassword.php?token=" . $token;
 
-        // Send the reset link via email
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
