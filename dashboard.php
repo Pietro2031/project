@@ -19,11 +19,12 @@ LIMIT 5
 $recentOrdersResult = $conn->query($recentOrdersQuery);
 $addonsQuery = "SELECT * FROM addons";
 $addonsResult = $conn->query($addonsQuery);
+$sortOrder = isset($_GET['sort']) && $_GET['sort'] == 'asc' ? 'ASC' : 'DESC';
+
 $topProductsQuery = "
 SELECT product_name, total_sales 
 FROM coffee_products
-ORDER BY total_sales DESC
-LIMIT 5
+ORDER BY total_sales $sortOrder
 ";
 $topProductsResult = $conn->query($topProductsQuery);
 ?>
@@ -274,8 +275,17 @@ $topProductsResult = $conn->query($topProductsQuery);
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Top 5 Most Sold Products</h3>
+                <h3 class="panel-title">Sold Products</h3>
+                <form method="GET" style="display: inline-block; float: right;">
+                    <input type="hidden" name="dashboard" value="1">
+                    <label for="sort">Sort by Sales:</label>
+                    <select name="sort" id="sort" onchange="this.form.submit()">
+                        <option value="desc" <?= isset($_GET['sort']) && $_GET['sort'] == 'asc' ? '' : 'selected' ?>>Descending</option>
+                        <option value="asc" <?= isset($_GET['sort']) && $_GET['sort'] == 'asc' ? 'selected' : '' ?>>Ascending</option>
+                    </select>
+                </form>
             </div>
+
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -295,6 +305,7 @@ $topProductsResult = $conn->query($topProductsQuery);
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
