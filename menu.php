@@ -229,7 +229,14 @@ $addonResult = $conn->query($addonQuery);
                     </div>
                 </div>
                 <div class="button">
-                    <button type="submit" class="button2" name="add_to_cart">Add to Cart</button>
+                    <button type="submit" class="button2"
+                        <?php
+                        if (!isset($_SESSION['verified']) || $_SESSION['verified'] !== 'verified') {
+                            echo 'onclick="toverify()"';
+                        }
+                        ?>
+                        name="add_to_cart">Add to Cart</button>
+
                 </div>
             </div>
         </form>
@@ -449,6 +456,12 @@ $addonResult = $conn->query($addonQuery);
                 modal.style.display = "none";
                 overlay.style.display = "none";
             }
+        }
+
+        function toverify() {
+            window.location.href = 'otp.php';
+            alert("Please log in to a verified account first!");
+
         }
     </script>
     <?php include 'footer.php'; ?>

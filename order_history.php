@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
 include("connection.php");
 session_start();
@@ -15,10 +13,25 @@ if ($stmt) {
     }
     $stmt->close();
 }
+
+// Handle status update when Cancel button is clicked
+if (isset($_POST['cancel_order'])) {
+    $order_id = $_POST['order_id'];
+    $update_status_query = "UPDATE orders SET status = 3 WHERE id = ? AND user_id = ?";
+    $stmt = $conn->prepare($update_status_query);
+    $stmt->bind_param("ii", $order_id, $userId);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: order_history.php");
+    exit();
+}
 ?>
 
-<link rel="stylesheet" href="css/global.css">
-<link rel="stylesheet" href="css/history.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/history.css">
 <style>
     /* Responsive table styles */
     .cart-container table {
@@ -129,42 +142,6 @@ if ($stmt) {
 
 <?php include("header.php"); ?>
 
-<?php
-$items_per_page = 4;
-$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($current_page - 1) * $items_per_page;
-$total_items_query = "
-        SELECT COUNT(DISTINCT orders.id) AS count 
-        FROM orders 
-        WHERE orders.user_id = '$userId'";
-$total_items_result = mysqli_query($conn, $total_items_query);
-$total_items = mysqli_fetch_assoc($total_items_result)['count'];
-$total_pages = ceil($total_items / $items_per_page);
-
-$get_orders = "
-    SELECT 
-        orders.id AS order_id,
-        orders.order_date,
-        orders.order_quantity,
-        orders.status,
-        orders.size,
-        orders.flavor,
-        orders.toppings,
-        GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
-        GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
-        SUM(orders.total_amount) AS amount_paid,
-        orders.payment_method
-    FROM orders
-    LEFT JOIN coffee_products ON FIND_IN_SET(coffee_products.id, orders.product_ids) > 0
-    LEFT JOIN payment ON orders.id = payment.order_id
-    WHERE orders.user_id = '$userId'
-    GROUP BY orders.id, orders.order_date, orders.order_quantity, orders.status, payment.payment_mode, orders.size
-    ORDER BY orders.order_date DESC
-    LIMIT $offset, $items_per_page";
-
-$run_orders = mysqli_query($conn, $get_orders);
-?>
-
 <section class="center">
     <div class="Itemcart">
         <h1>Purchase History</h1>
@@ -177,47 +154,85 @@ $run_orders = mysqli_query($conn, $get_orders);
                         <th>Quantity</th>
                         <th>Size</th>
                         <th>Details</th>
-                        <th>Favor</th>
+                        <th>Flavor</th>
                         <th>Toppings</th>
                         <th>Order Date</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = mysqli_fetch_array($run_orders)) : ?>
-                        <?php
-                        $order_date = date('F j, Y', strtotime($row['order_date']));
-                        $price = "₱ " . $row['amount_paid'];
-                        $status_text = [
+                    <?php
+                    $items_per_page = 4;
+                    $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                    $offset = ($current_page - 1) * $items_per_page;
+$total_items_query = "
+        SELECT COUNT(DISTINCT orders.id) AS count 
+        FROM orders 
+        WHERE orders.user_id = '$userId'";
+$total_items_result = mysqli_query($conn, $total_items_query);
+$total_items = mysqli_fetch_assoc($total_items_result)['count'];
+$total_pages = ceil($total_items / $items_per_page);
 
+                    $get_orders = "
+                        SELECT 
+                            orders.id AS order_id,
+                            orders.order_date,
+                            orders.order_quantity,
+                            orders.status,
+                            orders.size,
+                            orders.flavor,
+                            orders.toppings,
+                            GROUP_CONCAT(coffee_products.product_name SEPARATOR ', ') AS item_names,
+                            GROUP_CONCAT(coffee_products.product_image SEPARATOR ', ') AS item_images,
+                            SUM(orders.total_amount) AS amount_paid,
+                            orders.payment_method
+                        FROM orders
+                        LEFT JOIN coffee_products ON FIND_IN_SET(coffee_products.id, orders.product_ids) > 0
+                        WHERE orders.user_id = '$userId'
+                        GROUP BY orders.id
+                        ORDER BY orders.order_date DESC
+                        LIMIT $offset, $items_per_page";
+
+                    $run_orders = mysqli_query($conn, $get_orders);
+                    while ($row = mysqli_fetch_array($run_orders)) :
+                        $order_date = date('F j, Y', strtotime($row['order_date']));
+                        $status_text = [
                             "0" => "Placed",
-                            "1" => "Deliverd",
-                            "2" => "Canceled"
+                            "1" => "Delivered",
+                            "2" => "Canceled",
+                            "3" => "Canceled by User"
                         ][$row['status']];
-                        ?>
+                    ?>
                         <tr>
                             <td><?= $row['order_id'] ?></td>
                             <td>
-                                <div>
-                                    <?php
-                                    $names = explode(', ', $row['item_names']);
-                                    $images = explode(', ', $row['item_images']);
-                                    foreach ($images as $index => $image) :
-                                    ?>
-                                        <div style=" display: flex; flex-direction: row; align-items: center; ">
-                                            <img src="<?= $image ?>" alt="<?= $names[$index] ?>">
-                                            <?= $names[$index] ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
+                                <?php
+                                $names = explode(', ', $row['item_names']);
+                                $images = explode(', ', $row['item_images']);
+                                foreach ($images as $index => $image) {
+                                    echo "<div style='display: flex; align-items: center;'>
+                                            <img src='$image' alt='{$names[$index]}' style='width: 50px; height: 50px; object-fit: cover; margin-right: 10px;'>
+                                            {$names[$index]}
+                                          </div>";
+                                }
+                                ?>
                             </td>
                             <td><?= $row['order_quantity'] ?></td>
                             <td><?= $row['size'] ?></td>
-                            <td><?= $price ?> - <?= $row['payment_method'] ?></td>
+                            <td>₱ <?= number_format($row['amount_paid'], 2) ?> - <?= $row['payment_method'] ?></td>
                             <td><?= $row['flavor'] ?></td>
                             <td><?= $row['toppings'] ?></td>
-                            <td><?= $order_date . "<br>" . $row['order_date'] ?></td>
+                            <td><?= $order_date ?></td>
                             <td><?= $status_text ?></td>
+                            <td>
+                                <?php if ($row['status'] == 0) : ?>
+                                    <form method="POST" onsubmit="return confirmCancel()">
+                                        <input type="hidden" name="order_id" value="<?= $row['order_id'] ?>">
+                                        <button type="submit" name="cancel_order" class="cancel-btn">Cancel</button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
@@ -240,19 +255,11 @@ $run_orders = mysqli_query($conn, $get_orders);
     </div>
 </section>
 
-<div id="returnModal">
-    <div class="modal-content">
-        <h3>Return Order</h3>
-        <p>Please select the reason for returning the order:</p>
-        <select id="returnReason">
-            <option value="Damaged item">Damaged item</option>
-            <option value="Received wrong item">Received wrong item</option>
-            <option value="Item not as described">Item not as described</option>
-            <option value="Changed mind">Changed mind</option>
-            <option value="Other">Other</option>
-        </select>
-        <br><br>
-        <button onclick="submitReturnOrder()">Submit</button>
-        <button onclick="closeReturnModal()">Cancel</button>
-    </div>
-</div>
+<script>
+function confirmCancel() {
+    return confirm("Are you sure you want to cancel this order?");
+}
+</script>
+
+</body>
+</html>

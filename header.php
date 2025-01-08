@@ -23,6 +23,9 @@ if (isset($_SESSION['username'])) {
             $user = $result->fetch_assoc();
             $_SESSION['first_name'] = $user['Fname'];
             $_SESSION['last_name'] = $user['Lname'];
+            $_SESSION['verified'] = $user['verified'];
+
+            
             if (!empty($user['profile_picture'])) {
                 $userImage = $user['profile_picture'];
             }

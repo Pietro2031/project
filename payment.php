@@ -188,7 +188,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <select name="paymentMode" id="paymentMode" required>
                         <option value="GCash">GCash</option>
                         <option value="Debit Card">Debit Card</option>
-                        <option value="Pay on the Counter">Pay on the Counter</option>
                     </select>
                 </div>
                 <div class="payment-button">

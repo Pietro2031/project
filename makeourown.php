@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <?php include('connection.php');
     session_start(); ?>
     <meta charset="UTF-8">
@@ -14,6 +15,9 @@
 
 <body>
     <?php include('header.php'); ?>
+    <?php if ($_SESSION['verified'] != 'verified') {
+        echo "<script> window.location.href = 'otp.php'; alert('Please log in to a verified account first!');</script>";
+    } ?>
     <section class="section">
         <h1>Create Your Drink</h1>
         <div class="customization-container">
@@ -119,7 +123,6 @@
                 <select name="paymentMode" id="paymentMode" required>
                     <option value="GCash">GCash</option>
                     <option value="Debit Card">Debit Card</option>
-                    <option value="Pay on the Counter">Pay on the Counter</option>
                 </select>
             </div>
             <div class="payment-button">
