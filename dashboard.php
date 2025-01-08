@@ -276,7 +276,7 @@ $topProductsResult = $conn->query($topProductsQuery);
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Sold Products</h3>
-                <form method="GET" style="display: inline-block; float: right;">
+                <form method="GET" style="float: right;">
                     <input type="hidden" name="dashboard" value="1">
                     <label for="sort">Sort by Sales:</label>
                     <select name="sort" id="sort" onchange="this.form.submit()">
