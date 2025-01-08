@@ -54,6 +54,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                 $product_id_array = explode(",", $product_ids);
                                 $quantity_array = explode(",", $Size);
 
+
                                 $items_details = '';
 
                                 foreach ($product_id_array as $index => $product_id) {
@@ -70,6 +71,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                             $product_image = $row_item['product_image'];
 
                                             $item_quantity = isset($quantity_array[$index]) ? $quantity_array[$index] : 0;
+                                            $Upload = isset($upload_array[$index]) ? $upload_array[$index] : 0;
 
                                             $items_details .= "<div class='returnitem'>
                                             <div class='returninfo'>
@@ -88,6 +90,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                                     <div class='info2'>
                                                         <h4>Price</h4>
                                                         <p>₱ $Price</p>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -99,6 +102,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                         echo "Error preparing item statement: " . mysqli_error($conn);
                                     }
                                 }
+
                             ?>
                                 <tr>
                                     <td>
@@ -140,7 +144,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                             <?php if ($status == 0) : ?>
                                                 <p class="text3">A new order has been placed. Please review the details and to release the order.</p>
                                                 <div class="div3">
-                                                    <button onclick="showReceiptForm('<?php echo $order_id; ?>')" style="color: #337ab7; text-decoration: none;">Mark as Released</button>
+                                                    <a href="update_status.php?status=1&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Mark as Released</a>
                                                     <a href="update_status.php?status=2&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Cancel</a>
                                                 </div>
                                             <?php else : ?>
@@ -149,6 +153,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                         </div>
                                     </td>
                                 </tr>
+
                             <?php
                             }
                             ?>
@@ -176,27 +181,3 @@ $run_pro = mysqli_query($conn, $get_pro);
         </div>
     </div>
 </div>
-
-<!-- Receipt Upload Modal -->
-<div id="receiptModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: #fff; padding: 20px; border-radius: 8px; text-align: center;">
-        <h4>Upload Receipt</h4>
-        <form method="POST" enctype="multipart/form-data" action="upload_receipt.php">
-            <input type="hidden" name="order_id" id="order_id">
-            <input type="file" name="receipt" required><br><br>
-            <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Upload</button>
-            <button type="button" onclick="closeReceiptForm()" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Cancel</button>
-        </form>
-    </div>
-</div>
-
-<script>
-function showReceiptForm(orderId) {
-    document.getElementById('order_id').value = orderId;
-    document.getElementById('receiptModal').style.display = 'flex';
-}
-
-function closeReceiptForm() {
-    document.getElementById('receiptModal').style.display = 'none';
-}
-</script>
