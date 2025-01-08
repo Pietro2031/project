@@ -2,7 +2,7 @@
 $categoryFilter = isset($_GET['category']) ? $_GET['category'] : '';
 $sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'ASC';
 
-// Build the SQL query with optional filter and sort
+
 $query = "SELECT p.id, p.product_name, p.product_image, p.product_description, p.price, c.category_name 
           FROM coffee_products p 
           JOIN coffee_category c ON p.category_id = c.id";

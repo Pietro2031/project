@@ -1,11 +1,11 @@
 <?php
 
 
-// Get filter values
+
 $category = isset($_GET['category']) ? $_GET['category'] : 'all';
 $quantityFilter = isset($_GET['quantity_filter']) ? $_GET['quantity_filter'] : 'all';
 
-// Build the SQL queries
+
 $queries = [];
 if ($category === 'all' || $category === 'base') {
     $queries[] = "SELECT 'Base' AS category, base_name AS item_name, quantity, price, img FROM coffee_base";
@@ -17,10 +17,10 @@ if ($category === 'all' || $category === 'toppings') {
     $queries[] = "SELECT 'Topping' AS category, topping_name AS item_name, quantity, price, img FROM coffee_toppings";
 }
 
-// Combine queries
+
 $query = implode(" UNION ", $queries);
 
-// Apply quantity filter
+
 if ($quantityFilter !== 'all') {
     $quantityCondition = "";
     if ($quantityFilter === 'low') {
@@ -31,7 +31,7 @@ if ($quantityFilter !== 'all') {
         $quantityCondition = "quantity > 200";
     }
 
-    // Apply filter to all queries if 'all' category is selected
+
     if ($category === 'all') {
         $query = "SELECT * FROM (" . $query . ") AS combined WHERE " . $quantityCondition;
     } else {

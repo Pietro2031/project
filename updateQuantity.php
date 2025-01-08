@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 0;
 
     if ($cartId > 0 && $quantity > 0) {
-        // Update the quantity in the database
+
         $updateQuery = "UPDATE cart SET quantity = ? WHERE id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("ii", $quantity, $cartId);
@@ -14,17 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt->execute()) {
             echo "Quantity updated successfully!";
         } else {
-            http_response_code(500); // Internal server error
+            http_response_code(500);
             echo "Error updating quantity: " . $conn->error;
         }
 
         $stmt->close();
     } else {
-        http_response_code(400); // Bad request
+        http_response_code(400);
         echo "Invalid cart ID or quantity.";
     }
 } else {
-    http_response_code(405); // Method not allowed
+    http_response_code(405);
     echo "Invalid request method.";
 }
 

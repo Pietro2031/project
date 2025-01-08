@@ -58,7 +58,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                 $items_details = '';
 
                                 foreach ($product_id_array as $index => $product_id) {
-                                    // Get item details
+
                                     $run_items = mysqli_prepare($conn, "SELECT * FROM coffee_products WHERE id = ?");
                                     if ($run_items) {
                                         mysqli_stmt_bind_param($run_items, 's', $product_id);
@@ -153,7 +153,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                         </div>
                                     </td>
                                 </tr>
-                                
+
                             <?php
                             }
                             ?>

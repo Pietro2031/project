@@ -2,7 +2,7 @@
 $timeFrame = isset($_GET['time_frame']) ? $_GET['time_frame'] : 'any';
 $sortOrder = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'DESC';
 
-// Build the SQL query with time frame filter
+
 $query = "SELECT * FROM custom_drink";
 
 if ($timeFrame === '3day') {

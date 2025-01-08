@@ -1,23 +1,23 @@
 <?php
 
-// Fetch all categories from the coffee_category table
+
 $categories_query = "SELECT * FROM coffee_category";
 $categories_result = mysqli_query($conn, $categories_query);
 
-// Handle delete action
+
 if (isset($_GET['delete_category'])) {
     $id = $_GET['delete_category'];
 
-    // Fetch the image path before deleting the category
+
     $category_query = "SELECT category_image FROM coffee_category WHERE id = '" . mysqli_real_escape_string($conn, $id) . "'";
     $category_result = mysqli_query($conn, $category_query);
     $category = mysqli_fetch_assoc($category_result);
     $image_path = $category['category_image'];
 
-    // Delete the category
+
     $delete_query = "DELETE FROM coffee_category WHERE id = '" . mysqli_real_escape_string($conn, $id) . "'";
     if (mysqli_query($conn, $delete_query)) {
-        // Delete the image file from the server
+
         if (file_exists($image_path)) {
             unlink($image_path);
         }
@@ -28,25 +28,25 @@ if (isset($_GET['delete_category'])) {
     }
 }
 
-// Handle adding a new category
+
 if (isset($_POST['add_category'])) {
     $new_category_name = $_POST['category_name'];
     $category_image = $_FILES['category_image'];
 
     if (!empty($new_category_name) && !empty($category_image['name'])) {
-        // Handle image upload
+
         $target_dir = "uploads/category/";
         $target_file = $target_dir . basename($category_image["name"]);
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        // Validate image
+
         $check = getimagesize($category_image["tmp_name"]);
         if ($check === false) {
             echo "<script>alert('File is not an image.');</script>";
         } elseif (!move_uploaded_file($category_image["tmp_name"], $target_file)) {
             echo "<script>alert('There was an error uploading the image.');</script>";
         } else {
-            // Insert new category with image
+
             $insert_query = "INSERT INTO coffee_category (category_name, category_image) VALUES ('" . mysqli_real_escape_string($conn, $new_category_name) . "', '" . mysqli_real_escape_string($conn, $target_file) . "')";
             if (mysqli_query($conn, $insert_query)) {
                 echo "<script>alert('Category added successfully');</script>";
@@ -60,14 +60,14 @@ if (isset($_POST['add_category'])) {
     }
 }
 
-// Handle category update (edit)
+
 if (isset($_POST['edit_category'])) {
     $category_id = $_POST['category_id'];
     $updated_category_name = $_POST['edit_category_name'];
     $category_image = $_FILES['edit_category_image'];
 
     if (!empty($updated_category_name)) {
-        // Update image if a new one is uploaded
+
         $image_update_clause = '';
         if (!empty($category_image['name'])) {
             $target_dir = "uploads/category/";
@@ -80,12 +80,12 @@ if (isset($_POST['edit_category'])) {
             } elseif (!move_uploaded_file($category_image["tmp_name"], $target_file)) {
                 echo "<script>alert('There was an error uploading the image.');</script>";
             } else {
-                // If the image is successfully uploaded, set the image update query part
+
                 $image_update_clause = ", category_image='" . mysqli_real_escape_string($conn, $target_file) . "'";
             }
         }
 
-        // Update the category in the database
+
         $update_query = "UPDATE coffee_category SET category_name='" . mysqli_real_escape_string($conn, $updated_category_name) . "' $image_update_clause WHERE id='" . mysqli_real_escape_string($conn, $category_id) . "'";
         if (mysqli_query($conn, $update_query)) {
             echo "<script>alert('Category updated successfully');</script>";

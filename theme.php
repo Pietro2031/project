@@ -1,15 +1,15 @@
 <?php
-session_start(); // Start the session to access session variables
+session_start();
 
-// Include the database connection file
+
 include('connection.php');
 
-// Enable error reporting for debugging
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Fetch user data from the database
-$username = "admin"; // Assuming you want to fetch the admin's profile image
+
+$username = "admin";
 $query = "SELECT profile_picture FROM admin_account WHERE username = ?";
 $stmt = $conn->prepare($query);
 
@@ -20,43 +20,43 @@ if ($stmt) {
 
     if ($result->num_rows > 0) {
         $admin = $result->fetch_assoc();
-        $profile_picture = $admin['profile_picture']; // Get the profile picture from the database
+        $profile_picture = $admin['profile_picture'];
     } else {
-        $profile_picture = 'default-profile.png'; // Set a default image if no profile picture exists
+        $profile_picture = 'default-profile.png';
     }
 } else {
     echo "<p>Error in statement preparation: " . htmlspecialchars($conn->error) . "</p>";
 }
 if (!isset($_SESSION['admin_username'])) {
-    // Redirect to login page if not logged in
+
     header("Location: login.php");
     exit();
 }
 
-// Check if logo upload form is submitted
+
 if (isset($_POST['save_logo']) && isset($_FILES['logo'])) {
-    // Get the uploaded file details
+
     $logo = $_FILES['logo'];
 
-    // Check for upload errors
+
     if ($logo['error'] == UPLOAD_ERR_OK) {
         $file_tmp_name = $logo['tmp_name'];
         $file_name = basename($logo['name']);
         $file_size = $logo['size'];
         $file_type = $logo['type'];
 
-        // Set the destination directory where the logo will be stored
+
         $upload_dir = 'uploads/logos/';
-        
-        // Create the directory if it doesn't exist
+
+
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
 
-        // Move the uploaded file to the desired directory
+
         $file_path = $upload_dir . $file_name;
         if (move_uploaded_file($file_tmp_name, $file_path)) {
-            // Update the logo path in the database
+
             $update_logo_query = "UPDATE theme SET logo = ? WHERE id = 1";
             $stmt = $conn->prepare($update_logo_query);
             if ($stmt) {
@@ -75,19 +75,19 @@ if (isset($_POST['save_logo']) && isset($_FILES['logo'])) {
 }
 
 
-// Fetch the current logo from the database
+
 $query_logo = "SELECT logo FROM theme WHERE id = 1";
 $result_logo = $conn->query($query_logo);
 if ($result_logo->num_rows > 0) {
     $theme = $result_logo->fetch_assoc();
-    $current_logo = $theme['logo']; // Get the current logo
+    $current_logo = $theme['logo'];
 } else {
-    $current_logo = 'default-logo.png'; // Set a default logo if not found
+    $current_logo = 'default-logo.png';
 }
 
-// Check if save button is clicked and update database for specific color
+
 if (isset($_POST['save_primary']) || isset($_POST['save_font'])) {
-    // Update only the background or font color based on the button clicked
+
     if (isset($_POST['primary_color']) && isset($_POST['secondary_color'])) {
         $primary_color = $_POST['primary_color'];
         $secondary_color = $_POST['secondary_color'];
@@ -106,9 +106,9 @@ if (isset($_POST['save_primary']) || isset($_POST['save_font'])) {
     if (isset($_POST['font_color'])) {
         $font_color = $_POST['font_color'];
 
-        // Ensure font_color is not null
+
         if (empty($font_color)) {
-            $font_color = '#9E9B76'; // Default font color if none is provided
+            $font_color = '#9E9B76';
         }
 
         $update_query = "UPDATE theme SET font_color = ? WHERE id = 1";
@@ -123,7 +123,7 @@ if (isset($_POST['save_primary']) || isset($_POST['save_font'])) {
     }
 }
 
-// Reset background colors to default
+
 if (isset($_POST['reset_background'])) {
     $default_primary = '#fff';
     $default_secondary = '#C9C9A6';
@@ -139,7 +139,7 @@ if (isset($_POST['reset_background'])) {
     }
 }
 
-// Reset font color to default
+
 if (isset($_POST['reset_font'])) {
     $default_font = '#9E9B76';
 
@@ -154,46 +154,46 @@ if (isset($_POST['reset_font'])) {
     }
 }
 
-// Fetch the current theme from the database
+
 $query = "SELECT * FROM theme WHERE id = 1";
 $result = $conn->query($query);
 if ($result->num_rows > 0) {
     $theme = $result->fetch_assoc();
-    $primary_color = isset($theme['primary_color']) ? $theme['primary_color'] : '#fff'; 
+    $primary_color = isset($theme['primary_color']) ? $theme['primary_color'] : '#fff';
     $secondary_color = isset($theme['secondary_color']) ? $theme['secondary_color'] : '#C9C9A6';
-    $font_color = isset($theme['font_color']) ? $theme['font_color'] : '#9E9B76';  // Default font color
+    $font_color = isset($theme['font_color']) ? $theme['font_color'] : '#9E9B76';
 } else {
     echo "<p>Theme not found.</p>";
-    // Set default colors in case theme is missing
+
     $primary_color = '#fff';
     $secondary_color = '#C9C9A6';
     $font_color = '#9E9B76';
 }
 
-// Slideshow Upload
+
 if (isset($_POST['upload_slideshow']) && isset($_FILES['slideshow_image'])) {
-    // Get the uploaded file details
+
     $slideshow_image = $_FILES['slideshow_image'];
 
-    // Check for upload errors
+
     if ($slideshow_image['error'] == UPLOAD_ERR_OK) {
         $file_tmp_name = $slideshow_image['tmp_name'];
         $file_name = basename($slideshow_image['name']);
         $file_size = $slideshow_image['size'];
         $file_type = $slideshow_image['type'];
 
-        // Set the destination directory where the slideshow images will be stored
+
         $upload_dir = 'uploads/slideshow/';
-        
-        // Create the directory if it doesn't exist
+
+
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
 
-        // Set the file path
+
         $file_path = $upload_dir . $file_name;
 
-        // Check if the file already exists in the database
+
         $check_query = "SELECT COUNT(*) FROM slideshow WHERE slideshow_path = ?";
         $stmt = $conn->prepare($check_query);
         $stmt->bind_param("s", $file_path);
@@ -202,10 +202,10 @@ if (isset($_POST['upload_slideshow']) && isset($_FILES['slideshow_image'])) {
         $stmt->fetch();
         $stmt->close();
 
-        // If the file is not already in the database, insert it
+
         if ($count == 0) {
             if (move_uploaded_file($file_tmp_name, $file_path)) {
-                // Insert the slideshow image path into the database
+
                 $insert_query = "INSERT INTO slideshow (slideshow_path) VALUES (?)";
                 $stmt = $conn->prepare($insert_query);
                 if ($stmt) {
@@ -226,11 +226,11 @@ if (isset($_POST['upload_slideshow']) && isset($_FILES['slideshow_image'])) {
     }
 }
 
-// Delete Slideshow
+
 if (isset($_POST['delete_slideshow']) && isset($_POST['selected_slideshow'])) {
     $selected_slideshow_id = $_POST['selected_slideshow'];
-    
-    // Fetch the slideshow path from the database to delete the file
+
+
     $delete_query = "SELECT slideshow_path FROM slideshow WHERE id = ?";
     $stmt = $conn->prepare($delete_query);
     if ($stmt) {
@@ -241,12 +241,12 @@ if (isset($_POST['delete_slideshow']) && isset($_POST['selected_slideshow'])) {
             $slideshow = $result->fetch_assoc();
             $slideshow_path = $slideshow['slideshow_path'];
 
-            // Delete the slideshow image file from the server
+
             if (file_exists($slideshow_path)) {
                 unlink($slideshow_path);
             }
 
-            // Delete the slideshow entry from the database
+
             $delete_query = "DELETE FROM slideshow WHERE id = ?";
             $stmt = $conn->prepare($delete_query);
             $stmt->bind_param("i", $selected_slideshow_id);
@@ -258,7 +258,7 @@ if (isset($_POST['delete_slideshow']) && isset($_POST['selected_slideshow'])) {
     }
 }
 
-// Fetch current slideshows from the database
+
 $query_slideshow = "SELECT * FROM slideshow";
 $result_slideshow = $conn->query($query_slideshow);
 $slideshows = [];
@@ -274,6 +274,7 @@ if ($result_slideshow->num_rows > 0) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -306,7 +307,7 @@ if ($result_slideshow->num_rows > 0) {
                 <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
             </ul>
         </nav>
-         <div class="sidebar-bottom">
+        <div class="sidebar-bottom">
             <ul>
                 <li><a href="adminprofile.php"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
             </ul>
@@ -367,51 +368,52 @@ if ($result_slideshow->num_rows > 0) {
             </div>
             <h3>Upload New Logo</h3>
             <form method="POST" enctype="multipart/form-data">
-            <div class="logo-upload">
-    <label for="logo" class="file-upload-label"></label>
-    <input type="file" id="logo" name="logo" accept="image/*" class="file-upload-input">
-</div>
+                <div class="logo-upload">
+                    <label for="logo" class="file-upload-label"></label>
+                    <input type="file" id="logo" name="logo" accept="image/*" class="file-upload-input">
+                </div>
 
                 <div class="save-button">
                     <button type="submit" name="save_logo">Save Logo</button>
                 </div>
             </form>
         </div>
-    <!-- Slideshow Section -->
-<div class="theme-section">
-    <h2>Slideshow</h2>
+        <!-- Slideshow Section -->
+        <div class="theme-section">
+            <h2>Slideshow</h2>
 
-    <!-- Display Current Slideshows -->
-    <div class="current-slides">
-        <h3>Current Slideshows</h3>
-        <div class="slideshow-container">
-            <?php foreach ($slideshows as $slideshow) : ?>
-                <div class="slideshow-item">
-                    <img src="<?= htmlspecialchars($slideshow['slideshow_path']) ?>" alt="Slideshow Image" class="slideshow-image">
-                    <form method="POST">
-                        <input type="hidden" name="selected_slideshow" value="<?= $slideshow['id'] ?>">
-                        <button type="submit" name="delete_slideshow" class="delete-button">Delete</button>
-                    </form>
+            <!-- Display Current Slideshows -->
+            <div class="current-slides">
+                <h3>Current Slideshows</h3>
+                <div class="slideshow-container">
+                    <?php foreach ($slideshows as $slideshow) : ?>
+                        <div class="slideshow-item">
+                            <img src="<?= htmlspecialchars($slideshow['slideshow_path']) ?>" alt="Slideshow Image" class="slideshow-image">
+                            <form method="POST">
+                                <input type="hidden" name="selected_slideshow" value="<?= $slideshow['id'] ?>">
+                                <button type="submit" name="delete_slideshow" class="delete-button">Delete</button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
+            </div>
 
-    <!-- Upload New Slideshow Image -->
-    <h3>Upload New Slideshow Image</h3>
-    <form method="POST" enctype="multipart/form-data">
-    <div class="slideshow-upload">
-    <label for="slideshow_image" class="file-upload-label"></label>
-    <input type="file" id="slideshow_image" name="slideshow_image" accept="image/*" class="file-upload-input">
-</div>
+            <!-- Upload New Slideshow Image -->
+            <h3>Upload New Slideshow Image</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="slideshow-upload">
+                    <label for="slideshow_image" class="file-upload-label"></label>
+                    <input type="file" id="slideshow_image" name="slideshow_image" accept="image/*" class="file-upload-input">
+                </div>
 
-        <div class="save-button">
-            <button type="submit" name="upload_slideshow">Create Slideshow</button>
+                <div class="save-button">
+                    <button type="submit" name="upload_slideshow">Create Slideshow</button>
+                </div>
+            </form>
         </div>
-    </form>
-</div>
 
     </div>
 
 </body>
+
 </html>
