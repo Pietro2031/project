@@ -1,8 +1,8 @@
 <?php
-// Include connection file
+
 include('connection.php');
 
-// Fetching cart data and total price from the previous form
+
 $cartData = isset($_POST['cartData']) ? json_decode($_POST['cartData'], true) : [];
 $totalPrice = isset($_POST['totalPrice']) ? $_POST['totalPrice'] : 0;
 
@@ -11,11 +11,11 @@ if (empty($cartData)) {
     exit();
 }
 
-// Assuming there's a user session for placing the order
-session_start();
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; // For now, default to user_id = 1
 
-// Prepare the data for insertion
+session_start();
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
+
+
 $productIds = [];
 $totalQuantity = 0;
 $flavors = [];
@@ -25,24 +25,24 @@ $basePrice = 0.00;
 $addonPrice = 0.00;
 
 foreach ($cartData as $cartItem) {
-    $productIds[] = $cartItem['productId']; // Collect all product IDs
-    $totalQuantity += $cartItem['quantity']; // Sum up the total quantity
-    $size = $cartItem['size']; // Assume all items have the same size, otherwise, adjust logic accordingly
-    $flavors[] = !empty($cartItem['addons']['flavor']) ? $cartItem['addons']['flavor'] : ''; // Collect flavors
-    $toppings[] = !empty($cartItem['addons']['topping']) ? $cartItem['addons']['topping'] : ''; // Collect toppings
-    $basePrice += $cartItem['price']; // Sum base price of each product
-    $addonPrice += !empty($cartItem['addons']) ? array_sum(array_column($cartItem['addons'], 'price')) : 0.00; // Sum the price of add-ons
+    $productIds[] = $cartItem['productId'];
+    $totalQuantity += $cartItem['quantity'];
+    $size = $cartItem['size'];
+    $flavors[] = !empty($cartItem['addons']['flavor']) ? $cartItem['addons']['flavor'] : '';
+    $toppings[] = !empty($cartItem['addons']['topping']) ? $cartItem['addons']['topping'] : '';
+    $basePrice += $cartItem['price'];
+    $addonPrice += !empty($cartItem['addons']) ? array_sum(array_column($cartItem['addons'], 'price')) : 0.00;
 }
 
-// Serialize arrays for insertion
+
 $productIdsString = implode(',', $productIds);
 $flavorsString = implode(', ', $flavors);
 $toppingsString = implode(', ', $toppings);
 
-// Example payment method
-$paymentMethod = "Cash"; // You can modify this based on actual payment options
 
-// Insert the order into the database
+$paymentMethod = "Cash";
+
+
 $orderQuery = "
     INSERT INTO orders (
         user_id, total_amount, order_quantity, product_ids, size, base_price, addon_price, payment_method, flavor, toppings, order_date
@@ -64,10 +64,10 @@ $stmt->bind_param(
 );
 $stmt->execute();
 
-// Fetch the order ID
+
 $orderId = $stmt->insert_id;
 
-// Close the statement and connection
+
 $stmt->close();
 $conn->close();
 ?>

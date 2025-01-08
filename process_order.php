@@ -97,15 +97,15 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $cupSizeStmt->close();
     }
     foreach ($addonIds as $addon) {
-        $addonType = explode('-', $addon)[0]; // Extract the addon type (flavor/topping)
-        $addonId = intval(explode('-', $addon)[1]); // Extract the addon ID
+        $addonType = explode('-', $addon)[0];
+        $addonId = intval(explode('-', $addon)[1]);
 
         if ($addonType === 'flavor') {
             $addonQuery = "SELECT price FROM coffee_flavors WHERE id = ?";
         } elseif ($addonType === 'topping') {
             $addonQuery = "SELECT price FROM coffee_toppings WHERE id = ?";
         } else {
-            continue; // Skip unknown addon types
+            continue;
         }
 
         $addonStmt = $conn->prepare($addonQuery);
@@ -114,7 +114,7 @@ while ($row = $cartItemsResult->fetch_assoc()) {
         $addonResult = $addonStmt->get_result();
 
         if ($addonRow = $addonResult->fetch_assoc()) {
-            $addonPrice += floatval($addonRow['price']) * $quantity; // Multiply by quantity
+            $addonPrice += floatval($addonRow['price']) * $quantity;
         }
 
         $addonStmt->close();
@@ -201,11 +201,11 @@ $orderStmt->bind_param("idsssisdss", $userId, $totalPurchaseValue, $paymentMetho
 $orderStmt->execute();
 $orderStmt->close();
 
-// $clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
-// $clearCartStmt = $conn->prepare($clearCartQuery);
-// $clearCartStmt->bind_param($types, ...$params);
-// $clearCartStmt->execute();
-// $clearCartStmt->close();
+$clearCartQuery = "DELETE FROM cart WHERE user_id = ? AND id IN ($placeholders)";
+$clearCartStmt = $conn->prepare($clearCartQuery);
+$clearCartStmt->bind_param($types, ...$params);
+$clearCartStmt->execute();
+$clearCartStmt->close();
 
 unset($_SESSION['selectedItems']);
 unset($_SESSION['curenttotal']);

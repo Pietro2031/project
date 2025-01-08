@@ -1,5 +1,5 @@
 <?php
-// Fetching the cart data sent from the previous page
+
 $cartData = isset($_POST['cartData']) ? json_decode($_POST['cartData'], true) : [];
 
 if (empty($cartData)) {
@@ -7,13 +7,13 @@ if (empty($cartData)) {
     exit();
 }
 
-// Include connection file
+
 include('connection.php');
 
-// Initialize total price
+
 $totalPrice = 0;
 
-// Function to get add-on details (name and price) from the database
+
 function getAddonDetails($addonId, $conn)
 {
     if (strpos($addonId, 'flavor-') !== false) {
@@ -33,7 +33,7 @@ function getAddonDetails($addonId, $conn)
     return $addon;
 }
 
-// Function to get cup size details (name and price) from the database
+
 function getCupSizeDetails($sizeId, $conn)
 {
     $query = "SELECT size AS name, price FROM cup_size WHERE id = ?";
@@ -71,7 +71,7 @@ function getCupSizeDetails($sizeId, $conn)
             <tbody>
                 <?php foreach ($cartData as $cartItem): ?>
                     <?php
-                    // Fetch cup size details
+
                     $cupSize = getCupSizeDetails($cartItem['size']['id'], $conn);
                     ?>
                     <tr>
@@ -94,7 +94,7 @@ function getCupSizeDetails($sizeId, $conn)
                         </td>
                         <td>
                             <?php
-                            // Calculate the total price for the current item
+
                             $itemPrice = ($cartItem['price'] + $cupSize['price'] + $addonsPrice) * $cartItem['quantity'];
                             echo "₱" . number_format($itemPrice, 2);
                             $totalPrice += $itemPrice;
