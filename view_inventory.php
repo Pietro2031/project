@@ -3,7 +3,7 @@ include 'connection.php';
 
 $selected_type = isset($_GET['item_types']) ? $_GET['item_types'] : '';
 
-$items_per_page = 8;
+$items_per_page = 3;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
@@ -165,17 +165,17 @@ $total_pages = ceil($total_items / $items_per_page);
                 <div class="pagination">
                     <ul class="pagination">
                         <?php if ($current_page > 1) : ?>
-                            <li><a href="?page=<?php echo $current_page - 1; ?>&item_types=<?php echo $selected_type; ?>">&laquo; Previous</a></li>
+                            <li><a href="?view_inventory=1&page=<?php echo $current_page - 1; ?>&item_types=<?php echo $selected_type; ?>">&laquo; Previous</a></li>
                         <?php endif; ?>
 
                         <?php for ($page = 1; $page <= $total_pages; $page++) : ?>
                             <li <?php if ($page == $current_page) echo 'class="active"'; ?>>
-                                <a href="?page=<?php echo $page; ?>&item_types=<?php echo $selected_type; ?>"><?php echo $page; ?></a>
+                                <a href="?view_inventory=1&page=<?php echo $page; ?>&item_types=<?php echo $selected_type; ?>"><?php echo $page; ?></a>
                             </li>
                         <?php endfor; ?>
 
                         <?php if ($current_page < $total_pages) : ?>
-                            <li><a href="?page=<?php echo $current_page + 1; ?>&item_types=<?php echo $selected_type; ?>">Next &raquo;</a></li>
+                            <li><a href="?view_inventory=1&page=<?php echo $current_page + 1; ?>&item_types=<?php echo $selected_type; ?>">Next &raquo;</a></li>
                         <?php endif; ?>
                     </ul>
                 </div>

@@ -1,7 +1,7 @@
 <?php
 include('connection.php');
 
-$items_per_page = 10;
+$items_per_page = 9;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
@@ -50,7 +50,7 @@ $query .= " ORDER BY STR_TO_DATE(orders.order_date, '%Y-%m-%d') DESC LIMIT $offs
 $ordersResult = mysqli_query($conn, $query);
 
 // Fetch unique payment methods for the dropdown
-$paymentMethodsQuery = "SELECT DISTINCT payment_method FROM orders WHERE status = 2";
+$paymentMethodsQuery = "SELECT DISTINCT payment_method FROM orders";
 $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
 ?>
 
@@ -75,86 +75,90 @@ $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
                 margin-top: 20px;
             }
         }
+
+        .slideright .slidedown {
+            width: 100%;
+        }
+
+        .slideright {
+            gap: 10px;
+            padding: 10px;
+            align-items: flex-end;
+        }
     </style>
 </head>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Payment History</h3>
+            </div>
+            <div class="panel-body">
+                <form method="GET" action="admin.php" class="filter-form">
+                    <input type="hidden" name="payment_history" value="1">
+                    <div class="slideright">
+                        <div class="slidedown">
+                            <label for="payment_method">Payment Method:</label>
+                            <select name="payment_method" id="payment_method" class="form-control">
+                                <option value="">All</option>
+                                <?php while ($method = mysqli_fetch_assoc($paymentMethodsResult)): ?>
+                                    <option value="<?php echo $method['payment_method']; ?>"
+                                        <?php if ($selected_method == $method['payment_method']) echo 'selected'; ?>>
+                                        <?php echo $method['payment_method']; ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <div class="slidedown">
+                            <label for="time_frame">Time Frame:</label>
+                            <select name="time_frame" id="time_frame" class="form-control">
+                                <option value="">All Time</option>
+                                <option value="last_7_days" <?php if ($selected_time_frame == 'last_7_days') echo 'selected'; ?>>Last 7 Days</option>
+                                <option value="last_30_days" <?php if ($selected_time_frame == 'last_30_days') echo 'selected'; ?>>Last 30 Days</option>
+                                <option value="this_month" <?php if ($selected_time_frame == 'this_month') echo 'selected'; ?>>This Month</option>
+                            </select>
+                        </div>
+                        <input type="submit" value="Apply">
+                    </div>
+                </form>
 
-<body>
-    <div class="dashboard-container">
-        <h1>Payment History</h1>
-
-        <form method="GET" action="admin.php" class="filter-form">
-            <input type="hidden" name="payment_history" value="1">
-            <label for="payment_method">Payment Method:</label>
-            <select name="payment_method" id="payment_method">
-                <option value="">All</option>
-                <?php while ($method = mysqli_fetch_assoc($paymentMethodsResult)): ?>
-                    <option value="<?php echo $method['payment_method']; ?>"
-                        <?php if ($selected_method == $method['payment_method']) echo 'selected'; ?>>
-                        <?php echo $method['payment_method']; ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
-
-            <label for="time_frame">Time Frame:</label>
-            <select name="time_frame" id="time_frame">
-                <option value="">All Time</option>
-                <option value="last_7_days" <?php if ($selected_time_frame == 'last_7_days') echo 'selected'; ?>>Last 7 Days</option>
-                <option value="last_30_days" <?php if ($selected_time_frame == 'last_30_days') echo 'selected'; ?>>Last 30 Days</option>
-                <option value="this_month" <?php if ($selected_time_frame == 'this_month') echo 'selected'; ?>>This Month</option>
-            </select>
-
-            <button type="submit">Filter</button>
-        </form>
-
-        <!-- Print Button -->
-        <a href="print-payment_history.php">Print Table</a>
-
-        <div class="payment-history-table" id="printableTable">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Order Date</th>
-                        <th>Total Amount</th>
-                        <th>Payment Method</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($order = mysqli_fetch_assoc($ordersResult)): ?>
-                        <tr>
-                            <td><?php echo $order['id']; ?></td>
-                            <td><?php echo $order['username']; ?></td>
-                            <td><?php echo date('F j, Y', strtotime($order['order_date'])); ?></td>
-                            <td>₱<?php echo number_format($order['total_amount'], 2); ?></td>
-                            <td><?php echo $order['payment_method']; ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination">
-            <ul class="pagination">
-                <?php if ($current_page > 1): ?>
-                    <li><a href="admin.php?payment_history&page=<?php echo $current_page - 1; ?>&payment_method=<?php echo $selected_method; ?>&time_frame=<?php echo $selected_time_frame; ?>">&laquo; Previous</a></li>
-                <?php endif; ?>
-
-                <?php for ($page = 1; $page <= $total_pages; $page++): ?>
-                    <li <?php if ($page == $current_page) echo 'class="active"'; ?>>
-                        <a href="admin.php?payment_history&page=<?php echo $page; ?>&payment_method=<?php echo $selected_method; ?>&time_frame=<?php echo $selected_time_frame; ?>">
-                            <?php echo $page; ?>
-                        </a>
-                    </li>
-                <?php endfor; ?>
-
-                <?php if ($current_page < $total_pages): ?>
-                    <li><a href="admin.php?payment_history&page=<?php echo $current_page + 1; ?>&payment_method=<?php echo $selected_method; ?>&time_frame=<?php echo $selected_time_frame; ?>">Next &raquo;</a></li>
-                <?php endif; ?>
-            </ul>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Order Date</th>
+                                <th>Total Amount</th>
+                                <th>Payment Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($order = mysqli_fetch_assoc($ordersResult)): ?>
+                                <tr>
+                                    <td><?php echo $order['id']; ?></td>
+                                    <td><?php echo $order['username']; ?></td>
+                                    <td><?php echo date('F j, Y', strtotime($order['order_date'])); ?></td>
+                                    <td>₱<?php echo number_format($order['total_amount'], 2); ?></td>
+                                    <td><?php echo $order['payment_method']; ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <ul class="pagination">
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <li>
+                                <a href="admin.php?payment_history=1&page=<?php echo $i; ?>&payment_method=<?php echo $selected_method; ?>&time_frame=<?php echo $selected_time_frame; ?>"
+                                    class="<?php echo ($i == $current_page) ? 'active' : ''; ?>">
+                                    <?php echo $i; ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-
-</html>
+</div>

@@ -25,12 +25,12 @@
                     $baseResult = $conn->query($baseQuery);
                     if ($baseResult->num_rows > 0) {
                         while ($base = $baseResult->fetch_assoc()) {
-                            echo '<div class="base-item">
- <img src="' . $base['img'] . '" alt="' . $base['base_name'] . '">
- <div class="base-name">' . $base['base_name'] . '</div>
- <div class="base-price">₱' . number_format($base['price'], 2) . '</div> 
- <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['base_name'] . '" data-price="' . $base['price'] . '" data-img="' . $base['img'] . '">Select</button>
- </div>';
+                            echo   '<div class="base-item">
+                                        <img src="' . $base['img'] . '" alt="' . $base['base_name'] . '">
+                                        <div class="base-name">' . $base['base_name'] . '</div>
+                                        <div class="base-price">₱' . number_format($base['price'], 2) . '</div> 
+                                        <button class="select-base-btn" data-id="' . $base['id'] . '" data-name="' . $base['base_name'] . '" data-price="' . $base['price'] . '" data-img="' . $base['img'] . '">Select</button>
+                                    </div>';
                         }
                     } else {
                         echo '<p>No drink bases available.</p>';
@@ -41,7 +41,7 @@
             <div class="cup-container">
                 <h2>Your Custom Drink</h2>
                 <div class="virtual-cup">
-                    <img src="img/cup.png" alt="" style=" filter: drop-shadow(0px 0.1px 4px #999); ">
+                    <img src="img/cup2.png" alt="" style=" filter: drop-shadow(0px 0.1px 4px #999); ">
                     <img src="<?= $logo ?>" style=" z-index: 99;width: 150px;height: 150px;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
                     <div id="cup-content" class="cup-content"></div>
                 </div>
@@ -85,7 +85,7 @@
                         if ($ingredientResult->num_rows > 0) {
                             while ($ingredient = $ingredientResult->fetch_assoc()) {
                                 $nameField = ($table == "coffee_flavors") ? "flavor_name" : "topping_name";
-                                $imgPath = $ingredient['img']; 
+                                $imgPath = $ingredient['img'];
                                 echo '<div class="ingredient-item" data-category="' . $category . '">
                                     <img src="' . $imgPath . '" alt="' . $ingredient[$nameField] . '">
                                     <span class="base-name">' . $ingredient[$nameField] . ' - ₱' . number_format($ingredient['price'], 2) . '</span>
