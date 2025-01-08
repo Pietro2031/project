@@ -198,12 +198,14 @@ $totalPurchaseValue = 0;
                     <h2>Payment Method</h2>
                     <form action="process_order.php" method="POST">
                         <input type="hidden" name="total" value="<?= $totalPurchaseValue ?>">
-                        <label for="payment">Select Payment Method:</label>
-                        <select name="payment_method" id="payment">
-                            <option value="cash">Cash</option>
-                            <option value="credit_card">Credit Card</option>
-                            <option value="gcash">GCash</option>
-                        </select>
+                        <div class="slidedown">
+                            <label for="payment">Select Payment Method:</label>
+                            <select name="payment_method" id="payment">
+                                <option value="cash">Cash</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="gcash">GCash</option>
+                            </select>
+                        </div>
                         <button type="submit" class="buybtn">Submit Order</button>
                     </form>
                 </div>

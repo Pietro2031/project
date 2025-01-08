@@ -1,92 +1,120 @@
 <?php
-include('connection.php');
+// Fetching the cart data sent from the previous page
+$cartData = isset($_POST['cartData']) ? json_decode($_POST['cartData'], true) : [];
 
-if (isset($_POST['cartData'])) {
-    // Decode the cart data from JSON
-    $cartData = json_decode($_POST['cartData'], true);
-
-    // Common order details
-    $userId = 0; // Replace with actual user ID if available
-    $orderDate = date('Y-m-d H:i:s');
-    $status = 1; // Example status, modify as per your application logic
-    $paymentMethod = 'pay on conter'; // Replace with dynamic method if needed
-    $totalAmount = 0;
-    $orderQuantity = 0;
-
-    // Prepare for capturing data
-    $productIds = [];
-    $orderItems = []; // To store detailed product data for insertion
-
-    foreach ($cartData as $item) {
-        // Extract individual item details
-        $productId = $item['productId'];
-        $productName = $item['productName'] ?? '';
-        $quantity = $item['quantity'];
-        $price = $item['price'];
-
-        $size = $item['size'] ?? ''; // Capture size if provided
-        $sizePrice = $item['sizePrice'] ?? 0;
-
-        $addons = $item['addons'] ?? [];
-        $addonPrice = 0;
-        $addonDetails = '';
-
-        // Check if addons is an array
-        if (is_array($addons)) {
-            $addonPrice = array_sum(array_column($addons, 'price')); // Sum all addon prices
-            $addonDetails = implode(', ', array_column($addons, 'name')); // Combine addon names
-        }
-
-        $flavors = $item['flavors'] ?? [];
-        $flavorDetails = is_array($flavors) ? implode(', ', $flavors) : '';
-
-        $toppings = $item['toppings'] ?? [];
-        $toppingDetails = is_array($toppings) ? implode(', ', $toppings) : '';
-
-        // Update order totals
-        $orderQuantity += $quantity;
-        $totalAmount += $price;
-
-        // Add product ID for reference
-        $productIds[] = $productId;
-
-        // Prepare order item details for insertion
-        $orderItems[] = [
-            'product_id' => $productId,
-            'product_name' => $productName,
-            'quantity' => $quantity,
-            'price' => $price,
-            'size' => $size,
-            'size_price' => $sizePrice,
-            'addon_details' => $addonDetails,
-            'addon_price' => $addonPrice,
-            'flavor_details' => $flavorDetails,
-            'topping_details' => $toppingDetails,
-        ];
-    }
-
-    // Convert product IDs to string
-    $productIdsStr = implode(',', $productIds);
-
-    // Insert main order into `orders` table
-    $insertOrderQuery = "
-    INSERT INTO `orders` 
-    (`user_id`, `order_date`, `total_amount`, `order_quantity`, `product_ids`, `status`, `payment_method`, `created_at`) 
-    VALUES 
-    ($userId, '$orderDate', $totalAmount, $orderQuantity, '$productIdsStr', $status, '$paymentMethod', '$orderDate')";
-
-    if ($conn->query($insertOrderQuery) === TRUE) {
-        // Get the last inserted order ID
-        $orderId = $conn->insert_id;
-
-        // Insert each order item into `order_items` table
-        foreach ($orderItems as $item) {
-        }
-
-        echo "<script>alert('Order placed successfully!'); window.location.href = 'admin.php?POS';</script>";
-    } else {
-        echo "Error placing order: " . $conn->error;
-    }
+if (empty($cartData)) {
+    echo "No items in the cart.";
+    exit();
 }
 
-$conn->close();
+// Include connection file
+include('connection.php');
+
+// Initialize total price
+$totalPrice = 0;
+
+// Function to get add-on details (name and price) from the database
+function getAddonDetails($addonId, $conn)
+{
+    if (strpos($addonId, 'flavor-') !== false) {
+        $id = str_replace('flavor-', '', $addonId);
+        $query = "SELECT flavor_name AS name, price FROM coffee_flavors WHERE id = ?";
+    } elseif (strpos($addonId, 'topping-') !== false) {
+        $id = str_replace('topping-', '', $addonId);
+        $query = "SELECT topping_name AS name, price FROM coffee_toppings WHERE id = ?";
+    }
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $addon = $result->fetch_assoc();
+
+    return $addon;
+}
+
+// Function to get cup size details (name and price) from the database
+function getCupSizeDetails($sizeId, $conn)
+{
+    $query = "SELECT size AS name, price FROM cup_size WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $sizeId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cupSize = $result->fetch_assoc();
+
+    return $cupSize;
+}
+
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Order Summary</title>
+    <link rel="stylesheet" href="css/menu.css">
+</head>
+
+<body>
+    <div class="order-summary">
+        <h1>Your Order Summary</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Size</th> <!-- New column for cup size -->
+                    <th>Quantity</th>
+                    <th>Add-ons</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($cartData as $cartItem): ?>
+                    <?php
+                    // Fetch cup size details
+                    $cupSize = getCupSizeDetails($cartItem['size']['id'], $conn);
+                    ?>
+                    <tr>
+                        <td><?php echo $cartItem['productName']; ?></td>
+                        <td><?php echo $cupSize['name']; ?> (₱<?php echo number_format($cupSize['price'], 2); ?>)</td> <!-- Display cup size name and price -->
+                        <td><?php echo $cartItem['quantity']; ?></td>
+                        <td>
+                            <?php
+                            $addonsPrice = 0;
+                            if (!empty($cartItem['addons'])) {
+                                foreach ($cartItem['addons'] as $addonId) {
+                                    $addon = getAddonDetails($addonId, $conn);
+                                    echo $addon['name'] . " (₱" . number_format($addon['price'], 2) . ")<br>";
+                                    $addonsPrice += $addon['price'];
+                                }
+                            } else {
+                                echo "None";
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <?php
+                            // Calculate the total price for the current item
+                            $itemPrice = ($cartItem['price'] + $cupSize['price'] + $addonsPrice) * $cartItem['quantity'];
+                            echo "₱" . number_format($itemPrice, 2);
+                            $totalPrice += $itemPrice;
+                            ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <div class="total-price">
+            <h2>Total Price: ₱<?php echo number_format($totalPrice, 2); ?></h2>
+        </div>
+
+        <form action="place_order.php" method="POST">
+            <input type="hidden" name="cartData" value='<?php echo json_encode($cartData); ?>'>
+            <input type="hidden" name="totalPrice" value="<?php echo $totalPrice; ?>">
+            <button type="submit" class="checkout-btn">Place Order</button>
+        </form>
+    </div>
+</body>
+
+</html>

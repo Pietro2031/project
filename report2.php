@@ -73,7 +73,7 @@ $result = $stmt->get_result();
                     <table class="table table-bordered table-hover table-striped">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
+                                <th>Ref #</th>
                                 <th>User ID</th>
                                 <th>Order Date</th>
                                 <th>Total Amount</th>

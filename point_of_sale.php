@@ -134,12 +134,12 @@ $productResult = $conn->query($productQuery);
                     <h3><?php echo $product['product_name']; ?></h3>
                     <p class="price">₱ <?php echo number_format($product['price'], 2); ?></p>
                     <button class="add-btn" onclick="openModal(
-'<?php echo $product['id']; ?>',
-'<?php echo $product['product_name']; ?>',
-'<?php echo $product['product_description']; ?>',
-'<?php echo number_format($product['price'], 2); ?>',
-'<?php echo $product['product_image']; ?>'
-)">Order</button>
+                    '<?php echo $product['id']; ?>',
+                    '<?php echo $product['product_name']; ?>',
+                    '<?php echo $product['product_description']; ?>',
+                    '<?php echo number_format($product['price'], 2); ?>',
+                    '<?php echo $product['product_image']; ?>'
+                    )">Order</button>
                 </div>
             <?php endwhile; ?>
         </div>
