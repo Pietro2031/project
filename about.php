@@ -45,6 +45,7 @@ if (isset($_SESSION['username'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,95 +54,54 @@ if (isset($_SESSION['username'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <style>
-        body {
-            min-height: 80vh;
-            background-color: <?php echo $primaryColor; ?>;
-        }
-        .header .title1 {
-            color: <?php echo $fontColor; ?>;
-        }
-        .our-story h2 {
-            color: <?php echo $fontColor; ?>;
-        }
-        .our-story {
-            background-color: <?php echo $secondaryColor; ?>;
-        }
-        .image-desc-container h3{
-            color: <?php echo $fontColor; ?>;
+    body {
+        min-height: 80vh;
+        background-color: <?php echo $primaryColor; ?>;
+    }
 
-        }
-        .menu ul li{
-            color:#9E9B76;
-        }
-    </style>
+    .header .title1 {
+        color: <?php echo $fontColor; ?>;
+    }
+
+    .our-story h2 {
+        color: <?php echo $fontColor; ?>;
+    }
+
+    .our-story {
+        background-color: <?php echo $secondaryColor; ?>;
+    }
+
+    .image-desc-container h3 {
+        color: <?php echo $fontColor; ?>;
+
+    }
+
+    .menu ul li {
+        color: #9E9B76;
+    }
+</style>
+
 <body>
-<header class="header1">
-<img src="<?php echo $logo; ?>" alt="Peter Beans Logo" class="logopic">
-    <p class="logo">Peter Beans</p>
-    <nav class="navbar">
-        <a href="home.php"><strong>Home</strong></a>
-        <a href="menu.php"><strong>Menu</strong></a>
-        <a href="about.php"><strong>About</strong></a>
-        <a href="contactus.php"><strong>Contact Us</strong></a>
+        <?php include 'header.php'; ?>
 
-        <!-- Account Dropdown -->
-        <div class="action">
-            <div class="profile" onclick="menuToggle();" aria-expanded="false">
-                <img 
-                    src="<?php echo $userImage; ?>" 
-                    alt="Account Profile" 
-                    class="profile-img"
-                />
-            </div>
-            <div class="menu" aria-hidden="true">
-                <?php if ($userLoggedIn): ?>
-                    <strong><h3><br> <?php echo htmlspecialchars($_SESSION['first_name']) . ' ' . htmlspecialchars($_SESSION['last_name']); ?></h3></strong>
+    <!-- Header Section -->
+    <div class="header3">
+        <h1 class="title1">Peter Beans finest independent coffee house</h1>
+        <button class="view-shop-btn">View Shop</button>
+    </div>
 
-                    <ul>
-                    <li>
-                    <i class="fas fa-user"></i>
-    <a href="profile.php">My Profile</a>
-</li>
-<li>
-    <i class="fas fa-check-circle"></i>
-    <a href="otp.php">verification</a> 
-</li>
-<li>
-    <i class="fas fa-sign-out-alt"></i>
-    <a href="logout.php">Logout</a> <!-- Link to logout.php -->
-</li>
-
-                    </ul>
-                <?php else: ?>
-                    <ul>
-                        <li>
-                        <i class="fas fa-user-plus"></i>
-                            <a href="login.php">Sign Up</a>
-                        </li>
-                    </ul>
-                <?php endif; ?>
+    <section class="our-story">
+        <h2>Our Story</h2>
+        <div class="story-content">
+            <div class="story-images">
+                <img src="aboutimg3.jpg" class="top-left" alt="Coffee beans">
+                <img src="aboutimg1.jpg" class="center" alt="Barista at work">
+                <img src="aboutimg2.jpg" class="bottom-right" alt="Pouring coffee">
             </div>
         </div>
-    </nav>
-</header>
- <!-- Header Section -->
- <header class="header">
-    <h1 class="title1">Peter Beans finest independent coffee house</h1>
-    <button class="view-shop-btn">View Shop</button>
-  </header>
+    </section>
 
-  <section class="our-story">
-    <h2>Our Story</h2>
-    <div class="story-content">
-      <div class="story-images">
-        <img src="aboutimg3.jpg" class="top-left" alt="Coffee beans">
-        <img src="aboutimg1.jpg" class="center" alt="Barista at work">
-        <img src="aboutimg2.jpg" class="bottom-right" alt="Pouring coffee">
-      </div>
-    </div>
-  </section>
-
-  <pre class="left-text"> The Peter Beans is a welcoming coffee 
+    <pre class="left-text"> The Peter Beans is a welcoming coffee 
  shop dedicated to crafting the perfect 
  cup. With a focus on quality and community,
  we source the finest beans, prepare them
@@ -153,7 +113,7 @@ if (isset($_SESSION['username'])) {
  delicious bites, and genuine connections.
   </pre>
 
-  <pre class="right-text"> The Peter Beans is a cozy coffee 
+    <pre class="right-text"> The Peter Beans is a cozy coffee 
 shop dedicated to quality and 
 community. We source the finest
 beans, prepare them with care, and
@@ -167,7 +127,7 @@ At The Peter Beans, your story
 becomes part of ours.
   </pre>
 
-  <main>
+    <main>
         <section class="messy-grid">
             <div class="image-block" style="--offset-x: -10px; --offset-y: 20px; --rotate: -5deg;">
                 <img src="aboutimg13.jpg" alt="Coffee brewing">
@@ -199,54 +159,56 @@ becomes part of ours.
             </div>
         </section>
     </main>
-<footer>
-    <div class="footerContainer">
-        <div class="socialIcons">
-            <a href=""><i class="fa-brands fa-facebook"></i></a>
-            <a href=""><i class="fa-brands fa-instagram"></i></a>
-            <a href=""><i class="fa-brands fa-twitter"></i></a>
-            <a href=""><i class="fa-brands fa-youtube"></i></a>
+    <footer>
+        <div class="footerContainer">
+            <div class="socialIcons">
+                <a href=""><i class="fa-brands fa-facebook"></i></a>
+                <a href=""><i class="fa-brands fa-instagram"></i></a>
+                <a href=""><i class="fa-brands fa-twitter"></i></a>
+                <a href=""><i class="fa-brands fa-youtube"></i></a>
+            </div>
+            <div class="footerNav">
+                <ul>
+                    <li><a href="home.php">Home</a></li>
+                    <li><a href="menu.php">Menu</a></li>
+                    <li><a href="about.php">About</a></li>
+                    <li><a href="contactus.php">Contact Us</a></li>
+                </ul>
+            </div>
+
         </div>
-        <div class="footerNav">
-            <ul><li><a href="home.php">Home</a></li>
-                <li><a href="menu.php">Menu</a></li>
-                <li><a href="about.php">About</a></li>
-                <li><a href="contactus.php">Contact Us</a></li>
-            </ul>
+        <div class="footerBottom">
+            <p>Copyright &copy;2024 <strong><span class="designer">Peter Beans</span> </strong>All Rights Reserved</p>
         </div>
-        
-    </div>
-    <div class="footerBottom">
-        <p>Copyright &copy;2024 <strong><span class="designer">Peter Beans</span> </strong>All Rights Reserved</p>
-    </div>
-</footer>
+    </footer>
 
 
-<script>
-function menuToggle() {
-    const menu = document.querySelector(".menu");
-    const profile = document.querySelector(".profile");
-    
-    menu.classList.toggle("active");
+    <script>
+        function menuToggle() {
+            const menu = document.querySelector(".menu");
+            const profile = document.querySelector(".profile");
 
-    // Update aria attributes for accessibility
-    const expanded = profile.getAttribute("aria-expanded") === "true";
-    profile.setAttribute("aria-expanded", !expanded);
-    menu.setAttribute("aria-hidden", expanded);
-}   
+            menu.classList.toggle("active");
 
-// Close menu if clicked outside
-document.addEventListener("click", (event) => {
-    const menu = document.querySelector(".menu");
-    const profile = document.querySelector(".profile");
+            // Update aria attributes for accessibility
+            const expanded = profile.getAttribute("aria-expanded") === "true";
+            profile.setAttribute("aria-expanded", !expanded);
+            menu.setAttribute("aria-hidden", expanded);
+        }
 
-    if (!menu.contains(event.target) && !profile.contains(event.target)) {
-        menu.classList.remove("active");
-        profile.setAttribute("aria-expanded", "false");
-        menu.setAttribute("aria-hidden", "true");
-    }
-});
-</script>
-    
+        // Close menu if clicked outside
+        document.addEventListener("click", (event) => {
+            const menu = document.querySelector(".menu");
+            const profile = document.querySelector(".profile");
+
+            if (!menu.contains(event.target) && !profile.contains(event.target)) {
+                menu.classList.remove("active");
+                profile.setAttribute("aria-expanded", "false");
+                menu.setAttribute("aria-hidden", "true");
+            }
+        });
+    </script>
+
 </body>
+
 </html>
