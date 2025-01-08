@@ -70,7 +70,7 @@ $total_pages = ceil($total_items / $items_per_page);
                                 <th>Image</th>
                                 <th>Price</th>
                                 <th>Quantity</th>
-                                <th>Edit</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,7 +90,10 @@ $total_pages = ceil($total_items / $items_per_page);
                                         <td><img src="<?php echo $base_image; ?>" width="60" height="60"></td>
                                         <td>₱ <?php echo $base_price; ?></td>
                                         <td><?php echo $base_quantity; ?></td>
-                                        <td><a href="admin.php?item_type=edit_base&id=<?php echo $base_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a></td>
+                                        <td>
+                                            <a href="admin.php?item_type=edit_base&id=<?php echo $base_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a>
+                                            <a href="delete_item.php?item_type=base&id=<?php echo $base_id; ?>" style="color: red; text-decoration: none;" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                                        </td>
                                     </tr>
                             <?php }
                             } ?>
@@ -111,7 +114,10 @@ $total_pages = ceil($total_items / $items_per_page);
                                         <td><img src="<?php echo $flavor_image; ?>" width="60" height="60"></td>
                                         <td>₱ <?php echo $flavor_price; ?></td>
                                         <td><?php echo $flavor_quantity; ?></td>
-                                        <td><a href="admin.php?item_type=edit_flavor&id=<?php echo $flavor_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a></td>
+                                        <td>
+                                            <a href="admin.php?item_type=edit_flavor&id=<?php echo $flavor_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a>
+                                            <a href="delete_item.php?item_type=flavor&id=<?php echo $flavor_id; ?>" style="color: red; text-decoration: none;" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                                        </td>
                                     </tr>
                             <?php }
                             } ?>
@@ -132,7 +138,10 @@ $total_pages = ceil($total_items / $items_per_page);
                                         <td><img src="<?php echo $topping_image; ?>" width="60" height="60"></td>
                                         <td>₱ <?php echo $topping_price; ?></td>
                                         <td><?php echo $topping_quantity; ?></td>
-                                        <td><a href="admin.php?item_type=edit_topping&id=<?php echo $topping_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a></td>
+                                        <td>
+                                            <a href="admin.php?item_type=edit_topping&id=<?php echo $topping_id; ?>" style="color: #337ab7; text-decoration: none;">Edit</a>
+                                            <a href="delete_item.php?item_type=topping&id=<?php echo $topping_id; ?>" style="color: red; text-decoration: none;" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                                        </td>
                                     </tr>
                             <?php }
                             } ?>
@@ -161,7 +170,6 @@ $total_pages = ceil($total_items / $items_per_page);
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="pagination">
                     <ul class="pagination">
                         <?php if ($current_page > 1) : ?>
