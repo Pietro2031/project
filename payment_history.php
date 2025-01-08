@@ -5,11 +5,9 @@ $items_per_page = 9;
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
-// Retrieve filter values from GET request
 $selected_method = isset($_GET['payment_method']) ? $_GET['payment_method'] : '';
 $selected_time_frame = isset($_GET['time_frame']) ? $_GET['time_frame'] : '';
 
-// Base Query for Completed Orders
 $query = "
 SELECT orders.id, orders.order_date, orders.total_amount, orders.payment_method, user_account.username
 FROM orders
@@ -17,12 +15,10 @@ LEFT JOIN user_account ON orders.user_id = user_account.id
 WHERE orders.status = 1
 ";
 
-// Apply Payment Method Filter
 if (!empty($selected_method)) {
     $query .= " AND orders.payment_method = '" . mysqli_real_escape_string($conn, $selected_method) . "'";
 }
 
-// Apply Time Frame Filter
 if (!empty($selected_time_frame)) {
     $current_date = date('Y-m-d');
     switch ($selected_time_frame) {
@@ -38,18 +34,15 @@ if (!empty($selected_time_frame)) {
     }
 }
 
-// Get total count for pagination
 $total_items_query = "SELECT COUNT(*) AS count FROM ($query) AS subquery";
 $total_items_result = mysqli_query($conn, $total_items_query);
 $total_items_row = mysqli_fetch_assoc($total_items_result);
 $total_items = $total_items_row['count'];
 $total_pages = ceil($total_items / $items_per_page);
 
-// Apply Pagination
 $query .= " ORDER BY STR_TO_DATE(orders.order_date, '%Y-%m-%d') DESC LIMIT $offset, $items_per_page";
 $ordersResult = mysqli_query($conn, $query);
 
-// Fetch unique payment methods for the dropdown
 $paymentMethodsQuery = "SELECT DISTINCT payment_method FROM orders";
 $paymentMethodsResult = mysqli_query($conn, $paymentMethodsQuery);
 ?>
