@@ -57,7 +57,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $pdf->Cell(30, 8, $row['id'], 1, 0, 'C');
     $pdf->Cell(50, 8, $row['username'], 1, 0, 'C');
     $pdf->Cell(40, 8, date('F j, Y', strtotime($row['order_date'])), 1, 0, 'C');
-    $pdf->Cell(40, 8, '₱' . number_format($row['total_amount'], 2), 1, 0, 'C');
+    $pdf->Cell(40, 8, 'Php ' . number_format($row['total_amount'], 2), 1, 0, 'C');
     $pdf->Cell(30, 8, $row['payment_method'], 1, 1, 'C');
 
 
@@ -67,7 +67,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 $pdf->SetFont('helvetica', 'B', 11);
 $pdf->Cell(120, 10, 'Total Amount', 1, 0, 'R');
-$pdf->Cell(40, 10, '₱' . number_format($total_sum, 2), 1, 0, 'C');
+$pdf->Cell(40, 10, 'Php ' . number_format($total_sum, 2), 1, 0, 'C');
 $pdf->Cell(30, 10, '', 1, 1, 'C');
 
 

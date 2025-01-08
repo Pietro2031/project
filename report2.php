@@ -66,7 +66,7 @@ $result = $stmt->get_result();
                         </select>
                     </div>
                     <input type="submit" value="Apply" class="submit-btn-filter">
-                    <a href="print-payment_history.php" target="_blank" class="submit-btn-filter">Print</a>
+                    <a href="print-order.php" target="_blank" class="submit-btn-filter">Print</a>
                 </form>
 
                 <div class="table-responsive">
