@@ -1,9 +1,7 @@
 <?php
 session_start();
 
-
 include('connection.php');
-
 
 $username = "admin";
 $query = "SELECT profile_picture FROM admin_account WHERE username = ?";
@@ -19,11 +17,9 @@ if ($result->num_rows > 0) {
     $profile_picture = 'default-profile.png';
 }
 if (!isset($_SESSION['admin_username'])) {
-
     header("Location: login.php");
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -38,8 +34,6 @@ if (!isset($_SESSION['admin_username'])) {
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/table.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
-
 </head>
 
 <body>
@@ -60,7 +54,9 @@ if (!isset($_SESSION['admin_username'])) {
                 <li><a href="?dashboard" <?php if (isset($_GET['dashboard'])) {
                                                 echo 'class="active"';
                                             } ?>><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="themevalidation.php"><i class="fas fa-paint-brush"></i> Theme</a></li>
+                <li><a href="?themevalidation" <?php if (isset($_GET['themevalidation'])) {
+                                                    echo 'class="active"';
+                                                } ?>><i class="fas fa-chart-line"></i>Theme</a></li>
                 <li><a href="?view_order" <?php if (isset($_GET['order'])) {
                                                 echo 'class="active"';
                                             } ?>><i class="fas fa-chart-line"></i>Orders</a></li>
@@ -79,7 +75,9 @@ if (!isset($_SESSION['admin_username'])) {
                 <li><a href="?payment_history" <?php if (isset($_GET['payment_history'])) {
                                                     echo 'class="active"';
                                                 } ?>><i class="fas fa-chart-line"></i>Payment History</a></li>
-                <li><a href="userinfo.php"><i class="fas fa-user-tag"></i> User Information</a></li>
+                <li><a href="?user_information" <?php if (isset($_GET['user_information'])) {
+                                                    echo 'class="active"';
+                                                } ?>><i class="fas fa-chart-line"></i>User Information</a></li>
                 <li><a href="adminprofile.php"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
             </ul>
         </nav>
@@ -92,48 +90,63 @@ if (!isset($_SESSION['admin_username'])) {
         if (isset($_GET['dashboard'])) {
             include("dashboard.php");
         }
-        if (isset($_GET['view_order'])) {
+        elseif (isset($_GET['themevalidation'])) {
+            include("themevalidation.php");
+        }
+        elseif (isset($_GET['theme'])) {
+            include("theme.php");
+        }
+        elseif (isset($_GET['view_order'])) {
             include 'view_orders.php';
         }
-        if (isset($_GET['view_products'])) {
+        elseif (isset($_GET['view_products'])) {
             include 'view_products.php';
         }
-        if (isset($_GET['insert_products'])) {
+        elseif (isset($_GET['insert_products'])) {
             include 'insert_products.php';
         }
-        if (isset($_GET['edit_product'])) {
+        elseif (isset($_GET['edit_product'])) {
             include 'edit_product.php';
         }
-        if (isset($_GET['view_inventory'])) {
+        elseif (isset($_GET['view_inventory'])) {
             include 'view_inventory.php';
         }
-        if (isset($_GET['item_type'])) {
+        elseif (isset($_GET['item_type'])) {
             include 'edit_inventory.php';
         }
-        if (isset($_GET['view_category'])) {
+        elseif (isset($_GET['view_category'])) {
             include 'view_category.php';
         }
-        if (isset($_GET['insert_inventory'])) {
+        elseif (isset($_GET['insert_inventory'])) {
             include 'insert_inventory.php';
         }
-        if (isset($_GET['POS'])) {
+        elseif (isset($_GET['POS'])) {
             include 'point_of_sale.php';
         }
-        if (isset($_GET['payment_history'])) {
+        elseif (isset($_GET['payment_history'])) {
             include 'payment_history.php';
         }
-        if (isset($_GET['report'])) {
+        elseif (isset($_GET['report'])) {
             include 'report.php';
         }
-        if (isset($_GET['report2'])) {
+        elseif (isset($_GET['report2'])) {
             include 'report2.php';
         }
-        if (isset($_GET['report3'])) {
+        elseif (isset($_GET['report3'])) {
             include 'report3.php';
         }
-        if (isset($_GET['report4'])) {
+        elseif (isset($_GET['report4'])) {
             include 'report4.php';
         }
+        elseif (isset($_GET['user_information'])) {
+            include 'userinfo.php';
+        } else {
+            include("dashboard.php");
+        }
+
+
+
+
         ?>
 
     </div>

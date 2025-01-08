@@ -181,9 +181,9 @@ nav ul li a.active {
 
 /* Content Section */
 .content {
-  margin-left: 250px; /* Space for sidebar */
-  margin-top: 120px; /* Space for the fixed topbar */
-  width: calc(100% - 250px); /* Adjust content width considering sidebar */
+  /* margin-left: 250px; */ /* Space for sidebar */
+  /* margin-top: 120px; */ /* Space for the fixed topbar */
+  /* width: calc(100% - 250px); */ /* Adjust content width considering sidebar */
   padding: 30px;
   display: flex;
   justify-content: flex-start;
@@ -326,14 +326,14 @@ tfoot td .block-btn:hover {
 } /* Green for unblock */
 .search-bar {
   margin-bottom: 20px;
-  text-align: center;
+  /* text-align: center; */
 }
 .content .search-bar input[type="text"] {
   padding: 8px;
   width: 300px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-left: -600px;
+  /* margin-left: -600px; */
 }
 
 .content .search-bar button {
