@@ -18,7 +18,10 @@ $run_pro = mysqli_query($conn, $get_pro);
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">In Queue</h3>
+                <h3 class="panel-title">In Queue Regular orders</h3>
+                <div style="display: flex; gap: 5px;">
+                    <a href="?view_custom_orders">Custom orders</a>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
