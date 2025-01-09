@@ -12,7 +12,7 @@ $pdf->SetAutoPageBreak(TRUE, 25);
 $pdf->AddPage();
 
 $pdf->SetFont('helvetica', 'B', 16);
-$pdf->Cell(0, 10, 'Payment History', 0, 1, 'C');
+$pdf->Cell(0, 10, 'Inventory Report', 0, 1, 'C');
 
 $pdf->SetFont('helvetica', '', 10);
 $pdf->Cell(0, 10, 'Generated on ' . date('Y-m-d H:i:s'), 0, 1, 'C');

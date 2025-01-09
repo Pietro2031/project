@@ -1,27 +1,39 @@
 <?php
-
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
+$orderDateFilter = isset($_GET['order_date']) ? $_GET['order_date'] : '';
 $sortOrder = isset($_GET['sort']) ? $_GET['sort'] : 'DESC';
 
 // Build the SQL query with optional filter and sort
 $query = "SELECT o.id, o.user_id, o.order_date, o.total_amount, o.order_quantity, o.product_ids, o.status, o.payment_method, o.flavor, o.toppings 
           FROM orders o";
 
+$filters = [];
+$params = [];
+
 if ($statusFilter !== '') {
-    $query .= " WHERE o.status = ?";
+    $filters[] = "o.status = ?";
+    $params[] = $statusFilter;
+}
+
+if ($orderDateFilter !== '') {
+    $filters[] = "DATE(o.order_date) = ?";
+    $params[] = $orderDateFilter;
+}
+
+if (count($filters) > 0) {
+    $query .= " WHERE " . implode(' AND ', $filters);
 }
 
 $query .= " ORDER BY o.order_date $sortOrder";
 
 $stmt = $conn->prepare($query);
 
-if ($statusFilter !== '') {
-    $stmt->bind_param("i", $statusFilter);
+if (count($params) > 0) {
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
 }
 
 $stmt->execute();
 $result = $stmt->get_result();
-
 ?>
 <style>
     .slideright .slidedown {
@@ -59,6 +71,10 @@ $result = $stmt->get_result();
                         </select>
                     </div>
                     <div class="slidedown">
+                        <label for="order_date">Filter by Order Date:</label>
+                        <input type="date" name="order_date" id="order_date" class="form-control" value="<?= isset($_GET['order_date']) ? $_GET['order_date'] : '' ?>">
+                    </div>
+                    <div class="slidedown">
                         <label for="sort">Sort by Date:</label>
                         <select name="sort" id="sort" class="form-control">
                             <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Newest First</option>
@@ -66,7 +82,7 @@ $result = $stmt->get_result();
                         </select>
                     </div>
                     <input type="submit" value="Apply" class="submit-btn-filter">
-                    <a href="print-order.php" target="_blank" class="submit-btn-filter">Print</a>
+                    <a href="print-order.php?order_date=<?= $orderDateFilter ?>" target="_blank" class="submit-btn-filter">Print</a>
                 </form>
 
                 <div class="table-responsive">
@@ -113,7 +129,6 @@ $result = $stmt->get_result();
         </div>
     </div>
 </div>
-
 
 <?php
 $stmt->close();

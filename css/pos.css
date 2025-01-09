@@ -177,3 +177,24 @@ section.products {
   display: flex;
   flex-direction: column;
 }
+/* Styling the category filter combo box */
+#categoryFilter {
+  margin-top: 2%;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Add some hover and focus effects */
+#categoryFilter:hover,
+#categoryFilter:focus {
+  border-color: #5cb85c;
+  box-shadow: 0 0 5px rgba(92, 184, 92, 0.6);
+}
+

@@ -153,7 +153,7 @@ $conn->close();
         <p>Your order number is: <strong>#<?php echo $orderId; ?></strong></p>
         <p>We will notify you when your order is ready for pickup.</p>
 
-        <a href="menu.php" class="back-btn">Back to Menu</a>
+        <a href="admin.php?POS" class="back-btn">Back to Menu</a>
     </div>
 </body>
 

@@ -92,9 +92,8 @@ $run_orders = mysqli_query($conn, $get_orders);
                     <select name="status" id="status">
                         <option value="-1" <?= $status_filter === -1 ? 'selected' : '' ?>>All</option>
                         <option value="0" <?= $status_filter === 0 ? 'selected' : '' ?>>Placed</option>
-                        <option value="1" <?= $status_filter === 1 ? 'selected' : '' ?>>Delivered</option>
                         <option value="2" <?= $status_filter === 2 ? 'selected' : '' ?>>Canceled</option>
-                        <option value="3" <?= $status_filter === 3 ? 'selected' : '' ?>>Canceled by User</option>
+                        <option value="3" <?= $status_filter === 3 ? 'selected' : '' ?>>Delivered</option>
                     </select>
                     <label for="time_frame">Time Frame:</label>
                     <select name="time_frame" id="time_frame">

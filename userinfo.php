@@ -83,12 +83,17 @@ if (isset($_POST['action'])) {
 </div>
 
 <div class="content">
-    <div class="search-bar">
-        <form method="POST">
-            <input type="text" name="search" placeholder="Search by Username or Email" value="<?= htmlspecialchars($search_query); ?>">
-            <button type="submit">Search</button>
-        </form>
-    </div>
+<div class="search-bar">
+    <form method="POST">
+        <input type="text" name="search" placeholder="Search by Username or Email" value="<?= htmlspecialchars($search_query); ?>">
+        <button type="submit">Search</button>
+    </form>
+    <form action="generate_report.php" method="POST" style="display:inline;" target="_blank">
+        <button type="submit" name="generate_report">Print Report</button> <!-- Print Report button -->
+    </form>
+</div>
+
+
 
     <form id="bulkActionForm">
         <table>

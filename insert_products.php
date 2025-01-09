@@ -87,7 +87,7 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
                                     <div class="sectioninsidediv">
                                         <span>Toppings:</span>
                                         <select name="toppings_id" id="toppings">
-                                            <option value="">Select Toppings (Optional)</option>
+                                            <option value="">Select Toppings</option>
                                             <?php foreach ($toppings as $topping) : ?>
                                                 <option value="<?= $topping['id'] ?>">
                                                     <?= $topping['topping_name'] ?>
@@ -116,6 +116,12 @@ while ($toppingRow = mysqli_fetch_assoc($toppingResult)) {
                                     </div>
                                 </div>
                             </div>
+                            <div class="sectioninsidediv">
+    <span>Description:</span>
+    <textarea name="description" id="description" rows="4" required></textarea>
+    <p class="tooltiptext">Enter the product description</p>
+</div>
+
                         </div>
                         <input type="submit" name="submit" class="submit-btn" value="Add Coffee">
                     </form>
@@ -184,9 +190,12 @@ if (isset($_POST['submit'])) {
         $target = null;
     }
 
+    $description = mysqli_real_escape_string($conn, $_POST['description']);
+
     $insertQuery = "INSERT INTO coffee_products 
-                    (product_name, category_id, drink_bases, flavor_id, toppings_id, price, product_image, total_sales) 
-                    VALUES ('$name', '$category_id', '$base_id', '$flavor_id', '$toppings_id', '$price', '$target', '$total_sales')";
+                    (product_name, category_id, drink_bases, flavor_id, toppings_id, price, product_image, total_sales, product_description) 
+                    VALUES ('$name', '$category_id', '$base_id', '$flavor_id', '$toppings_id', '$price', '$target', '$total_sales', '$description')";
+    
 
     error_log("SQL Query: " . $insertQuery);
 
