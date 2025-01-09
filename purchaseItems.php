@@ -192,23 +192,35 @@ $totalPurchaseValue = 0;
                     <p><b>Total</b></p>
                     <p><b>₱<?= number_format($totalPurchaseValue, 2); ?></b></p>
                 </div>
+<!-- Payment Method Section -->
+<div class="payment-method">
+    <h2>Payment Method</h2>
+    <form action="process_order.php" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="total" value="<?= $totalPurchaseValue ?>">
+        
+        <!-- Payment Method Selection -->
+        <div class="slidedown">
+            <label for="payment">Select Payment Method:</label>
+            <select name="payment_method" id="payment">
+                <option value="cash">Cash</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="gcash">GCash</option>
+            </select>
+        </div>
+        
+        <!-- Image Upload Field -->
+        <div class="image-upload">
+            <h3>Upload Proof of Payment</h3>
+            <label for="payment-proof">Choose Image:</label>
+            <input type="file" name="payment_proof" id="payment-proof" accept="image/*" required>
+        </div>
+        
+        <!-- Submit Order Button -->
+        <button type="submit" class="buybtn">Submit Order</button>
+    </form>
+</div>
 
-                <!-- Payment Method Section -->
-                <div class="payment-method">
-                    <h2>Payment Method</h2>
-                    <form action="process_order.php" method="POST">
-                        <input type="hidden" name="total" value="<?= $totalPurchaseValue ?>">
-                        <div class="slidedown">
-                            <label for="payment">Select Payment Method:</label>
-                            <select name="payment_method" id="payment">
-                                <option value="cash">Cash</option>
-                                <option value="credit_card">Credit Card</option>
-                                <option value="gcash">GCash</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="buybtn">Submit Order</button>
-                    </form>
-                </div>
+
             <?php else: ?>
                 <p>No items in the cart.</p>
             <?php endif; ?>
