@@ -140,6 +140,8 @@ if (!isset($_SESSION['admin_username'])) {
         }
         elseif (isset($_GET['user_information'])) {
             include 'userinfo.php';
+        }elseif (isset($_GET['view_custom_orders'])) {
+            include 'view_custom_orders.php';
         } else {
             include("dashboard.php");
         }

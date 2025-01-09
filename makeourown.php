@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <?php include('connection.php');
     session_start(); ?>
     <meta charset="UTF-8">
@@ -56,20 +55,28 @@
                 <div class="div-22">
                     <div class="label-size">Size</div>
                     <div class="div-size">
-                        <div class="div-size-info">
-                            <input type="radio" name="size" value="S" id="sizeS" required>
-                            <label for="sizeS">S</label>
-                        </div>
-                        <div class="div-size-info">
-                            <input type="radio" name="size" value="M" id="sizeM" required>
-                            <label for="sizeM">M</label>
-                            <p>+₱10</p>
-                        </div>
-                        <div class="div-size-info">
-                            <input type="radio" name="size" value="L" id="sizeL" required>
-                            <label for="sizeL">L</label>
-                            <p>+₱20</p>
-                        </div>
+                        <?php
+                        $cupSizesQuery = "SELECT id, size, quantity, price, img FROM cup_size";
+                        $cupSizesResult = $conn->query($cupSizesQuery);
+                        if ($cupSizesResult && $cupSizesResult->num_rows > 0):
+                            while ($cupSize = $cupSizesResult->fetch_assoc()):
+                                $isDisabled = $cupSize['quantity'] == 0 ? 'disabled' : '';
+                        ?>
+                                <div class="div-size-info">
+                                    <input type="radio" name="size"
+                                        value="<?php echo $cupSize['size']; ?>"
+                                        id="size-<?php echo $cupSize['size']; ?>"
+                                        data-price="<?php echo $cupSize['price']; ?>"
+                                        <?php echo $isDisabled; ?> required>
+                                    <label for="size-<?php echo $cupSize['size']; ?>">
+                                        <?php echo $cupSize['size']; ?>
+                                    </label>
+                                    <p><?php echo $cupSize['quantity'] > 0 ? '+₱' . number_format($cupSize['price'], 2) : 'Out of Stock'; ?></p>
+                                </div>
+                        <?php
+                            endwhile;
+                        endif;
+                        ?>
                     </div>
                 </div>
                 <button id="checkout-btn" class="checkout-btn">Checkout</button>
@@ -91,19 +98,22 @@
                                 $nameField = ($table == "coffee_flavors") ? "flavor_name" : "topping_name";
                                 $imgPath = $ingredient['img'];
                                 echo '<div class="ingredient-item" data-category="' . $category . '">
-                                    <img src="' . $imgPath . '" alt="' . $ingredient[$nameField] . '">
-                                    <span class="base-name">' . $ingredient[$nameField] . ' - ₱' . number_format($ingredient['price'], 2) . '</span>
-                                    <button data-id="' . $ingredient['id'] . '" data-name="' . $ingredient[$nameField] . '" data-price="' . $ingredient['price'] . '" data-img="' . $imgPath . '" data-category="' . $category . '">Add</button>
-                                </div>';
+                <img src="' . $imgPath . '" alt="' . $ingredient[$nameField] . '">
+                <span class="base-name">' . $ingredient[$nameField] . ' - ₱' . number_format($ingredient['price'], 2) . '</span>
+                <button data-id="' . $ingredient['id'] . '" data-name="' . $ingredient[$nameField] . '" 
+                        data-price="' . $ingredient['price'] . '" 
+                        data-img="' . $imgPath . '" 
+                        data-category="' . $category . '">Add</button>
+            </div>';
                             }
                         } else {
                             echo '<p>No ' . $category . ' available.</p>';
                         }
                     }
-
                     displayIngredients($conn, "coffee_flavors", "flavors");
                     displayIngredients($conn, "coffee_toppings", "toppings");
                     ?>
+
                 </div>
             </div>
         </div>
@@ -149,30 +159,48 @@
             };
             window.confirmOrder = () => {
                 const paymentMethod = document.getElementById("paymentMode").value;
-                const totalPrice = parseFloat(popupTotalPrice.textContent.replace('₱', ''));
+                const totalPrice = parseFloat(document.getElementById("popup-total-price").textContent.replace('₱', ''));
+                const base = document.querySelector(".base");
+                const size = document.querySelector("input[name='size']:checked");
+                const flavor = document.querySelector(".cup-content .flavor img");
+                const toppings = Array.from(document.querySelectorAll(".cup-content .topping img"));
+
                 if (!totalPrice || totalPrice <= 0) {
                     alert("Your order total is invalid.");
                     return;
                 }
-                const base = document.querySelector(".base");
+
                 if (!base) {
                     alert("Please select a drink base.");
                     return;
                 }
-                const ingredients = [];
-                document.querySelectorAll("#cup-content .ingredient img").forEach(img => {
-                    ingredients.push(img.getAttribute("title"));
-                });
-                if (!totalPrice || totalPrice <= 0 || ingredients.length === 0) {
-                    alert(totalPrice + "Your order is incomplete. Please add ingredients or select a drink base.");
+
+                if (!size) {
+                    alert("Please select a drink size.");
                     return;
                 }
+
                 const orderData = {
-                    base: base.textContent,
-                    ingredients: ingredients,
+                    base: {
+                        name: base.querySelector("img").alt,
+                        id: base.dataset.id || null, // Fetching base ID
+                    },
+                    size: {
+                        name: size.value,
+                        price: parseFloat(size.dataset.price) || 0, // Fetching size price
+                    },
+                    flavor: flavor ? {
+                        name: flavor.alt, // Use the `alt` attribute for flavor name
+                        id: flavor.parentElement.dataset.id || null, // Fetching flavor ID
+                    } : null,
+                    toppings: toppings.map(topping => ({
+                        name: topping.alt, // Use the `alt` attribute for topping name
+                        id: topping.parentElement.dataset.id || null, // Fetching topping ID
+                    })),
                     total_price: totalPrice,
                     payment_method: paymentMethod,
                 };
+
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "save_order.php", true);
                 xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -182,7 +210,9 @@
                             try {
                                 const response = JSON.parse(xhr.responseText);
                                 if (response.success) {
-                                    alert("Your order has been successfully Placed! Thank you for your purchase.");
+                                    // Display the received data for confirmation
+                                    displayReceivedData(response.data_received);
+                                    alert("Your order has been successfully placed! Thank you for your purchase.");
                                     window.location.href = "home.php";
                                 } else {
                                     alert(`Failed to process your order: ${response.message}`);
@@ -198,12 +228,40 @@
                         }
                     }
                 };
+
                 xhr.onerror = function() {
                     alert("A network error occurred. Please check your internet connection and try again.");
                     console.error("Network error");
                 };
+
                 xhr.send(JSON.stringify(orderData));
             };
+
+            // Function to display received data
+            function displayReceivedData(data) {
+                const resultContainer = document.createElement('div');
+                resultContainer.style.padding = '20px';
+                resultContainer.style.border = '1px solid #ccc';
+                resultContainer.style.marginTop = '20px';
+                resultContainer.style.backgroundColor = '#f9f9f9';
+
+                resultContainer.innerHTML = `
+        <h3>Order Summary</h3>
+        <p><strong>Base:</strong> ${data.base.name} (ID: ${data.base.id})</p>
+        <p><strong>Size:</strong> ${data.size.name} (Price: ₱${data.size.price})</p>
+        <p><strong>Flavor:</strong> ${data.flavor ? `${data.flavor.name} (ID: ${data.flavor.id})` : 'None'}</p>
+        <p><strong>Toppings:</strong> ${data.toppings.length > 0
+            ? data.toppings.map(topping => `${topping.name} (ID: ${topping.id})`).join(', ')
+            : 'None'}</p>
+        <p><strong>Total Price:</strong> ₱${data.total_price}</p>
+        <p><strong>Payment Method:</strong> ${data.payment_method}</p>
+    `;
+
+                document.body.appendChild(resultContainer);
+            }
+
+
+
             const cupContent = document.getElementById("cup-content");
             const totalPriceElement = document.getElementById("total-price");
             const ingredientTabs = document.querySelectorAll(".tab");
@@ -216,69 +274,174 @@
             let toggleAlignment = true;
             document.querySelectorAll(".select-base-btn").forEach(button => {
                 button.addEventListener("click", () => {
+                    // Deselect previously selected base
                     document.querySelectorAll(".base-item").forEach(item => item.classList.remove("selected"));
                     button.parentElement.classList.add("selected");
+
+                    // Update base price
                     const basePrice = parseFloat(button.dataset.price);
                     totalPrice = basePrice + sizePrice;
+
+                    // Reset ingredients and count
                     ingredientsCount = 0;
-                    cupContent.innerHTML = `<div class="base"><img src="${button.dataset.img}" alt=""></div>`;
+                    cupContent.innerHTML = `
+            <div class="base" data-id="${button.dataset.id}">
+                <img src="${button.dataset.img}" alt="${button.dataset.name}" title="${button.dataset.name}">
+            </div>`;
                     toggleAlignment = true;
+
+                    // Update total price
                     updateTotalPrice();
                 });
             });
             document.querySelectorAll(".ingredient-item button").forEach(button => {
-                button.addEventListener("click", () => {
-                    const category = button.dataset.category;
-                    const ingredientName = button.dataset.name;
-                    const ingredientPrice = parseFloat(button.dataset.price);
-                    const ingredientImg = button.dataset.img;
+    button.addEventListener("click", () => {
+        const category = button.dataset.category;
+        const ingredientName = button.dataset.name.toLowerCase();
+        const ingredientPrice = parseFloat(button.dataset.price);
+        const ingredientImg = button.dataset.img;
+        const ingredientId = button.dataset.id; // Ensure ingredient ID is captured
 
-                    if (category === "flavors") {
-                        const existingFlavor = document.querySelector(".cup-content .flavor");
-                        if (existingFlavor) {
-                            cupContent.removeChild(existingFlavor);
-                            totalPrice -= parseFloat(existingFlavor.dataset.price);
-                        }
+        const existingIngredient = Array.from(cupContent.children).find(
+            ingredient => ingredient.querySelector("img").title.toLowerCase() === ingredientName
+        );
 
-                        const flavorDiv = document.createElement("div");
-                        flavorDiv.className = "ingredient flavor";
-                        flavorDiv.dataset.price = ingredientPrice;
-                        flavorDiv.innerHTML = `<img src="${ingredientImg}" alt="${ingredientName}" title="${ingredientName}">`;
-                        cupContent.appendChild(flavorDiv);
-                    } else if (category === "toppings") {
-                        const toppingDiv = document.createElement("div");
-                        toppingDiv.className = "ingredient topping";
-                        toppingDiv.dataset.price = ingredientPrice;
-                        toppingDiv.innerHTML = `<img src="${ingredientImg}" alt="${ingredientName}" title="${ingredientName}">`;
-                        cupContent.appendChild(toppingDiv);
+        if (existingIngredient) {
+            alert(`You can only add one of each ingredient. "${ingredientName}" is already in your cup.`);
+            return;
+        }
 
-                        toppingDiv.addEventListener("click", () => {
-                            cupContent.removeChild(toppingDiv);
-                            totalPrice -= ingredientPrice;
-                            updateTotalPrice();
-                        });
+        const ingredientDiv = document.createElement("div");
+        if (category === "flavors") {
+            const existingFlavor = document.querySelector(".cup-content .flavor");
+            if (existingFlavor) {
+                totalPrice -= parseFloat(existingFlavor.dataset.price);
+                cupContent.removeChild(existingFlavor);
+            }
+            ingredientDiv.className = "ingredient flavor";
+        } else if (category === "toppings") {
+            ingredientDiv.className = "ingredient topping";
+        }
+
+        ingredientDiv.dataset.price = ingredientPrice;
+        ingredientDiv.dataset.id = ingredientId; // Attach the ingredient ID
+        ingredientDiv.dataset.name = ingredientName;
+        ingredientDiv.innerHTML = `<img src="${ingredientImg}" alt="${ingredientName}" title="${ingredientName}">`;
+        cupContent.appendChild(ingredientDiv);
+
+        ingredientDiv.addEventListener("click", () => {
+            cupContent.removeChild(ingredientDiv);
+            totalPrice -= ingredientPrice;
+
+            ingredientsCount--;
+            updateTotalPrice();
+        });
+
+        totalPrice += ingredientPrice;
+        ingredientsCount++;
+        updateTotalPrice();
+    });
+});
+
+window.confirmOrder = () => {
+    const paymentMethod = document.getElementById("paymentMode").value;
+    const totalPrice = parseFloat(document.getElementById("popup-total-price").textContent.replace('₱', ''));
+    const base = document.querySelector(".base");
+    const size = document.querySelector("input[name='size']:checked");
+    const flavor = document.querySelector(".cup-content .flavor");
+    const toppings = Array.from(document.querySelectorAll(".cup-content .topping"));
+
+    if (!totalPrice || totalPrice <= 0) {
+        alert("Your order total is invalid.");
+        return;
+    }
+
+    if (!base) {
+        alert("Please select a drink base.");
+        return;
+    }
+
+    if (!size) {
+        alert("Please select a drink size.");
+        return;
+    }
+
+    const orderData = {
+        base: {
+            name: base.querySelector("img").alt,
+            id: base.dataset.id || null,
+        },
+        size: {
+            name: size.value,
+            price: parseFloat(size.dataset.price) || 0,
+        },
+        flavor: flavor ? {
+            name: flavor.dataset.name,
+            id: flavor.dataset.id || null,
+        } : null,
+        toppings: toppings.map(topping => ({
+            name: topping.dataset.name,
+            id: topping.dataset.id || null,
+        })),
+        total_price: totalPrice,
+        payment_method: paymentMethod,
+    };
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "save_order.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        displayReceivedData(response.data_received);
+                        alert("Your order has been successfully placed! Thank you for your purchase.");
+                    } else {
+                        alert(`Failed to process your order: ${response.message}`);
                     }
+                } catch (e) {
+                    alert("An unexpected error occurred while processing your request.");
+                    console.error("Failed to parse server response:", e);
+                }
+            } else {
+                alert(`An error occurred: HTTP ${xhr.status}`);
+            }
+        }
+    };
 
-                    totalPrice += ingredientPrice;
-                    updateTotalPrice();
-                });
-            });
+    xhr.onerror = function () {
+        alert("A network error occurred. Please check your internet connection and try again.");
+    };
 
+    xhr.send(JSON.stringify(orderData));
+};
+
+
+            function updateTotalPrice() {
+                totalPriceElement.textContent = `₱${totalPrice.toFixed(2)}`;
+            }
+            <?php
+
+            $cupSizesQuery = "SELECT size, price, max_ingredients FROM cup_size";
+            $cupSizesResult = $conn->query($cupSizesQuery);
+            $sizesData = [];
+            if ($cupSizesResult && $cupSizesResult->num_rows > 0) {
+                while ($size = $cupSizesResult->fetch_assoc()) {
+                    $sizesData[] = $size;
+                }
+            }
+            ?>
             document.querySelectorAll("input[name='size']").forEach(input => {
                 input.addEventListener("change", () => {
                     const selectedSize = input.value;
                     const previousSizePrice = sizePrice;
-                    if (selectedSize === "S") {
-                        sizePrice = 0;
-                        maxIngredients = 7;
-                    }
-                    if (selectedSize === "M") {
-                        sizePrice = 10;
-                        maxIngredients = 8;
-                    }
-                    if (selectedSize === "L") {
-                        sizePrice = 20;
-                        maxIngredients = 10;
+                    const sizesData = <?php echo json_encode($sizesData); ?>;
+                    const selectedSizeData = sizesData.find(size => size.size === selectedSize);
+                    if (selectedSizeData) {
+                        sizePrice = parseFloat(selectedSizeData.price) || 0;
+                        maxIngredients = parseInt(selectedSizeData.max_ingredients) || 7;
                     }
                     while (ingredientsCount > maxIngredients) {
                         const lastIngredient = cupContent.lastChild;
@@ -305,20 +468,6 @@
                             item.style.display = "none";
                         }
                     });
-                });
-            });
-
-            function updateTotalPrice() {
-                totalPriceElement.textContent = `₱${totalPrice.toFixed(2)}`;
-            }
-            document.querySelectorAll(".ingredient-item button").forEach(button => {
-                button.addEventListener("click", () => {
-                    const category = button.dataset.category;
-                    const ingredientPrice = parseFloat(button.dataset.price);
-                    const ingredientName = button.dataset.name;
-
-                    totalPrice += ingredientPrice;
-                    updateTotalPrice();
                 });
             });
         });

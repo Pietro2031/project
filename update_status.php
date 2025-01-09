@@ -36,6 +36,11 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
                     echo $updateBaseQuery;
                 }
             }
+            $updateproductQuery = "UPDATE coffee_products SET total_sales = total_sales + $quantity WHERE id = $productId;";
+            $updateproductResult = $conn->query($updateproductQuery);
+            
+
+            
         }
         foreach ($flavorsArray as $flavorId) {
             $flavorQuery = "SELECT id, flavor_name, quantity FROM coffee_flavors WHERE flavor_name = '$flavorId'";
