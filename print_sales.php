@@ -14,7 +14,7 @@ $pdf = new MYPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('Peter Beans System');
-$pdf->SetTitle('Payment History');
+$pdf->SetTitle('Sales Report');
 $pdf->SetSubject('Generated Report');
 
 $pdf->SetMargins(10, 30, 20);
@@ -34,53 +34,44 @@ $pdf->Ln(10);
 
 $pdf->SetFont('helvetica', 'B', 11);
 $pdf->Cell(30, 8, 'Order ID', 1, 0, 'C');
-$pdf->Cell(50, 8, 'Customer', 1, 0, 'C');
 $pdf->Cell(40, 8, 'Order Date', 1, 0, 'C');
 $pdf->Cell(40, 8, 'Total Amount', 1, 0, 'C');
-$pdf->Cell(30, 8, 'Payment', 1, 1, 'C');
 
 // Build the query with the filters
 $query = "
-SELECT orders.id, 
-       IFNULL(user_account.username, 'Unknown') AS username, 
-       orders.order_date, 
-       orders.total_amount, 
-       orders.payment_method 
+SELECT orders.id, user_account.username, orders.order_date, orders.total_amount, orders.payment_method 
 FROM orders
 LEFT JOIN user_account ON orders.user_id = user_account.id
+WHERE orders.status = 1
 ";
 
-$conditions = [];
 if (!empty($selected_method)) {
-    $conditions[] = "orders.payment_method = '" . mysqli_real_escape_string($conn, $selected_method) . "'";
+    $query .= " AND orders.payment_method = '" . mysqli_real_escape_string($conn, $selected_method) . "'";
 }
 
 if (!empty($selected_time_frame)) {
+    $current_date = date('Y-m-d');
     switch ($selected_time_frame) {
         case 'last_7_days':
-            $conditions[] = "orders.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+            $query .= " AND orders.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
             break;
         case 'last_30_days':
-            $conditions[] = "orders.order_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+            $query .= " AND orders.order_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
             break;
         case 'this_month':
-            $conditions[] = "MONTH(orders.order_date) = MONTH(CURDATE()) AND YEAR(orders.order_date) = YEAR(CURDATE())";
+            $query .= " AND MONTH(orders.order_date) = MONTH(CURDATE()) AND YEAR(orders.order_date) = YEAR(CURDATE())";
             break;
     }
 }
 
 if (!empty($selected_date)) {
     $selected_date = date('Y-m-d', strtotime($selected_date));
-    $conditions[] = "DATE(orders.order_date) = '" . mysqli_real_escape_string($conn, $selected_date) . "'";
+    $query .= " AND DATE(orders.order_date) = '" . mysqli_real_escape_string($conn, $selected_date) . "'";
 }
 
 if (!empty($search_keyword)) {
-    $conditions[] = "(user_account.username LIKE '%" . mysqli_real_escape_string($conn, $search_keyword) . "%' 
-                      OR orders.id LIKE '%" . mysqli_real_escape_string($conn, $search_keyword) . "%')";
-}
-
-if (!empty($conditions)) {
-    $query .= " WHERE " . implode(" AND ", $conditions);
+    $query .= " AND (user_account.username LIKE '%" . mysqli_real_escape_string($conn, $search_keyword) . "%' 
+                 OR orders.id LIKE '%" . mysqli_real_escape_string($conn, $search_keyword) . "%')";
 }
 
 $result = mysqli_query($conn, $query);
@@ -89,10 +80,8 @@ $total_sum = 0;
 $pdf->SetFont('helvetica', '', 11);
 while ($row = mysqli_fetch_assoc($result)) {
     $pdf->Cell(30, 8, $row['id'], 1, 0, 'C');
-    $pdf->Cell(50, 8, $row['username'], 1, 0, 'C');
     $pdf->Cell(40, 8, date('F j, Y', strtotime($row['order_date'])), 1, 0, 'C');
     $pdf->Cell(40, 8, 'Php ' . number_format($row['total_amount'], 2), 1, 0, 'C');
-    $pdf->Cell(30, 8, $row['payment_method'], 1, 1, 'C');
 
     $total_sum += $row['total_amount'];
 }
