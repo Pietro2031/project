@@ -63,7 +63,7 @@ try {
     ");
 
     // Set default status to 'Pending' (1)
-    $status = 1;
+    $status = 0;
 
     // Bind parameters
     $stmt->bind_param(
