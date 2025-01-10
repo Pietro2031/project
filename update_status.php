@@ -21,7 +21,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
         $toppingsArray = explode(',', $toppingsString);
         $sizesArray = explode(',', $sizesString);
 
-        // Check stock for drink bases
         foreach ($productIdsArray as $productId) {
             $productQuery = "SELECT drink_bases FROM coffee_products WHERE id = $productId";
             $productResult = $conn->query($productQuery);
@@ -39,7 +38,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
             }
         }
 
-        // Check stock for flavors
         foreach ($flavorsArray as $flavorName) {
             $flavorQuery = "SELECT quantity, flavor_name FROM coffee_flavors WHERE flavor_name = '$flavorName'";
             $flavorResult = $conn->query($flavorQuery);
@@ -51,7 +49,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
             }
         }
 
-        // Check stock for toppings
         foreach ($toppingsArray as $toppingName) {
             $toppingQuery = "SELECT quantity, topping_name FROM coffee_toppings WHERE topping_name = '$toppingName'";
             $toppingResult = $conn->query($toppingQuery);
@@ -63,7 +60,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
             }
         }
 
-        // Check stock for cup sizes
         foreach ($sizesArray as $sizeName) {
             $sizeQuery = "SELECT quantity, size FROM cup_size WHERE size = '$sizeName'";
             $sizeResult = $conn->query($sizeQuery);
@@ -148,7 +144,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
             exit;
         }
 
-        // Stock is sufficient, update quantities
         foreach ($productIdsArray as $productId) {
             $productQuery = "SELECT drink_bases FROM coffee_products WHERE id = $productId";
             $productResult = $conn->query($productQuery);
@@ -156,6 +151,7 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
                 $productRow = $productResult->fetch_assoc();
                 $drinkBaseId = $productRow['drink_bases'];
                 $conn->query("UPDATE coffee_base SET quantity = quantity - $order_quantity WHERE id = $drinkBaseId");
+                $conn->query("UPDATE coffee_products SET total_sales = total_sales + $order_quantity WHERE id = $productId");
             }
         }
 
@@ -171,7 +167,6 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
             $conn->query("UPDATE cup_size SET quantity = quantity - $order_quantity WHERE size = '$sizeName'");
         }
 
-        // Update order status
         if ($status === 1 || $status === 2) {
             $updateStatusQuery = "UPDATE orders SET status = ? WHERE id = ?";
             $stmt = $conn->prepare($updateStatusQuery);
