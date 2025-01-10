@@ -49,6 +49,113 @@ function getCupSizeDetails($sizeId, $conn)
 <head>
     <title>Order Summary</title>
     <link rel="stylesheet" href="css/menu.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f5e6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .order-summary {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fdf6e3;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .order-summary h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #8b572a;
+        }
+
+        .order-item {
+            padding: 15px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item .details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .order-item .details h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #8b572a;
+        }
+
+        .order-item .details p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .order-item .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8b572a;
+            margin-top: 5px;
+        }
+
+        .total-price {
+            text-align: right;
+            font-size: 18px;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 2px solid #ddd;
+            color: #333;
+        }
+
+        .total-price h2 {
+            margin: 0;
+            color: #8b572a;
+        }
+
+        .checkout-btn {
+            display: block;
+            width: 100%;
+            background: #8b572a;
+            color: white;
+            font-size: 18px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .checkout-btn:hover {
+            background: #7a4e25;
+        }
+
+        @media screen and (max-width: 600px) {
+            .order-summary {
+                padding: 15px;
+            }
+
+            .order-item .details {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .checkout-btn {
+                font-size: 16px;
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -130,6 +237,11 @@ function getCupSizeDetails($sizeId, $conn)
             <input type="hidden" name="cartData" value='<?php echo json_encode($cartData); ?>'>
             <input type="hidden" name="totalPrice" value="<?php echo $totalPrice; ?>">
             <input type="hidden" name="addonsprice" value="<?= $addonsPrice ?>">
+
+            <label for="">Payment</label>
+            <input type="number">
+            <label for="">Payment</label>
+            <input type="file">
             <button type="submit" class="checkout-btn">Place Order</button>
         </form>
     </div>
