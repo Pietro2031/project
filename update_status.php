@@ -19,8 +19,8 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
         $productIdsArray = explode(',', $productIdsString);
         $flavorsArray = explode(',', $flavorsString);
         $toppingsArray = explode(',', $toppingsString);
-        $sizesArray = explode(',', $sizesString);
-
+        $sizesArray = explode(',', $sizesString); 
+ 
         foreach ($productIdsArray as $productId) {
             $productId = (int)trim($productId);
             $productQuery = "SELECT drink_bases, flavor_id, toppings_id FROM coffee_products WHERE id = $productId";
