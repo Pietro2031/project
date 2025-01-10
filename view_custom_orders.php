@@ -117,7 +117,7 @@ $run_pro = mysqli_query($conn, $get_pro);
                                                     <p class="text2"><?= $username ?></p>
                                                 </div>
                                             </div>
-                                            <?php if ($status == 1) : ?>
+                                            <?php if ($status == 0) : ?>
                                                 <p class="text3">A new order has been placed. Please review the details and to release the order.</p>
                                                 <div class="div3">
                                                     <a href="update_custom_status.php?status=1&orderid=<?php echo $order_id; ?>" style="color: #337ab7; text-decoration: none;">Mark as Released</a>
