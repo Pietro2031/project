@@ -4,11 +4,11 @@ header('Content-Type: application/json');
 session_start();
 
 try {
-    // Get the raw POST data
+
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
 
-    // Validate data
+
     $missingFields = [];
 
     if (empty($data['base']['name'])) {
@@ -30,12 +30,12 @@ try {
         $missingFields[] = 'Payment method';
     }
 
-    // Check if any fields are missing
+
     if (!empty($missingFields)) {
         throw new Exception('Missing required fields: ' . implode(', ', $missingFields));
     }
 
-    // Validate and prepare toppings
+
     $toppings = [];
     $toppingIds = [];
     $toppingNames = [];
@@ -46,26 +46,26 @@ try {
                     'name' => $topping['name'],
                     'id' => $topping['id']
                 ];
-                $toppingIds[] = $topping['id']; // Collect topping IDs
-                $toppingNames[] = $topping['name']; // Collect topping names
+                $toppingIds[] = $topping['id'];
+                $toppingNames[] = $topping['name'];
             }
         }
     }
     $toppingsJson = !empty($toppings) ? json_encode($toppings, JSON_UNESCAPED_UNICODE) : null;
-    $toppingIdsString = !empty($toppingIds) ? implode(',', $toppingIds) : null; // Create comma-separated string of IDs
-    $toppingNamesString = !empty($toppingNames) ? implode(',', $toppingNames) : null; // Create comma-separated string of names
+    $toppingIdsString = !empty($toppingIds) ? implode(',', $toppingIds) : null;
+    $toppingNamesString = !empty($toppingNames) ? implode(',', $toppingNames) : null;
 
-    // Prepare SQL query
+
     $stmt = $conn->prepare("
         INSERT INTO custom_drink (
             base_name, base_id, size_name, size_price, flavor_name, flavor_id, toppings, topping_ids, topping_names, total_price, payment_method, status, username
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
-    // Set default status to 'Pending' (1)
+
     $status = 0;
 
-    // Bind parameters
+
     $stmt->bind_param(
         "sisdsssssdsis",
         $data['base']['name'],
@@ -75,15 +75,15 @@ try {
         $data['flavor']['name'],
         $data['flavor']['id'],
         $toppingsJson,
-        $toppingIdsString, // Pass comma-separated string of IDs
-        $toppingNamesString, // Pass comma-separated string of names
+        $toppingIdsString,
+        $toppingNamesString,
         $data['total_price'],
         $data['payment_method'],
         $status,
         $_SESSION['username']
     );
 
-    // Execute the query
+
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,
