@@ -10,7 +10,7 @@ $total_items_row = mysqli_fetch_assoc($total_items_result);
 $total_items = $total_items_row['count'];
 $total_pages = ceil($total_items / $items_per_page);
 
-$get_pro = "SELECT * FROM custom_drink WHERE status = 1 ORDER BY created_at ASC LIMIT $offset, $items_per_page";
+$get_pro = "SELECT * FROM custom_drink WHERE status = 0 ORDER BY created_at ASC LIMIT $offset, $items_per_page";
 $run_pro = mysqli_query($conn, $get_pro);
 ?>
 
