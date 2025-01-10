@@ -22,20 +22,28 @@ if (isset($_GET['status']) && isset($_GET['orderid'])) {
         $sizesArray = explode(',', $sizesString);
 
         foreach ($productIdsArray as $productId) {
-            $productQuery = "SELECT drink_bases FROM coffee_products WHERE id = $productId";
+            $productId = (int)trim($productId);
+            $productQuery = "SELECT drink_bases, flavor_id, toppings_id FROM coffee_products WHERE id = $productId";
             $productResult = $conn->query($productQuery);
             if ($productResult->num_rows > 0) {
-                $productRow = $productResult->fetch_assoc();
-                $drinkBaseId = $productRow['drink_bases'];
-                $baseQuery = "SELECT quantity, base_name FROM coffee_base WHERE id = $drinkBaseId";
-                $baseResult = $conn->query($baseQuery);
-                if ($baseResult->num_rows > 0) {
-                    $baseRow = $baseResult->fetch_assoc();
-                    if ($baseRow['quantity'] < $order_quantity) {
-                        $low_stock_items[] = $baseRow['base_name'] . " (Base)";
-                    }
+                while ($productRow = $productResult->fetch_assoc()) {
+                    $drinkBaseId = $productRow['drink_bases'];
+                    $flavorId = $productRow['flavor_id'];
+                    $toppingId = $productRow['toppings_id'];
+                    $quantity = (int) $orderRow['order_quantity'];
+                    $updateBaseQuery = "UPDATE coffee_base SET quantity = quantity - $quantity WHERE id = $drinkBaseId";
+                    $conn->query($updateBaseQuery);
+                    echo $updateBaseQuery;
+                    $updateFlavorQuery = "UPDATE coffee_flavors SET quantity = quantity - $quantity WHERE id = $flavorId";
+                    $conn->query($updateFlavorQuery);
+                    echo $updateBaseQuery;
+                    $updateToppingQuery = "UPDATE coffee_toppings SET quantity = quantity - $quantity WHERE id = $toppingId";
+                    $conn->query($updateToppingQuery);
+                    echo $updateBaseQuery;
                 }
             }
+            $updateproductQuery = "UPDATE coffee_products SET total_sales = total_sales + $quantity WHERE id = $productId;";
+            $updateproductResult = $conn->query($updateproductQuery);
         }
 
         foreach ($flavorsArray as $flavorName) {
